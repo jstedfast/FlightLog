@@ -183,7 +183,12 @@ namespace FlightLog {
 			
 			static string FormatFlightTime (int seconds)
 			{
-				return Math.Round (seconds / 3600.0, 1).ToString () + " hours";
+				double time = Math.Round (seconds / 3600.0, 1);
+				
+				if (time > 0.9 && time < 1.1)
+					return "1 hour";
+				
+				return time.ToString () + " hours";
 			}
 			
 			public override void Draw (RectangleF area)
