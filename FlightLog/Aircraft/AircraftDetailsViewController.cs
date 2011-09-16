@@ -25,22 +25,20 @@
 // 
 
 using System;
+using System.Drawing;
 
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
-namespace FlightLog
-{
+namespace FlightLog {
 	public class AircraftDetailsViewController : DialogViewController
 	{
 		EditAircraftDetailsViewController editor;
 		StringElement isComplex, isHighPerformance, isTailDragger;
 		StringElement category, classification;
-		StringElement make, model, notes;
-		StringElement tailNumber;
+		AircraftProfileView profile;
 		UIBarButtonItem edit;
-		ImageElement photo;
 		Aircraft aircraft;
 		
 		public AircraftDetailsViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
@@ -63,17 +61,12 @@ namespace FlightLog
 		
 		public override void LoadView ()
 		{
-			Section section = new Section ();
-			section.Add (photo = new ImageElement (null));
-			section.Add (tailNumber = new StringElement ("Tail Number"));
-			Root.Add (section);
+			base.LoadView ();
 			
-			section = new Section ("Make & Model");
-			section.Add (make = new StringElement ("Make"));
-			section.Add (model = new StringElement ("Model"));
-			Root.Add (section);
+			profile = new AircraftProfileView (View.Bounds.Width);
+			Root.Add (new Section (profile));
 			
-			section = new Section ("Type of Aircraft");
+			Section section = new Section ("Type of Aircraft");
 			section.Add (category = new StringElement ("Category"));
 			section.Add (classification = new StringElement ("Classification"));
 			section.Add (isComplex = new StringElement ("Complex"));
@@ -81,29 +74,25 @@ namespace FlightLog
 			section.Add (isTailDragger = new StringElement ("Tail Dragger"));
 			Root.Add (section);
 			
-			section = new Section ("Notes");
-			section.Add (notes = new MultilineElement (""));
-			Root.Add (section);
-			
 			edit = new UIBarButtonItem (UIBarButtonSystemItem.Edit, OnEditClicked);
 			NavigationItem.LeftBarButtonItem = edit;
-			
-			base.LoadView ();
 		}
 		
 		void UpdateDetails ()
 		{
 			Title = Aircraft.TailNumber;
 			
-			tailNumber.Value = Aircraft.TailNumber;
-			make.Value = Aircraft.Make;
-			model.Value = Aircraft.Model;
+			// FIXME: use the actual aircraft photo...
+			profile.Photograph = null;
+			profile.Make = Aircraft.Make;
+			profile.Model = Aircraft.Model;
+			profile.Remarks = Aircraft.Notes;
+			
 			category.Value = Aircraft.Category.ToHumanReadableName ();
 			classification.Value = Aircraft.Classification.ToHumanReadableName ();
 			isComplex.Value = Aircraft.IsComplex ? "Yes" : "No";
 			isHighPerformance.Value = Aircraft.IsHighPerformance ? "Yes" : "No";
 			isTailDragger.Value = Aircraft.IsTailDragger ? "Yes" : "No";
-			notes.Value = Aircraft.Notes;
 			
 			foreach (var section in Root)
 				Root.Reload (section, UITableViewRowAnimation.None);

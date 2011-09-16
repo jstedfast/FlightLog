@@ -102,6 +102,7 @@
     <Compile Include="Aircraft\AircraftSplitViewController.cs" />
     <Compile Include="Aircraft\AircraftViewController.cs" />
     <Compile Include="Flights\FlightLogSplitViewController.cs" />
+    <Compile Include="Aircraft\AircraftProfileView.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
@@ -135,5 +136,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Images\mini-plane72.png" />
     <EmbeddedResource Include="Images\calendar.png" />
+    <EmbeddedResource Include="Images\mini-plane128.png" />
   </ItemGroup>
 </Project>
