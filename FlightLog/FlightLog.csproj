@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B3ADF509-B95B-49A7-A7E8-9DB77F505540}</ProjectGuid>
+    <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>FlightLog</RootNamespace>
+    <AssemblyName>FlightLog</AssemblyName>
+    <Description>Flight LogBook for private pilots.</Description>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhoneSimulator\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <MtouchLink>None</MtouchLink>
+    <MtouchDebug>true</MtouchDebug>
+    <MtouchI18n />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <MtouchLink>None</MtouchLink>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhone\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <MtouchDebug>true</MtouchDebug>
+    <CodesignKey>iPhone Developer</CodesignKey>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhone\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <CodesignKey>iPhone Developer</CodesignKey>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="monotouch" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Info.plist" />
+    <None Include="README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Main.cs" />
+    <Compile Include="AppDelegate.cs" />
+    <Compile Include="Aircraft\Aircraft.cs" />
+    <Compile Include="Airports\Airport.cs" />
+    <Compile Include="Airports\AirportAnnotation.cs" />
+    <Compile Include="Airports\AirportParseException.cs" />
+    <Compile Include="Airports\Airports.cs" />
+    <Compile Include="Airports\AirportViewController.cs" />
+    <Compile Include="Airports\AirportViewController.designer.cs">
+      <DependentUpon>AirportViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LogBook\LogBook.cs" />
+    <Compile Include="SQLiteNet\SQLite.cs" />
+    <Compile Include="Extensions\EnumExtension.cs" />
+    <Compile Include="Aircraft\AircraftElement.cs" />
+    <Compile Include="Utilities\LRUCache.cs" />
+    <Compile Include="Aircraft\AircraftDetailsViewController.cs" />
+    <Compile Include="Elements\LimitedEntryElement.cs" />
+    <Compile Include="Aircraft\EditAircraftDetailsViewController.cs" />
+    <Compile Include="Elements\ElementEventArgs.cs" />
+    <Compile Include="Aircraft\AircraftEventArgs.cs" />
+    <Compile Include="Elements\SwipeToDeleteTableSource.cs" />
+    <Compile Include="Airports\AirportEntryElement.cs" />
+    <Compile Include="Aircraft\AircraftEntryElement.cs" />
+    <Compile Include="Elements\NumericEntryElement.cs" />
+    <Compile Include="Elements\HobbsMeterEntryElement.cs" />
+    <Compile Include="Elements\MultilineEntryElement.cs" />
+    <Compile Include="Elements\FlightDateEntryElement.cs" />
+    <Compile Include="Flights\EditFlightDetailsViewController.cs" />
+    <Compile Include="Flights\FlightDetailsViewController.cs" />
+    <Compile Include="Flights\Flight.cs" />
+    <Compile Include="Flights\FlightElement.cs" />
+    <Compile Include="Flights\FlightEventArgs.cs" />
+    <Compile Include="Flights\FlightLogViewController.cs" />
+    <Compile Include="Aircraft\AircraftSplitViewController.cs" />
+    <Compile Include="Aircraft\AircraftViewController.cs" />
+    <Compile Include="Flights\FlightLogSplitViewController.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterfaceDefinition Include="Airports\AirportViewController.xib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\first.png" />
+    <Content Include="Images\first%402x.png" />
+    <Content Include="Images\second.png" />
+    <Content Include="Images\second%402x.png" />
+    <Content Include="Airports.sqlite">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Aircraft\" />
+    <Folder Include="Airports\" />
+    <Folder Include="LogBook\" />
+    <Folder Include="SQLiteNet\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Utilities\" />
+    <Folder Include="Elements\" />
+    <Folder Include="Flights\" />
+    <Folder Include="Pilots\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
+      <Project>{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}</Project>
+      <Name>MonoTouch.Dialog</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\mini-plane72.png" />
+    <EmbeddedResource Include="Images\calendar.png" />
+  </ItemGroup>
+</Project>
