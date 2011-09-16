@@ -57,6 +57,10 @@ namespace FlightLog
 			}
 		}
 		
+		public bool EditorEngaged {
+			get { return editor != null; }
+		}
+		
 		public override void LoadView ()
 		{
 			Section section = new Section ();

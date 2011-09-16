@@ -173,7 +173,7 @@ namespace FlightLog {
 		
 		void OnAddClicked (object sender, EventArgs args)
 		{
-			if (editor != null)
+			if (editor != null && !details.EditorEngaged)
 				return;
 			
 			editor = new EditFlightDetailsViewController (new Flight (DateTime.Today), false);
