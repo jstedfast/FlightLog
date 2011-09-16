@@ -63,7 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
-    <None Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -126,7 +125,6 @@
     <Folder Include="Utilities\" />
     <Folder Include="Elements\" />
     <Folder Include="Flights\" />
-    <Folder Include="Pilots\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

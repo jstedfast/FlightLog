@@ -91,7 +91,7 @@ namespace FlightLog {
 			Root.Add (section);
 			
 			section = new Section ("Remarks");
-			section.Add (remarks = new MultilineElement ("", 3));
+			section.Add (remarks = new MultilineElement (""));
 			Root.Add (section);
 			
 			edit = new UIBarButtonItem (UIBarButtonSystemItem.Edit, OnEditClicked);
