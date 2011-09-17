@@ -82,8 +82,7 @@ namespace FlightLog {
 		{
 			Title = Aircraft.TailNumber;
 			
-			// FIXME: use the actual aircraft photo...
-			profile.Photograph = null;
+			profile.Photograph = PhotoManager.Load (Aircraft.TailNumber);
 			profile.Make = Aircraft.Make;
 			profile.Model = Aircraft.Model;
 			profile.Remarks = Aircraft.Notes;

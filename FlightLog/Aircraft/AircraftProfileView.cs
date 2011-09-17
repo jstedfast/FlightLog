@@ -42,18 +42,19 @@ namespace FlightLog {
 		const float YBorderPadding = 20.0f;
 		const float ImageTextPadding = 20.0f;
 		const float TextPadding = 8.0f;
-		const float PhotoSize = 128.0f;
+		const float PhotoHeight = 128.0f;
+		const float PhotoWidth = 171.0f;
 		
-		const float TextOffset = XBorderPadding + PhotoSize + ImageTextPadding;
+		const float TextOffset = XBorderPadding + PhotoWidth + ImageTextPadding;
 		const float MakeYOffset = YBorderPadding + TextPadding;
 		const float ModelYOffset = MakeYOffset + AircraftMakeFontSize + TextPadding;
 		const float RemarksYOffset = ModelYOffset + AircraftModelFontSize + TextPadding * 3;
-		const float ProfileHeight = PhotoSize + YBorderPadding * 2;
+		const float ProfileHeight = PhotoHeight + YBorderPadding * 2;
 		
 		static UIFont AircraftModelFont = UIFont.BoldSystemFontOfSize (AircraftModelFontSize);
 		static UIFont AircraftMakeFont = UIFont.BoldSystemFontOfSize (AircraftMakeFontSize);
 		static UIFont RemarksFont = UIFont.ItalicSystemFontOfSize (RemarksFontSize);
-		static CGPath photoBorder = GraphicsUtil.MakeRoundedPath (PhotoSize, 8.0f);
+		static CGPath photoBorder = GraphicsUtil.MakeRoundedRectPath (new RectangleF (0.0f, 0.0f, PhotoWidth, PhotoHeight), 8.0f);
 		static UIColor TextColor = UIColor.FromRGB (76, 86, 108);
 		static UIImage DefaultPhoto;
 		
@@ -71,7 +72,7 @@ namespace FlightLog {
 			BackgroundColor = UIColor.Clear;
 			
 			// Add a subview for the aircraft's photo
-			photoView = new UIImageView (new RectangleF (XBorderPadding, YBorderPadding, PhotoSize, PhotoSize));
+			photoView = new UIImageView (new RectangleF (XBorderPadding, YBorderPadding, PhotoWidth, PhotoHeight));
 			photoView.BackgroundColor = UIColor.Clear;
 			AddSubview (photoView);
 		}

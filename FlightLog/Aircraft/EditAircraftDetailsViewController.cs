@@ -153,7 +153,7 @@ namespace FlightLog
 			
 			// FIXME: the photo (and tail#, if not adding a new aircraft) should probably be in a header
 			Section section = new Section ("");
-			section.Add (photo = new ImageElement (null));
+			section.Add (photo = new ImageElement (PhotoManager.Load (Aircraft.TailNumber)));
 			section.Add (tailNumber = new AircraftEntryElement (Aircraft.TailNumber));
 			Root.Add (section);
 			
@@ -195,7 +195,7 @@ namespace FlightLog
 		{
 			FetchValues ();
 			
-			if (tailNumber.Value == null || tailNumber.Value.Length < 5)
+			if (tailNumber.Value == null || tailNumber.Value.Length < 2)
 				return;
 			
 			// Save the values back to the Aircraft object

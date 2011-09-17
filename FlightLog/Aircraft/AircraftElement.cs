@@ -43,11 +43,12 @@ namespace FlightLog {
 		const float TailNumberFontSize = 18.0f;
 		const float FlightTimeFontSize = 12.0f;
 		const float TextPadding = 4.0f;
-		const float PhotoSize = 72.0f;
+		const float PhotoHeight = 72.0f;
+		const float PhotoWidth = 96.0f;
 		const float PhotoXPad = 0.0f;
 		const float PhotoYPad = 0.0f;
 		
-		const float PhotoWidth = 2 * PhotoXPad + PhotoSize;
+		const float PhotoAreaWidth = 2 * PhotoXPad + PhotoWidth;
 		
 		const float AircraftModelYOffset = TextPadding;
 		const float AircraftMakeYOffset = AircraftModelYOffset + AircraftModelFontSize + TextPadding + 4;
@@ -63,7 +64,7 @@ namespace FlightLog {
 		static CGGradient BottomGradient, TopGradient;
 		static UIImage DefaultPhoto;
 		
-		public static float CellHeight = PhotoSize + 2 * PhotoYPad;
+		public static float CellHeight = PhotoHeight + 2 * PhotoYPad;
 		
 		static AircraftCell ()
 		{
@@ -180,10 +181,10 @@ namespace FlightLog {
 				
 				// Compute the bounds for each line of text...
 				var tailXOffset = bounds.X + bounds.Width - TailNumberWidth - TextPadding;
-				var textXOffset = PhotoWidth + TextPadding;
+				var textXOffset = PhotoAreaWidth + TextPadding;
 				
-				var modelWidth = bounds.Width - PhotoWidth - TailNumberWidth - (TextPadding * 2);
-				var makeWidth = bounds.Width - PhotoWidth - (TextPadding * 2);
+				var modelWidth = bounds.Width - PhotoAreaWidth - TailNumberWidth - (TextPadding * 2);
+				var makeWidth = bounds.Width - PhotoAreaWidth - (TextPadding * 2);
 				var timeWidth = makeWidth;
 				
 				var modelBounds = new RectangleF (textXOffset, bounds.Y + AircraftModelYOffset, modelWidth, AircraftModelFontSize);
@@ -201,11 +202,11 @@ namespace FlightLog {
 				// FIXME: get the actual flight time
 				DrawString (FormatFlightTime (FlightTime (9, 52)), timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
 				
-				UIImage photo = LogBook.GetPhotograph (aircraft.TailNumber);
+				UIImage photo = PhotoManager.Load (aircraft.TailNumber);
 				if (photo == null)
 					photo = DefaultPhoto;
 				
-				photo.Draw (new RectangleF (PhotoXPad, PhotoYPad, PhotoSize, PhotoSize));
+				photo.Draw (new RectangleF (PhotoXPad, PhotoYPad, PhotoWidth, PhotoHeight));
 			}
 		}
 		

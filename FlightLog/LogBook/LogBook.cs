@@ -38,90 +38,7 @@ using SQLite;
 namespace FlightLog {
 	public static class LogBook
 	{
-		static LRUCache<string,UIImage> photoCache = new LRUCache<string, UIImage> (10);
 		static SQLiteConnection sqlitedb;
-		
-		/// <summary>
-		/// The AircraftPhoto class is a way to avoid having to put huge photograph data
-		/// in an 'Aircraft' record. Instead, an API is provided to get a UIImage based
-		/// on an aircraft's tail-number and we use an LRU cache to make things a little
-		/// less expensive for doing lookups as well as keeping memory usage down.
-		/// </summary>
-		class AircraftPhoto {
-			public AircraftPhoto (string tailNumber, UIImage image)
-			{
-				TailNumber = tailNumber;
-				Photograph = image;
-			}
-			
-			public AircraftPhoto (string tailNumber)
-			{
-				TailNumber = tailNumber;
-			}
-			
-			public AircraftPhoto ()
-			{
-			}
-			
-			/// <summary>
-			/// Gets or sets the tail-number of the aircraft.
-			/// </summary>
-			/// <value>
-			/// The tail-number of the aircraft.
-			/// </value>
-			[PrimaryKey][Indexed][MaxLength (6)]
-			public string TailNumber {
-				get; set;
-			}
-			
-			/// <summary>
-			/// Gets or sets the raw photo data.
-			/// </summary>
-			/// <value>
-			/// The raw photo data.
-			/// </value>
-			public byte[] PhotoData {
-				get; set;
-			}
-			
-			/// <summary>
-			/// Gets or sets the photograph.
-			/// </summary>
-			/// <value>
-			/// The photograph.
-			/// </value>
-			[Ignore]
-			public UIImage Photograph {
-				get {
-					if (PhotoData != null && PhotoData.Length > 0)
-						return UIImage.LoadFromData (NSData.FromArray (PhotoData));
-					
-					return null;
-				}
-				
-				set {
-					if (value != null) {
-						NSData data = value.AsJPEG (1.0f);
-						
-						MemoryStream memory = new MemoryStream ();
-						using (var stream = data.AsStream ()) {
-							byte[] buf = new byte[4096];
-							int nread;
-							
-							do {
-								nread = stream.Read (buf, 0, buf.Length);
-								if (nread > 0)
-									memory.Write (buf, 0, nread);
-							} while (nread > 0);
-						}
-						
-						PhotoData = memory.ToArray ();
-					} else {
-						PhotoData = null;
-					}
-				}
-			}
-		}
 		
 		public static void Init ()
 		{
@@ -131,7 +48,6 @@ namespace FlightLog {
 			sqlitedb = new SQLiteConnection (logbook);
 			sqlitedb.CreateTable<Flight> ();
 			sqlitedb.CreateTable<Aircraft> ();
-			sqlitedb.CreateTable<AircraftPhoto> ();
 		}
 		
 		#region Aircraft
@@ -189,7 +105,7 @@ namespace FlightLog {
 			if (!CanDelete (aircraft))
 				return false;
 			
-			photoCache.Remove (aircraft.TailNumber);
+			PhotoManager.Delete (aircraft.TailNumber);
 			
 			return sqlitedb.Delete<Aircraft> (aircraft) > 0;
 		}
@@ -235,71 +151,6 @@ namespace FlightLog {
 			var results = sqlitedb.Query<Aircraft> ("select * from Aircraft where TailNumber = ?", tailNumber);
 			
 			return results.Count > 0 ? results[0] : null;
-		}
-		#endregion
-		
-		#region Aircraft Photos
-		/// <summary>
-		/// Gets the photo of the aircraft specified by the given tail number.
-		/// </summary>
-		/// <returns>
-		/// A photo of the aircraft specified by the given tail number.
-		/// </returns>
-		/// <param name='tailNumber'>
-		/// The tail number of the desired aircraft.
-		/// </param>
-		public static UIImage GetPhotograph (string tailNumber)
-		{
-			UIImage image = photoCache[tailNumber];
-			
-			if (image == null) {
-				var results = sqlitedb.Query<AircraftPhoto> ("select 1 from AircraftPhoto where TailNumber = ?", tailNumber);
-				
-				image = results.Count > 0 ? results[0].Photograph : null;
-				
-				if (image == null)
-					return null;
-				
-				photoCache[tailNumber] = image;
-			}
-			
-			return image;
-		}
-		
-		/// <summary>
-		/// Sets the photo of the specified aircraft in the LogBook.
-		/// </summary>
-		/// <param name='tailNumber'>
-		/// The tail number of the aircraft featured in the photo.
-		/// </param>
-		/// <param name='image'>
-		/// The image to set as the photograph for the specified aircraft.
-		/// </param>
-		public static bool SetPhotograph (string tailNumber, UIImage image)
-		{
-			var results = sqlitedb.Query<AircraftPhoto> ("select 1 from AircraftPhoto where TailNumber = ?", tailNumber);
-			AircraftPhoto photo = results.Count > 0 ? results[0] : null;
-			
-			if (photo == null)
-				photo = new AircraftPhoto (tailNumber, image);
-			else
-				photo.Photograph = image;
-			
-			if (photoCache.Contains (tailNumber))
-				photoCache[tailNumber] = image;
-			
-			return sqlitedb.Insert (photo) > 0;
-		}
-		
-		/// <summary>
-		/// Delete the specified aircraft photo from the LogBook.
-		/// </summary>
-		/// <param name='tailNumber'>
-		/// The tailNumber of the aircraft to delete the photo of.
-		/// </param>
-		public static bool DeletePhotograph (string tailNumber)
-		{
-			return sqlitedb.Delete<AircraftPhoto> (new AircraftPhoto (tailNumber)) > 0;
 		}
 		#endregion
 		

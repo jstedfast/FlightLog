@@ -103,6 +103,7 @@
     <Compile Include="Aircraft\AircraftViewController.cs" />
     <Compile Include="Flights\FlightLogSplitViewController.cs" />
     <Compile Include="Aircraft\AircraftProfileView.cs" />
+    <Compile Include="Utilities\PhotoManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
