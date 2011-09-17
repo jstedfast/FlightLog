@@ -298,14 +298,9 @@ namespace FlightLog {
 			base.Selected (indexPath);
 		}
 		
-		public event EventHandler<FlightEventArgs> FlightSelected;
-		
-		protected virtual void OnFlightSelected (Flight flight)
+		void OnFlightSelected (Flight flight)
 		{
-			var handler = FlightSelected;
-			
-			if (handler != null)
-				handler (this, new FlightEventArgs (flight));
+			details.Flight = flight;
 		}
 	}
 }

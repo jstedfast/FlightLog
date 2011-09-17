@@ -46,18 +46,12 @@ namespace FlightLog {
 			details = new FlightDetailsViewController ();
 			flights = new FlightLogViewController (details);
 			
-			flights.FlightSelected += (sender, e) => {
-				details.Flight = e.Flight;
-			};
-			
 			controllers = new UIViewController[] {
 				new UINavigationController (flights),
 				new UINavigationController (details),
 			};
 			
 			ViewControllers = controllers;
-			
-			//PushViewController (flights, false);
 		}
 		
 		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
