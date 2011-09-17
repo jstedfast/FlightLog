@@ -222,7 +222,7 @@ namespace FlightLog {
 			case UIInterfaceOrientation.LandscapeLeft:
 				return true;
 			default:
-				return true;
+				return false;
 			}
 		}
 		
