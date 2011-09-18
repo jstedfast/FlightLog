@@ -38,12 +38,12 @@ namespace FlightLog {
 		const float AircraftMakeFontSize = 18.0f;
 		const float AircraftModelFontSize = 16.0f;
 		const float RemarksFontSize = 13.0f;
-		const float XBorderPadding = 42.0f;
+		const float XBorderPadding = 43.0f;
 		const float YBorderPadding = 20.0f;
 		const float ImageTextPadding = 20.0f;
 		const float TextPadding = 8.0f;
-		const float PhotoHeight = 128.0f;
-		const float PhotoWidth = 171.0f;
+		const float PhotoHeight = 210.0f;
+		const float PhotoWidth = 280.0f;
 		
 		const float TextOffset = XBorderPadding + PhotoWidth + ImageTextPadding;
 		const float MakeYOffset = YBorderPadding + TextPadding;
@@ -54,11 +54,10 @@ namespace FlightLog {
 		static UIFont AircraftModelFont = UIFont.BoldSystemFontOfSize (AircraftModelFontSize);
 		static UIFont AircraftMakeFont = UIFont.BoldSystemFontOfSize (AircraftMakeFontSize);
 		static UIFont RemarksFont = UIFont.ItalicSystemFontOfSize (RemarksFontSize);
-		static CGPath photoBorder = GraphicsUtil.MakeRoundedRectPath (new RectangleF (0.0f, 0.0f, PhotoWidth, PhotoHeight), 8.0f);
+		static RectangleF PhotoRect = new RectangleF (0.0f, 0.0f, PhotoWidth, PhotoHeight);
+		static CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
 		static UIColor TextColor = UIColor.FromRGB (76, 86, 108);
 		static UIImage DefaultPhoto;
-		
-		UIImageView photoView;
 		
 		static AircraftProfileView ()
 		{
@@ -70,21 +69,10 @@ namespace FlightLog {
 		public AircraftProfileView (RectangleF frame) : base (frame)
 		{
 			BackgroundColor = UIColor.Clear;
-			
-			// Add a subview for the aircraft's photo
-			photoView = new UIImageView (new RectangleF (XBorderPadding, YBorderPadding, PhotoWidth, PhotoHeight));
-			photoView.BackgroundColor = UIColor.Clear;
-			AddSubview (photoView);
 		}
 		
 		public UIImage Photograph {
-			get { return photoView.Image; }
-			set {
-				if (value == null)
-					photoView.Image = DefaultPhoto;
-				else
-					photoView.Image = value;
-			}
+			get; set;
 		}
 		
 		public string Make {
@@ -112,11 +100,23 @@ namespace FlightLog {
 			DrawString (Model ?? "Unknown Model", new RectangleF (x + TextOffset, y + ModelYOffset, textWidth, AircraftModelFontSize), AircraftModelFont);
 			DrawString (Remarks ?? "", new RectangleF (x + TextOffset, y + RemarksYOffset, textWidth, RemarksFontSize * 3), RemarksFont, UILineBreakMode.WordWrap);
 			
+			ctx.SaveState ();
+			
 			ctx.TranslateCTM (XBorderPadding, YBorderPadding);
-			ctx.AddPath (photoBorder);
+			ctx.AddPath (PhotoBorder);
+			ctx.Clip ();
+			
+			if (Photograph == null)
+				DefaultPhoto.Draw (PhotoRect);
+			else
+				Photograph.Draw (PhotoRect);
+			
+			ctx.AddPath (PhotoBorder);
 			ctx.SetStrokeColor (0.5f, 0.5f, 0.5f, 1.0f);
-			ctx.SetLineWidth (1.0f);
+			ctx.SetLineWidth (0.5f);
 			ctx.StrokePath ();
+			
+			ctx.RestoreState ();
 		}
 	}
 }

@@ -39,12 +39,11 @@ namespace FlightLog
 	{
 		RadioGroup classes = new RadioGroup ("AircraftClassification", 0);
 		BooleanElement isComplex, isHighPerformance, isTailDragger;
-		LimitedEntryElement make, model, notes;
 		RootElement category, classification;
-		AircraftEntryElement tailNumber;
+		EditAircraftProfileView profile;
 		UIBarButtonItem cancel, save;
+		LimitedEntryElement notes;
 		int previousCategory;
-		ImageElement photo;
 		bool exists;
 		
 		public EditAircraftDetailsViewController (Aircraft aircraft, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
@@ -119,14 +118,6 @@ namespace FlightLog
 			return root;
 		}
 		
-		Section CreateMakeAndModelSection ()
-		{
-			return new Section ("Make & Model") {
-				(make = new LimitedEntryElement ("Make", "Aircraft Manufacturer", Aircraft.Make, 30)),
-				(model = new LimitedEntryElement ("Model", "Aircraft Model", Aircraft.Model, 20)),
-			};
-		}
-		
 		Section CreateAircraftTypeSection ()
 		{
 			Section section = new Section ("Type of Aircraft") {
@@ -144,6 +135,8 @@ namespace FlightLog
 		
 		public override void LoadView ()
 		{
+			base.LoadView ();
+			
 			if (Aircraft == null) {
 				Aircraft = new Aircraft ();
 				exists = false;
@@ -151,26 +144,25 @@ namespace FlightLog
 			
 			Title = exists ? Aircraft.TailNumber : "New Aircraft";
 			
-			// FIXME: the photo (and tail#, if not adding a new aircraft) should probably be in a header
-			Section section = new Section ("");
-			section.Add (photo = new ImageElement (PhotoManager.Load (Aircraft.TailNumber)));
-			section.Add (tailNumber = new AircraftEntryElement (Aircraft.TailNumber));
-			Root.Add (section);
+			profile = new EditAircraftProfileView (View.Bounds.Width);
+			profile.Photograph = PhotoManager.Load (Aircraft.TailNumber);
+			profile.TailNumber = Aircraft.TailNumber;
+			profile.Model = Aircraft.Model;
+			profile.Make = Aircraft.Make;
 			
-			Root.Add (CreateMakeAndModelSection ());
 			Root.Add (CreateAircraftTypeSection ());
 			Root.Add (new Section ("Notes") {
 				(notes = new LimitedEntryElement (null, "Enter any additional notes about the aircraft here.",
 					Aircraft.Notes, 140)),
 			});
 			
+			Root[0].HeaderView = profile;
+			
 			cancel = new UIBarButtonItem (UIBarButtonSystemItem.Cancel, OnCancelClicked);
 			NavigationItem.LeftBarButtonItem = cancel;
 			
 			save = new UIBarButtonItem (UIBarButtonSystemItem.Save, OnSaveClicked);
 			NavigationItem.RightBarButtonItem = save;
-			
-			base.LoadView ();
 		}
 		
 		void OnCancelClicked (object sender, EventArgs args)
@@ -195,13 +187,13 @@ namespace FlightLog
 		{
 			FetchValues ();
 			
-			if (tailNumber.Value == null || tailNumber.Value.Length < 2)
+			if (profile.TailNumber == null || profile.TailNumber.Length < 2)
 				return;
 			
 			// Save the values back to the Aircraft object
-			Aircraft.TailNumber = tailNumber.Value;
-			Aircraft.Make = make.Value;
-			Aircraft.Model = model.Value;
+			Aircraft.TailNumber = profile.TailNumber;
+			Aircraft.Make = profile.Make;
+			Aircraft.Model = profile.Model;
 			Aircraft.Classification = ClassificationFromIndexes (category.RadioSelected, classes.Selected);
 			Aircraft.IsComplex = isComplex.Value;
 			Aircraft.IsHighPerformance = isHighPerformance.Value;

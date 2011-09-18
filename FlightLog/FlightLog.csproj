@@ -104,6 +104,8 @@
     <Compile Include="Flights\FlightLogSplitViewController.cs" />
     <Compile Include="Aircraft\AircraftProfileView.cs" />
     <Compile Include="Utilities\PhotoManager.cs" />
+    <Compile Include="Elements\DialogView.cs" />
+    <Compile Include="Aircraft\EditAircraftProfileView.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
