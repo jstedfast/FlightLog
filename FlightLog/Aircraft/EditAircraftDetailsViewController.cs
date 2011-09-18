@@ -167,7 +167,7 @@ namespace FlightLog
 		
 		void OnCancelClicked (object sender, EventArgs args)
 		{
-			this.NavigationController.PopViewControllerAnimated (true);
+			NavigationController.PopViewControllerAnimated (true);
 			
 			OnEditorClosed ();
 		}
@@ -190,6 +190,16 @@ namespace FlightLog
 			if (profile.TailNumber == null || profile.TailNumber.Length < 2)
 				return;
 			
+			if (profile.Photograph != null) {
+				NSError error;
+				
+				if (!PhotoManager.Save (profile.TailNumber, profile.Photograph, out error)) {
+					UIAlertView alert = new UIAlertView ("Error", error.LocalizedDescription, null, "Dismiss", null);
+					alert.Show ();
+					return;
+				}
+			}
+			
 			// Save the values back to the Aircraft object
 			Aircraft.TailNumber = profile.TailNumber;
 			Aircraft.Make = profile.Make;
@@ -205,7 +215,7 @@ namespace FlightLog
 			else
 				LogBook.Add (Aircraft);
 			
-			this.NavigationController.PopViewControllerAnimated (true);
+			NavigationController.PopViewControllerAnimated (true);
 			
 			OnEditorClosed ();
 		}

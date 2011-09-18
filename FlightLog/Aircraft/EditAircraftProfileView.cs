@@ -52,7 +52,6 @@ namespace FlightLog {
 		
 		static RectangleF PhotoRect = new RectangleF (XBorderPadding, YBorderPadding, PhotoWidth, PhotoHeight);
 		static CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
-		static UIImagePickerController picker = new UIImagePickerController ();
 		static UIFont AddPhotoFont = UIFont.BoldSystemFontOfSize (AddPhotoFontSize);
 		static UIColor AddPhotoTextColor = UIColor.FromRGB (76, 86, 108);
 		static UIColor HighlightedButtonColor = UIColor.LightGray;
@@ -60,7 +59,9 @@ namespace FlightLog {
 		
 		LimitedEntryElement make, model;
 		AircraftEntryElement tailNumber;
+		UIImagePickerController picker;
 		UIPopoverController popover;
+		UIActionSheet sheet;
 		UIImage photograph;
 		DialogView dialog;
 		bool pressed;
@@ -72,8 +73,6 @@ namespace FlightLog {
 			BackgroundColor = UIColor.Clear;
 			
 			float dialogWidth = frame.Width - TableViewOffset - XBorderPadding - 55.0f;
-			Console.WriteLine ("Profile view requesting {0}px width for dialog view", dialogWidth);
-			Console.WriteLine ("Profile view gets {0}px width", frame.Width);
 			RectangleF dialogFrame = new RectangleF (TableViewOffset, YBorderPadding, dialogWidth, PhotoHeight);
 			RootElement root = new RootElement (null);
 			root.Add (CreateTailNumberSection ());
@@ -211,8 +210,85 @@ namespace FlightLog {
 			
 			public override void FinishedPickingImage (UIImagePickerController picker, UIImage image, NSDictionary editingInfo)
 			{
-				profile.Photograph = image;
+				profile.OnPhotoChosen (picker, image);
 			}
+		}
+		
+		class PhotoActionSheetDelegate : UIActionSheetDelegate {
+			EditAircraftProfileView profile;
+			
+			public PhotoActionSheetDelegate (EditAircraftProfileView profile)
+			{
+				this.profile = profile;
+			}
+			
+			public override void Dismissed (UIActionSheet actionSheet, int buttonIndex)
+			{
+				profile.OnActionSheetDismissed (actionSheet, buttonIndex);
+			}
+		}
+		
+		void OnActionSheetDismissed (UIActionSheet sheet, int buttonIndex)
+		{
+			if (sheet != null) {
+				sheet.Dispose ();
+				sheet = null;
+			}
+			
+			picker = new UIImagePickerController ();
+			picker.Delegate = new PhotoPickerDelegate (this);
+			
+			switch (buttonIndex) {
+			case 0: // Choose Photo
+				picker.SourceType = UIImagePickerControllerSourceType.PhotoLibrary;
+				picker.AllowsEditing = true;
+				break;
+			case 1: // Take Photo
+				picker.SourceType = UIImagePickerControllerSourceType.Camera;
+				picker.CameraDevice = UIImagePickerControllerCameraDevice.Rear;
+				picker.CameraCaptureMode = UIImagePickerControllerCameraCaptureMode.Photo;
+				picker.CameraFlashMode = UIImagePickerControllerCameraFlashMode.Auto;
+				picker.ShowsCameraControls = true;
+				picker.AllowsEditing = true;
+				break;
+			}
+			
+			popover = new UIPopoverController (picker);
+			popover.DidDismiss += OnPopoverDismissed;
+			
+			popover.PresentFromRect (PhotoRect, this, UIPopoverArrowDirection.Any, true);
+		}
+		
+		void ShowPhotoPickerOptions ()
+		{
+			// If the device (such as the simulator) doesn't have a camera, don't present that option.
+			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)) {
+				OnActionSheetDismissed (null, 0);
+				return;
+			}
+			
+			sheet = new UIActionSheet ("Aircraft Photo");
+			sheet.AddButton ("Choose Photo");
+			sheet.AddButton ("Take Photo");
+			
+			sheet.Delegate = new PhotoActionSheetDelegate (this);
+			
+			sheet.ShowFrom (PhotoRect, this, true);
+		}
+		
+		void OnPhotoChosen (UIImagePickerController picker, UIImage photo)
+		{
+			Photograph = photo;
+			popover.Dismiss (true);
+		}
+		
+		void OnPopoverDismissed (object sender, EventArgs args)
+		{
+			popover.Dispose ();
+			popover = null;
+			
+			picker.Dispose ();
+			picker = null;
 		}
 		
 		bool IsInsidePhotoButton (NSSet touches)
@@ -263,13 +339,7 @@ namespace FlightLog {
 			if (!pressed)
 				return;
 			
-			if (popover == null) {
-				picker.Delegate = new PhotoPickerDelegate (this);
-				popover = new UIPopoverController (picker);
-			}
-			
-			popover.PresentFromRect (PhotoRect, this, UIPopoverArrowDirection.Any, true);
-			
+			ShowPhotoPickerOptions ();
 			SetNeedsDisplay ();
 			pressed = false;
 		}
@@ -279,11 +349,6 @@ namespace FlightLog {
 			if (photograph != null) {
 				photograph.Dispose ();
 				photograph = null;
-			}
-			
-			if (popover != null) {
-				popover.Dispose ();
-				popover = null;
 			}
 			
 			if (dialog != null) {
