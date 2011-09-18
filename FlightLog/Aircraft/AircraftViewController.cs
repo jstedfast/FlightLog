@@ -64,9 +64,6 @@ namespace FlightLog {
 				section.Add (element);
 			}
 			
-			// FIXME: We need to listen for Flight additions/changes as they
-			// may change the total flight time on an aircraft we are displaying.
-			
 			Root.Add (section);
 			
 			LogBook.AircraftAdded += OnAircraftAdded;
@@ -101,10 +98,12 @@ namespace FlightLog {
 		
 		void OnAircraftAdded (object sender, AircraftEventArgs added)
 		{
-			// FIXME: what should we do if a search is engaged?
 			AircraftElement element = new AircraftElement (added.Aircraft);
 			
 			element.Changed += OnElementChanged;
+			
+			// Disengage search before adding to the list
+			FinishSearch ();
 			
 			Root[0].Add (element);
 			Root.Reload (Root[0], UITableViewRowAnimation.Fade);
