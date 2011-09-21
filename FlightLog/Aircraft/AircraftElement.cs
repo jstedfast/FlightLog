@@ -202,7 +202,7 @@ namespace FlightLog {
 				// FIXME: get the actual flight time
 				DrawString (FormatFlightTime (FlightTime (9, 52)), timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
 				
-				UIImage photo = PhotoManager.Load (aircraft.TailNumber);
+				UIImage photo = PhotoManager.Load (aircraft.TailNumber, true);
 				if (photo == null)
 					photo = DefaultPhoto;
 				

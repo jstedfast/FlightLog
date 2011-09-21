@@ -82,7 +82,7 @@ namespace FlightLog {
 		{
 			Title = Aircraft.TailNumber;
 			
-			profile.Photograph = PhotoManager.Load (Aircraft.TailNumber);
+			profile.Photograph = PhotoManager.Load (Aircraft.TailNumber, false);
 			profile.Make = Aircraft.Make;
 			profile.Model = Aircraft.Model;
 			profile.Remarks = Aircraft.Notes;

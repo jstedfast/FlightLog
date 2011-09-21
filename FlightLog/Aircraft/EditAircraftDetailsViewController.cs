@@ -145,7 +145,7 @@ namespace FlightLog
 			Title = exists ? Aircraft.TailNumber : "New Aircraft";
 			
 			profile = new EditAircraftProfileView (View.Bounds.Width);
-			profile.Photograph = PhotoManager.Load (Aircraft.TailNumber);
+			profile.Photograph = PhotoManager.Load (Aircraft.TailNumber, false);
 			profile.TailNumber = Aircraft.TailNumber;
 			profile.Model = Aircraft.Model;
 			profile.Make = Aircraft.Make;
@@ -191,13 +191,19 @@ namespace FlightLog
 				return;
 			
 			if (profile.Photograph != null) {
+				UIImage thumbnail;
 				NSError error;
 				
-				if (!PhotoManager.Save (profile.TailNumber, profile.Photograph, out error)) {
+				if (!PhotoManager.Save (profile.TailNumber, profile.Photograph, false, out error)) {
 					UIAlertView alert = new UIAlertView ("Error", error.LocalizedDescription, null, "Dismiss", null);
 					alert.Show ();
 					return;
 				}
+				
+				thumbnail = PhotoManager.ScaleToSize (profile.Photograph, 96, 72);
+				PhotoManager.Save (profile.TailNumber, thumbnail, true, out error);
+				// Note: we don't dispose the thumbnail because it has been added to the cache.
+				thumbnail = null;
 			}
 			
 			// Save the values back to the Aircraft object

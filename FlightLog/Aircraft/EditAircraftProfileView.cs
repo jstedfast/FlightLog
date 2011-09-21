@@ -154,6 +154,7 @@ namespace FlightLog {
 					0.0f, 0.0f, 0.0f, 0.35f,
 					0.0f, 0.0f, 0.0f, 0.05f
 				};
+				
 				using (var gradient = new CGGradient (cs, gradColors, new float [] { 0.0f, 0.1f, 0.4f, 1.0f })) {
 					ctx.DrawLinearGradient (gradient, topCenter, bottomCenter, 0);
 				}
@@ -276,9 +277,21 @@ namespace FlightLog {
 			sheet.ShowFrom (PhotoRect, this, true);
 		}
 		
+		void OnPhotoSaved (UIImage photo, NSError error)
+		{
+			// dispose of the full-size photograph
+			photo.Dispose ();
+		}
+		
 		void OnPhotoChosen (UIImagePickerController picker, UIImage photo)
 		{
-			Photograph = photo;
+			Photograph = PhotoManager.ScaleToSize (photo, (int) PhotoWidth, (int) PhotoHeight);
+			
+			if (picker.SourceType == UIImagePickerControllerSourceType.Camera)
+				photo.SaveToPhotosAlbum (OnPhotoSaved);
+			else
+				photo.Dispose ();
+			
 			popover.Dismiss (true);
 		}
 		
