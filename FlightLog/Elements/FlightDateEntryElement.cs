@@ -47,6 +47,10 @@ namespace FlightLog {
 			get; set;
 		}
 		
+		protected override NSString CellKey {
+			get { return key; }
+		}
+		
 		string FormatDate (DateTime date)
 		{
 			return date.ToShortDateString ();
@@ -75,43 +79,52 @@ namespace FlightLog {
 			return FormatDate (DateValue);
 		}
 		
-		class DatePickerController : UINavigationController {
-			FlightDateEntryElement element;
-			DialogViewController dvc;
+		class DatePickerController : UIViewController {
 			UIDatePicker picker;
 			
-			public DatePickerController (DialogViewController dvc, FlightDateEntryElement element)
+			public DatePickerController ()
 			{
 				Title = "Pick a Date";
 				
-				View = picker = new UIDatePicker () {
+				View = picker = new UIDatePicker (RectangleF.Empty) {
+					AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
 					Mode = UIDatePickerMode.Date,
-					Date = element.DateValue,
 				};
-				
-				this.element = element;
-				this.dvc = dvc;
 			}
 			
-			public override void ViewWillDisappear (bool animated)
+			public UIPopoverController Popover {
+				get; set;
+			}
+			
+			public DateTime DateValue {
+				get { return (DateTime) picker.Date; }
+				set { picker.Date = (NSDate) value; }
+			}
+			
+			public override void ViewDidAppear (bool animated)
 			{
-				base.ViewWillDisappear (animated);
+				Popover.SetPopoverContentSize (picker.Frame.Size, animated);
 				
-				element.DateValue = picker.Date;
-				
-				dvc.Root.Reload (element, UITableViewRowAnimation.None);
+				base.ViewDidAppear (animated);
 			}
 		}
 		
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
-			picker = new DatePickerController (dvc, this);
-			
+			picker = new DatePickerController ();
 			popover = new UIPopoverController (picker);
-			//popover.PopoverArrowDirection = UIPopoverArrowDirection.Any;
+			//picker.DateValue = DateValue;
+			picker.Popover = popover;
 			
 			var cell = GetActiveCell ();
-			popover.PresentFromRect (cell.Bounds, cell.AccessoryView, UIPopoverArrowDirection.Any, true);
+			
+			popover.DidDismiss += (sender, e) => {
+				DateValue = picker.DateValue;
+				
+				GetImmediateRootElement ().Reload (this, UITableViewRowAnimation.None);
+			};
+			
+			popover.PresentFromRect (cell.Frame, tableView, UIPopoverArrowDirection.Any, true);
 		}
 		
 		public override bool Matches (string text)
@@ -125,4 +138,3 @@ namespace FlightLog {
 		}
 	}
 }
-

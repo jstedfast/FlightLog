@@ -43,7 +43,7 @@ namespace FlightLog {
 		AircraftEntryElement aircraft;
 		LimitedEntryElement remarks;
 		UIBarButtonItem cancel, save;
-		DateElement date;
+		FlightDateEntryElement date;
 		bool exists;
 		
 		public EditFlightDetailsViewController (Flight flight, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
@@ -64,7 +64,7 @@ namespace FlightLog {
 		Section CreateFlightSection ()
 		{
 			return new Section ("Flight") {
-				(date = new DateElement ("Date", Flight.Date)),
+				(date = new FlightDateEntryElement ("Date", Flight.Date)),
 				(aircraft = new AircraftEntryElement (Flight.Aircraft)),
 				(departed = new AirportEntryElement ("Departed", Flight.AirportDeparted)),
 				(visited1 = new AirportEntryElement ("Visited", Flight.AirportVisited1)),
