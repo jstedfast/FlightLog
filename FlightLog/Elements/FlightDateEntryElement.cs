@@ -35,6 +35,7 @@ namespace FlightLog {
 	public class FlightDateEntryElement : Element
 	{
 		static NSString key = new NSString ("FlightDateEntryElement");
+		static SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
 		DatePickerController picker;
 		UIPopoverController popover;
 		
@@ -53,7 +54,8 @@ namespace FlightLog {
 		
 		string FormatDateTime (DateTime date)
 		{
-			return date.ToString ("f");
+			//return date.ToString ("f");
+			return date.ToLongDateString ();
 		}
 		
 		public override UITableViewCell GetCell (UITableView tv)
@@ -74,13 +76,9 @@ namespace FlightLog {
 			return cell;
 		}
 		
-		public override string Summary ()
-		{
-			return FormatDateTime (DateValue);
-		}
-		
-		static SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
-		
+#if false
+		// Note: Need to figure out how users want to deal with time pickers as far as timezones go.
+		// e.g. do they want to enter local time or zulu time? Should I have an option for that?
 		class TimePickerController : UIViewController {
 			UIBarButtonItem done;
 			UIDatePicker picker;
@@ -120,11 +118,13 @@ namespace FlightLog {
 				base.Dispose (disposing);
 			}
 		}
+#endif
 		
 		class DatePickerController : UIViewController {
-			TimePickerController timePicker;
-			UIBarButtonItem editTime;
+			//TimePickerController timePicker;
+			//UIBarButtonItem editTime;
 			UIBarButtonItem cancel;
+			UIBarButtonItem done;
 			UIDatePicker picker;
 			
 			public DatePickerController (DateTime date)
@@ -143,8 +143,12 @@ namespace FlightLog {
 					Popover.Dismiss (true);
 				};
 				
-				editTime = new UIBarButtonItem ("Time", UIBarButtonItemStyle.Plain, OnEditClicked);
-				NavigationItem.RightBarButtonItem = editTime;
+				//editTime = new UIBarButtonItem ("Time", UIBarButtonItemStyle.Plain, OnEditClicked);
+				//NavigationItem.RightBarButtonItem = editTime;
+				
+				done = new UIBarButtonItem (UIBarButtonSystemItem.Action);
+				NavigationItem.RightBarButtonItem = done;
+				done.Clicked += OnDoneClicked;
 			}
 			
 			public UIPopoverController Popover {
@@ -158,12 +162,13 @@ namespace FlightLog {
 			
 			public override void ViewWillAppear (bool animated)
 			{
-				if (timePicker != null)
-					DateValue = timePicker.DateValue;
+				//if (timePicker != null)
+				//	DateValue = timePicker.DateValue;
 				
 				base.ViewWillAppear (animated);
 			}
 			
+#if false
 			void OnEditClicked (object sender, EventArgs args)
 			{
 				if (timePicker == null)
@@ -174,12 +179,13 @@ namespace FlightLog {
 				
 				NavigationController.PushViewController (timePicker, true);
 			}
+#endif
 			
 			public event EventHandler DatePicked;
 			
 			public void OnDoneClicked (object sender, EventArgs args)
 			{
-				DateValue = timePicker.DateValue;
+				//DateValue = timePicker.DateValue;
 				Popover.Dismiss (true);
 				
 				if (DatePicked != null)
@@ -188,6 +194,7 @@ namespace FlightLog {
 			
 			protected override void Dispose (bool disposing)
 			{
+#if false
 				if (timePicker != null) {
 					timePicker.Dispose ();
 					timePicker = null;
@@ -197,10 +204,16 @@ namespace FlightLog {
 					editTime.Dispose ();
 					editTime = null;
 				}
+#endif
 				
 				if (cancel != null) {
 					cancel.Dispose ();
 					cancel = null;
+				}
+				
+				if (done != null) {
+					done.Dispose ();
+					done = null;
 				}
 				
 				if (picker != null) {
