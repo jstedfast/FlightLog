@@ -51,9 +51,9 @@ namespace FlightLog {
 			get { return key; }
 		}
 		
-		string FormatDate (DateTime date)
+		string FormatDateTime (DateTime date)
 		{
-			return date.ToShortDateString ();
+			return date.ToString ("f");
 		}
 		
 		public override UITableViewCell GetCell (UITableView tv)
@@ -68,7 +68,7 @@ namespace FlightLog {
 				cell.TextLabel.TextAlignment = UITextAlignment.Left;
 			}
 			
-			cell.DetailTextLabel.Text = FormatDate (DateValue);
+			cell.DetailTextLabel.Text = FormatDateTime (DateValue);
 			cell.TextLabel.Text = Caption;
 			
 			return cell;
@@ -76,20 +76,75 @@ namespace FlightLog {
 		
 		public override string Summary ()
 		{
-			return FormatDate (DateValue);
+			return FormatDateTime (DateValue);
+		}
+		
+		static SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
+		
+		class TimePickerController : UIViewController {
+			UIBarButtonItem done;
+			UIDatePicker picker;
+			
+			public TimePickerController (EventHandler doneClicked)
+			{
+				Title = "Pick a Time";
+				
+				View = picker = new UIDatePicker (new RectangleF (PointF.Empty, DatePickerSize)) {
+					AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
+					Mode = UIDatePickerMode.Time,
+					MinuteInterval = 5,
+				};
+				
+				done = new UIBarButtonItem (UIBarButtonSystemItem.Done);
+				NavigationItem.RightBarButtonItem = done;
+				done.Clicked += doneClicked;
+			}
+			
+			public DateTime DateValue {
+				get { return (DateTime) picker.Date; }
+				set { picker.Date = (NSDate) value; }
+			}
+			
+			protected override void Dispose (bool disposing)
+			{
+				if (picker != null) {
+					picker.Dispose ();
+					picker = null;
+				}
+				
+				if (done != null) {
+					done.Dispose ();
+					done = null;
+				}
+				
+				base.Dispose (disposing);
+			}
 		}
 		
 		class DatePickerController : UIViewController {
+			TimePickerController timePicker;
+			UIBarButtonItem editTime;
+			UIBarButtonItem cancel;
 			UIDatePicker picker;
 			
-			public DatePickerController ()
+			public DatePickerController (DateTime date)
 			{
 				Title = "Pick a Date";
 				
-				View = picker = new UIDatePicker (RectangleF.Empty) {
+				View = picker = new UIDatePicker (new RectangleF (PointF.Empty, DatePickerSize)) {
 					AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
 					Mode = UIDatePickerMode.Date,
+					Date = date,
 				};
+				
+				cancel = new UIBarButtonItem (UIBarButtonSystemItem.Cancel);
+				NavigationItem.LeftBarButtonItem = cancel;
+				cancel.Clicked += (sender, e) => {
+					Popover.Dismiss (true);
+				};
+				
+				editTime = new UIBarButtonItem ("Time", UIBarButtonItemStyle.Plain, OnEditClicked);
+				NavigationItem.RightBarButtonItem = editTime;
 			}
 			
 			public UIPopoverController Popover {
@@ -101,30 +156,87 @@ namespace FlightLog {
 				set { picker.Date = (NSDate) value; }
 			}
 			
-			public override void ViewDidAppear (bool animated)
+			public override void ViewWillAppear (bool animated)
 			{
-				Popover.SetPopoverContentSize (picker.Frame.Size, animated);
+				if (timePicker != null)
+					DateValue = timePicker.DateValue;
 				
-				base.ViewDidAppear (animated);
+				base.ViewWillAppear (animated);
 			}
+			
+			void OnEditClicked (object sender, EventArgs args)
+			{
+				if (timePicker == null)
+					timePicker = new TimePickerController (OnDoneClicked);
+				
+				timePicker.ContentSizeForViewInPopover = DatePickerSize;
+				timePicker.DateValue = DateValue;
+				
+				NavigationController.PushViewController (timePicker, true);
+			}
+			
+			public event EventHandler DatePicked;
+			
+			public void OnDoneClicked (object sender, EventArgs args)
+			{
+				DateValue = timePicker.DateValue;
+				Popover.Dismiss (true);
+				
+				if (DatePicked != null)
+					DatePicked (this, EventArgs.Empty);
+			}
+			
+			protected override void Dispose (bool disposing)
+			{
+				if (timePicker != null) {
+					timePicker.Dispose ();
+					timePicker = null;
+				}
+				
+				if (editTime != null) {
+					editTime.Dispose ();
+					editTime = null;
+				}
+				
+				if (cancel != null) {
+					cancel.Dispose ();
+					cancel = null;
+				}
+				
+				if (picker != null) {
+					picker.Dispose ();
+					picker = null;
+				}
+				
+				base.Dispose (disposing);
+			}
+		}
+		
+		void OnDatePicked (object sender, EventArgs args)
+		{
+			DateValue = ((DatePickerController) sender).DateValue;
+			
+			GetImmediateRootElement ().Reload (this, UITableViewRowAnimation.None);
 		}
 		
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
-			picker = new DatePickerController ();
-			popover = new UIPopoverController (picker);
-			//picker.DateValue = DateValue;
+			picker = new DatePickerController (DateValue);
+			popover = new UIPopoverController (new UINavigationController (picker));
+			picker.ContentSizeForViewInPopover = DatePickerSize;
+			picker.DatePicked += OnDatePicked;
 			picker.Popover = popover;
 			
 			var cell = GetActiveCell ();
 			
 			popover.DidDismiss += (sender, e) => {
-				DateValue = picker.DateValue;
-				
-				GetImmediateRootElement ().Reload (this, UITableViewRowAnimation.None);
+				popover.Dispose ();
+				popover = null;
+				picker.Dispose ();
+				picker = null;
 			};
 			
-			popover.PresentFromRect (cell.Frame, tableView, UIPopoverArrowDirection.Any, true);
+			popover.PresentFromRect (cell.Frame, tableView, UIPopoverArrowDirection.Up, true);
 		}
 		
 		public override bool Matches (string text)
