@@ -39,15 +39,11 @@ namespace FlightLog {
 		
 		public AircraftSplitViewController ()
 		{
-			TabBarItem.Image = UIImage.FromBundle ("Images/first");
+			TabBarItem.Image = UIImage.FromBundle ("Images/aircraft");
 			Title = "Aircraft";
 			
 			details = new AircraftDetailsViewController ();
 			overview = new AircraftViewController (details);
-			
-			//overview.AircraftSelected += (sender, e) => {
-			//	details.Aircraft = e.Aircraft;
-			//};
 			
 			controllers = new UIViewController[] {
 				new UINavigationController (overview),

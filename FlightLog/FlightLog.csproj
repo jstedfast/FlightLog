@@ -118,6 +118,8 @@
     <Content Include="Airports.sqlite">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\aircraft.png" />
+    <Content Include="Images\aircraft%402x.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
