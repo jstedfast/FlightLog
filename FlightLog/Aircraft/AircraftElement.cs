@@ -59,7 +59,7 @@ namespace FlightLog {
 		static UIFont TailNumberFont = UIFont.BoldSystemFontOfSize (TailNumberFontSize);
 		static UIFont AircraftModelFont = UIFont.BoldSystemFontOfSize (AircraftModelFontSize);
 		static UIFont AircraftMakeFont = UIFont.SystemFontOfSize (AircraftMakeFontSize);
-		static UIFont FlightTimeFont = UIFont.SystemFontOfSize (FlightTimeFontSize);
+		static UIFont FlightTimeFont = UIFont.ItalicSystemFontOfSize (FlightTimeFontSize);
 		static UIColor TailNumberColor = UIColor.FromRGB (56, 84, 135); //(147, 170, 204);
 		static CGGradient BottomGradient, TopGradient;
 		static UIImage DefaultPhoto;
@@ -127,31 +127,22 @@ namespace FlightLog {
 				if (flightTime == 0)
 					return "No time logged for this aircraft.";
 				
-				int minutes = (flightTime / 60) % 60;
-				int hours = flightTime / 3600;
+				double hours = Math.Round (flightTime / 3600.0, 1);
 				
-				if (hours > 1000) {
-					// get rid of insiginificant digits
-					hours = (hours / 10) * 10;
-					minutes = -1;
-				} else if (hours > 10) {
-					// get rid of insignificant digits
-					minutes = -1;
-				}
+				if (hours == 1.0)
+					return "1 hour logged in this aircraft.";
 				
-				if (minutes < 10) {
-					if (minutes > 0 || minutes == -1)
-						return string.Format ("Over {0} hours logged in this aircraft.", hours);
-					else
-						return string.Format ("{0} hours logged in this aircraft.", hours);
-				}
-				
-				return string.Format ("{0} hours and {1} minutes logged in this aircraft.", hours, minutes);
+				return string.Format ("{0} hours logged in this aircraft.", hours);
 			}
 			
-			int FlightTime (int hours, int minutes)
+			static int GetFlightTime (Aircraft aircraft)
 			{
-				return (hours * 3600) + (minutes * 60);
+				int total = 0;
+				
+				foreach (Flight flight in LogBook.GetFlights (aircraft.TailNumber))
+					total += flight.FlightTime;
+				
+				return total;
 			}
 			
 			public override void Draw (RectangleF rect)
@@ -199,8 +190,7 @@ namespace FlightLog {
 				DrawString (aircraft.Model ?? "", modelBounds, AircraftModelFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				DrawString (aircraft.Make ?? "", makeBounds, AircraftMakeFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				
-				// FIXME: get the actual flight time
-				DrawString (FormatFlightTime (FlightTime (9, 52)), timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
+				DrawString (FormatFlightTime (GetFlightTime (aircraft)), timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
 				
 				UIImage photo = PhotoManager.Load (aircraft.TailNumber, true);
 				if (photo == null)
