@@ -230,50 +230,57 @@ namespace FlightLog {
 				RectangleF rect;
 				SizeF size;
 				
-				// Render the departed airport
-				airportColor.SetColor ();
-				rect = new RectangleF (x, y, width, AirportFontSize);
-				size = DrawString (Flight.AirportDeparted, rect, AirportFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
-				width -= size.Width;
-				x += size.Width;
-				
-				// Render the '-' between the departed and arrived airports
-				textColor.SetColor ();
-				rect = new RectangleF (x, y, width, AirportFontSize);
-				size = DrawString ("-", rect, AirportFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
-				width -= size.Width;
-				x += size.Width;
-				
-				// Render the arrived airport
-				airportColor.SetColor ();
-				rect = new RectangleF (x, y, width, AirportFontSize);
-				size = DrawString (Flight.AirportArrived, rect, AirportFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
-				width -= size.Width;
-				x += size.Width;
-				
-				// Render any additional airports visited
-				List<string> visited = new List<string> ();
-				
-				if (flight.AirportVisited1 != null && flight.AirportVisited1.Length > 0)
-					visited.Add (flight.AirportVisited1);
-				if (flight.AirportVisited2 != null && flight.AirportVisited2.Length > 0)
-					visited.Add (flight.AirportVisited2);
-				if (flight.AirportVisited3 != null && flight.AirportVisited3.Length > 0)
-					visited.Add (flight.AirportVisited3);
-				
-				string[] prefix = new string[] { " via ", ", ", ", " };
-				for (int i = 0; i < visited.Count; i++) {
-					textColor.SetColor ();
-					rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
-					size = DrawString (prefix[i], rect, ViaFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+				if (flight.AirportDeparted != null || flight.AirportArrived != null) {
+					// Render the departed airport
+					airportColor.SetColor ();
+					rect = new RectangleF (x, y, width, AirportFontSize);
+					if (flight.AirportDeparted != null)
+						size = DrawString (Flight.AirportDeparted, rect, AirportFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+					else
+						size = DrawString (Flight.AirportArrived, rect, AirportFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 					width -= size.Width;
 					x += size.Width;
 					
-					airportColor.SetColor ();
-					rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
-					size = DrawString (visited[i], rect, ViaBoldFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
-					width -= size.Width;
-					x += size.Width;
+					if (flight.AirportArrived != null) {
+						// Render the '-' between the departed and arrived airports
+						textColor.SetColor ();
+						rect = new RectangleF (x, y, width, AirportFontSize);
+						size = DrawString ("-", rect, AirportFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+						width -= size.Width;
+						x += size.Width;
+						
+						// Render the arrived airport
+						airportColor.SetColor ();
+						rect = new RectangleF (x, y, width, AirportFontSize);
+						size = DrawString (Flight.AirportArrived, rect, AirportFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+						width -= size.Width;
+						x += size.Width;
+					}
+					
+					// Render any additional airports visited
+					List<string> visited = new List<string> ();
+					
+					if (flight.AirportVisited1 != null && flight.AirportVisited1.Length > 0)
+						visited.Add (flight.AirportVisited1);
+					if (flight.AirportVisited2 != null && flight.AirportVisited2.Length > 0)
+						visited.Add (flight.AirportVisited2);
+					if (flight.AirportVisited3 != null && flight.AirportVisited3.Length > 0)
+						visited.Add (flight.AirportVisited3);
+					
+					string[] prefix = new string[] { " via ", ", ", ", " };
+					for (int i = 0; i < visited.Count; i++) {
+						textColor.SetColor ();
+						rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
+						size = DrawString (prefix[i], rect, ViaFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+						width -= size.Width;
+						x += size.Width;
+						
+						airportColor.SetColor ();
+						rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
+						size = DrawString (visited[i], rect, ViaBoldFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+						width -= size.Width;
+						x += size.Width;
+					}
 				}
 				
 				// Move down onto the next line (to render the aircraft info)

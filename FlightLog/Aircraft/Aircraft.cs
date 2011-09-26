@@ -253,6 +253,20 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Gets the category from the specified classification.
+		/// </summary>
+		/// <returns>
+		/// The appropriate category for the specified classification.
+		/// </returns>
+		/// <param name='classification'>
+		/// An AircraftClassification.
+		/// </param>
+		public static AircraftCategory GetCategoryFromClass (AircraftClassification classification)
+		{
+			return (AircraftCategory) ((((int) classification) / CategoryStep) * CategoryStep);
+		}
+		
+		/// <summary>
 		/// Gets the aircraft's category based on the classification.
 		/// </summary>
 		/// <value>
@@ -260,7 +274,7 @@ namespace FlightLog {
 		/// </value>
 		public AircraftCategory Category {
 			get {
-				return (AircraftCategory) ((((int) Classification) / CategoryStep) * CategoryStep);
+				return GetCategoryFromClass (Classification);
 			}
 		}
 		

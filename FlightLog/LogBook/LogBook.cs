@@ -72,6 +72,9 @@ namespace FlightLog {
 		/// </param>
 		public static bool Add (Aircraft aircraft)
 		{
+			if (Contains (aircraft))
+				return false;
+			
 			if (sqlitedb.Insert (aircraft) > 0) {
 				OnAircraftAdded (aircraft);
 				return true;
@@ -92,6 +95,20 @@ namespace FlightLog {
 		public static bool CanDelete (Aircraft aircraft)
 		{
 			return sqlitedb.Query<Flight> ("select 1 from Flight where Aircraft = ?", aircraft.TailNumber).Count == 0;
+		}
+		
+		/// <summary>
+		/// Checks whether or not the LogBook contains the specified aircraft.
+		/// </summary>
+		/// <returns>
+		/// <c>true</c> if the specified aircraft is already in the LogBook; otherwise, <c>false</c>.
+		/// </returns>
+		/// <param name='aircraft'>
+		/// The aircraft to check for.
+		/// </param>
+		public static bool Contains (Aircraft aircraft)
+		{
+			return sqlitedb.Query<Flight> ("select 1 from Aircraft where TailNumber = ?", aircraft.TailNumber).Count == 1;
 		}
 		
 		/// <summary>
@@ -274,6 +291,27 @@ namespace FlightLog {
 		{
 			return from flight in sqlitedb.Table<Flight> ()
 				   where flight.Aircraft == tailNumber
+				   orderby flight.Date
+				   select flight;
+		}
+		
+		/// <summary>
+		/// Gets the logged flights flown with the specified aircraft since the specified date.
+		/// </summary>
+		/// <returns>
+		/// The logged flights flown with the specified aircraft since the specified date.
+		/// </returns>
+		/// <param name='tailNumber'>
+		/// The tail number of the aircraft.
+		/// </param>
+		/// <param name='since'>
+		/// The start date.
+		/// </param>
+		public static IEnumerable<Flight> GetFlights (string tailNumber, DateTime since)
+		{
+			return from flight in sqlitedb.Table<Flight> ()
+				   where flight.Aircraft == tailNumber
+				   where flight.Date >= since
 				   orderby flight.Date
 				   select flight;
 		}

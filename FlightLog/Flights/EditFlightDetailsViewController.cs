@@ -122,7 +122,7 @@ namespace FlightLog {
 		
 		void OnCancelClicked (object sender, EventArgs args)
 		{
-			this.NavigationController.PopViewControllerAnimated (true);
+			NavigationController.PopViewControllerAnimated (true);
 			
 			OnEditorClosed ();
 		}
@@ -143,13 +143,7 @@ namespace FlightLog {
 			FetchValues ();
 			
 			// Don't let the user save if the info is incomplete
-			if (aircraft.Value == null || aircraft.Value.Length < 6)
-				return;
-			
-			if (departed.Value == null || arrived == null)
-				return;
-			
-			if (total.ValueAsSeconds == 0)
+			if (aircraft.Value == null || aircraft.Value.Length < 2)
 				return;
 			
 			// Save the values back to the Flight record
@@ -160,6 +154,9 @@ namespace FlightLog {
 			Flight.AirportVisited2 = visited2.Value;
 			Flight.AirportVisited3 = visited3.Value;
 			Flight.AirportArrived = arrived.Value;
+			
+			if (Flight.AirportArrived == null)
+				Flight.AirportArrived = Flight.AirportDeparted;
 			
 			// Flight Time values
 			Flight.FlightTime = total.ValueAsSeconds;
@@ -188,7 +185,7 @@ namespace FlightLog {
 			else
 				LogBook.Add (Flight);
 			
-			this.NavigationController.PopViewControllerAnimated (true);
+			NavigationController.PopViewControllerAnimated (true);
 			
 			OnEditorClosed ();
 		}
