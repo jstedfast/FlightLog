@@ -120,13 +120,11 @@ namespace FlightLog {
 			return entry;
 		}
 		
-		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText)
+		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
-			int newLength = currentText.Length - changedRange.Length + replacementText.Length;
-			StringBuilder result;
 			int i;
 			
-			if (newLength == 0)
+			if (result.Length == 0)
 				return true;
 			
 			// Validate according to http://en.wikipedia.org/wiki/Aircraft_registration
@@ -140,15 +138,6 @@ namespace FlightLog {
 				
 				return false;
 			}
-			
-			// Combine the currentText with the replacementText to get our resulting text
-			result = new StringBuilder (newLength);
-			for (i = 0; i < changedRange.Location; i++)
-				result.Append (char.ToUpperInvariant (currentText[i]));
-			for (i = 0; i < replacementText.Length; i++)
-				result.Append (char.ToUpperInvariant (replacementText[i]));
-			for (i = changedRange.Location + changedRange.Length; i < currentText.Length; i++)
-				result.Append (char.ToUpperInvariant (currentText[i]));
 			
 #if ENABLE_GLOBAL_SUPPORT
 			// If the resulting tail number begins with a digit, make sure it is valid
@@ -185,7 +174,7 @@ namespace FlightLog {
 			
 			// If this is a U.S. tail number, verify that it doesn't contain an I or O
 			if (result[0] == 'N') {
-				if (result.ToString ().IndexOfAny (NotAllowedInTheUS) != -1)
+				if (result.IndexOfAny (NotAllowedInTheUS) != -1)
 					return false;
 			}
 			

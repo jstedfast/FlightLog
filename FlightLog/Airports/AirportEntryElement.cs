@@ -69,10 +69,10 @@ namespace FlightLog {
 			return entry;
 		}
 		
-		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText)
+		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
 			// Base method checks against the max length for us...
-			if (!base.AllowTextChange (currentText, changedRange, replacementText))
+			if (!base.AllowTextChange (currentText, changedRange, replacementText, result))
 				return false;
 			
 			// Validate that all of the characters are legal for an airport code

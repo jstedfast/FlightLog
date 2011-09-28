@@ -127,17 +127,15 @@ namespace FlightLog {
 			}
 		}
 		
-		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText)
+		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
-			int newLength = currentText.Length - changedRange.Length + replacementText.Length;
-			StringBuilder result;
 			int dot, hours = 0;
 			int i;
 			
-			if (newLength > MaxLength)
+			if (result.Length > MaxLength)
 				return false;
 			
-			if (newLength == 0)
+			if (result.Length == 0)
 				return true;
 			
 			// Validate that the replacement characters are all numeric
@@ -145,15 +143,6 @@ namespace FlightLog {
 				if ((replacementText[i] < '0' || replacementText[i] > '9') && replacementText[i] != '.')
 					return false;
 			}
-			
-			// Combine the currentText with the replacementText to get our resulting text
-			result = new StringBuilder (newLength);
-			for (i = 0; i < changedRange.Location; i++)
-				result.Append (currentText[i]);
-			for (i = 0; i < replacementText.Length; i++)
-				result.Append (replacementText[i]);
-			for (i = changedRange.Location + changedRange.Length; i < currentText.Length; i++)
-				result.Append (currentText[i]);
 			
 			// Validate the value
 			for (i = 0, dot = -1; i < result.Length; i++) {

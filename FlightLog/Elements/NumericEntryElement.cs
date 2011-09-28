@@ -104,36 +104,23 @@ namespace FlightLog {
 			}
 		}
 		
-		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText)
+		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
-			int newLength = currentText.Length - changedRange.Length + replacementText.Length;
-			StringBuilder result;
-			int value, i;
-			string str;
+			int value;
 			
-			if (newLength > MaxLength)
+			if (result.Length > MaxLength)
 				return false;
 			
-			if (newLength == 0)
+			if (result.Length == 0)
 				return true;
 			
 			// Validate that the replacement characters are all numeric
-			for (i = 0; i < replacementText.Length; i++) {
+			for (int i = 0; i < replacementText.Length; i++) {
 				if (replacementText[i] < '0' || replacementText[i] > '9')
 					return false;
 			}
 			
-			// Combine the currentText with the replacementText to get our resulting text
-			result = new StringBuilder (newLength);
-			for (i = 0; i < changedRange.Location; i++)
-				result.Append (currentText[i]);
-			for (i = 0; i < replacementText.Length; i++)
-				result.Append (replacementText[i]);
-			for (i = changedRange.Location + changedRange.Length; i < currentText.Length; i++)
-				result.Append (currentText[i]);
-			
-			str = result.ToString ();
-			if (!Int32.TryParse (str, out value))
+			if (!Int32.TryParse (result, out value))
 				return false;
 			
 			if (value < MinValue || value > MaxValue)

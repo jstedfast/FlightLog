@@ -113,16 +113,26 @@ namespace FlightLog {
 		/// <param name='replacementText'>
 		/// The text which will replace the range of text in currentText.
 		/// </param>
-		protected virtual bool AllowTextChange (string currentText, NSRange changedRange, string replacementText)
+		/// <param name='result'>
+		/// The text that will result in the change.
+		/// </param>
+		protected virtual bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
-			int newLength = currentText.Length - changedRange.Length + replacementText.Length;
-			
-			return newLength <= MaxLength;
+			return result.Length <= MaxLength;
 		}
 		
 		bool OnShouldChangeCharacters (UITextField field, NSRange range, string text)
 		{
-			return AllowTextChange (field.Text, range, text);
+			string currentText = field.Text;
+			string result;
+			
+			result = currentText.Substring (0, range.Location) + text + currentText.Substring (range.Location + range.Length);
+			if (!AllowTextChange (currentText, range, text, result))
+				return false;
+			
+			val = result;
+			
+			return true;
 		}
 	}
 }
