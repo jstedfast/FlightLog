@@ -94,6 +94,7 @@ namespace FlightLog {
 		public class AircraftCellView : UIView
 		{
 			Aircraft aircraft;
+			int flightTime;
 			
 			public AircraftCellView ()
 			{
@@ -109,6 +110,20 @@ namespace FlightLog {
 				get { return aircraft; }
 				set {
 					aircraft = value;
+					SetNeedsDisplay ();
+				}
+			}
+			
+			/// <summary>
+			/// Gets or sets the total time spent flying this aircraft.
+			/// </summary>
+			/// <value>
+			/// The flight time.
+			/// </value>
+			public int FlightTime {
+				get { return flightTime; }
+				set {
+					flightTime = value;
 					SetNeedsDisplay ();
 				}
 			}
@@ -133,16 +148,6 @@ namespace FlightLog {
 					return "1 hour logged in this aircraft.";
 				
 				return string.Format ("{0} hours logged in this aircraft.", hours);
-			}
-			
-			static int GetFlightTime (Aircraft aircraft)
-			{
-				int total = 0;
-				
-				foreach (Flight flight in LogBook.GetFlights (aircraft.TailNumber))
-					total += flight.FlightTime;
-				
-				return total;
 			}
 			
 			public override void Draw (RectangleF rect)
@@ -190,7 +195,7 @@ namespace FlightLog {
 				DrawString (aircraft.Model ?? "", modelBounds, AircraftModelFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				DrawString (aircraft.Make ?? "", makeBounds, AircraftMakeFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				
-				DrawString (FormatFlightTime (GetFlightTime (aircraft)), timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
+				DrawString (FormatFlightTime (flightTime), timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
 				
 				UIImage photo = PhotoManager.Load (aircraft.TailNumber, true);
 				if (photo == null)
@@ -225,6 +230,20 @@ namespace FlightLog {
 			}
 		}
 		
+		/// <summary>
+		/// Gets or sets the total time spent flying this aircraft.
+		/// </summary>
+		/// <value>
+		/// The flight time.
+		/// </value>
+		public int FlightTime {
+			get { return view.FlightTime; }
+			set {
+				view.FlightTime = value;
+				SetNeedsDisplay ();
+			}
+		}
+		
 		//public override UITableViewCellEditingStyle EditingStyle {
 		//	get {
 		//		// Our only supported editing operation is delete.
@@ -243,10 +262,14 @@ namespace FlightLog {
 	public class AircraftElement : Element, IElementSizing
 	{
 		static NSString key = new NSString ("AircraftElement");
+		int flightTime = -1;
 		
 		public AircraftElement (Aircraft aircraft) : base (null)
 		{
 			aircraft.Updated += OnAircraftUpdated;
+			LogBook.FlightUpdated += OnFlightUpdated;
+			LogBook.FlightDeleted += OnFlightDeleted;
+			LogBook.FlightAdded += OnFlightAdded;
 			Aircraft = aircraft;
 		}
 		
@@ -270,6 +293,54 @@ namespace FlightLog {
 				handler (this, EventArgs.Empty);
 		}
 		
+		void OnFlightAdded (object sender, FlightEventArgs args)
+		{
+			if (flightTime == -1 || args.Flight.Aircraft != Aircraft.TailNumber)
+				return;
+			
+			flightTime += args.Flight.FlightTime;
+			
+			var cell = GetActiveCell () as AircraftCell;
+			if (cell != null)
+				cell.FlightTime = flightTime;
+		}
+		
+		void OnFlightUpdated (object sender, FlightEventArgs args)
+		{
+			if (flightTime == -1 || args.Flight.Aircraft != Aircraft.TailNumber)
+				return;
+			
+			var cell = GetActiveCell () as AircraftCell;
+			if (cell != null) {
+				flightTime = GetFlightTime (Aircraft);
+				cell.FlightTime = flightTime;
+			} else {
+				flightTime = -1;
+			}
+		}
+		
+		void OnFlightDeleted (object sender, FlightEventArgs args)
+		{
+			if (flightTime == -1 || args.Flight.Aircraft != Aircraft.TailNumber)
+				return;
+			
+			flightTime -= args.Flight.FlightTime;
+			
+			var cell = GetActiveCell () as AircraftCell;
+			if (cell != null)
+				cell.FlightTime = flightTime;
+		}
+		
+		static int GetFlightTime (Aircraft aircraft)
+		{
+			int total = 0;
+			
+			foreach (Flight flight in LogBook.GetFlights (aircraft.TailNumber))
+				total += flight.FlightTime;
+			
+			return total;
+		}
+		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
 			AircraftCell cell = tv.DequeueReusableCell (key) as AircraftCell;
@@ -278,6 +349,11 @@ namespace FlightLog {
 				cell = new AircraftCell (Aircraft, key);
 			else
 				cell.Aircraft = Aircraft;
+			
+			if (flightTime == -1)
+				flightTime = GetFlightTime (Aircraft);
+			
+			cell.FlightTime = flightTime;
 			
 			return cell;
 		}
@@ -302,6 +378,10 @@ namespace FlightLog {
 				Aircraft.Updated -= OnAircraftUpdated;
 				Aircraft = null;
 			}
+			
+			LogBook.FlightUpdated -= OnFlightUpdated;
+			LogBook.FlightDeleted -= OnFlightDeleted;
+			LogBook.FlightAdded -= OnFlightAdded;
 			
 			base.Dispose (disposing);
 		}

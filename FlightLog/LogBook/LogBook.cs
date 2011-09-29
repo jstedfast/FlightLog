@@ -202,6 +202,19 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Event that gets emitted when a Flight is deleted from the LogBook.
+		/// </summary>
+		public static event EventHandler<FlightEventArgs> FlightDeleted;
+		
+		static void OnFlightDeleted (Flight flight)
+		{
+			var handler = FlightDeleted;
+			
+			if (handler != null)
+				handler (null, new FlightEventArgs (flight));
+		}
+		
+		/// <summary>
 		/// Delete the specified Flight entry.
 		/// </summary>
 		/// <param name='flight'>
@@ -209,7 +222,25 @@ namespace FlightLog {
 		/// </param>
 		public static bool Delete (Flight flight)
 		{
-			return sqlitedb.Delete<Flight> (flight) > 0;
+			if (sqlitedb.Delete<Flight> (flight) > 0) {
+				OnFlightDeleted (flight);
+				return true;
+			}
+			
+			return false;
+		}
+		
+		/// <summary>
+		/// Event that gets emitted when aFlight is updated in the LogBook.
+		/// </summary>
+		public static event EventHandler<FlightEventArgs> FlightUpdated;
+		
+		static void OnFlightUpdated (Flight flight)
+		{
+			var handler = FlightUpdated;
+			
+			if (handler != null)
+				handler (null, new FlightEventArgs (flight));
 		}
 		
 		/// <summary>
@@ -221,6 +252,7 @@ namespace FlightLog {
 		public static bool Update (Flight flight)
 		{
 			if (sqlitedb.Update (flight) > 0) {
+				OnFlightUpdated (flight);
 				flight.OnUpdated ();
 				return true;
 			}
@@ -236,9 +268,7 @@ namespace FlightLog {
 		/// </returns>
 		public static IEnumerable<Flight> GetAllFlights ()
 		{
-			return from flight in sqlitedb.Table<Flight> ()
-				   orderby flight.Date descending
-				   select flight;
+			return sqlitedb.Query<Flight> ("select * from Flight order by Date desc");
 		}
 		
 		/// <summary>
@@ -255,10 +285,7 @@ namespace FlightLog {
 		/// </param>
 		public static IEnumerable<Flight> GetFlights (DateTime start, DateTime end)
 		{
-			return from flight in sqlitedb.Table<Flight> ()
-				   where (flight.Date >= start && flight.Date <= end)
-				   orderby flight.Date
-				   select flight;
+			return sqlitedb.Query<Flight> ("select * from Flight where Date between ? and ? order by Date desc", start, end);
 		}
 		
 		/// <summary>
@@ -272,10 +299,7 @@ namespace FlightLog {
 		/// </param>
 		public static IEnumerable<Flight> GetFlights (DateTime since)
 		{
-			return from flight in sqlitedb.Table<Flight> ()
-				   where flight.Date >= since
-				   orderby flight.Date
-				   select flight;
+			return sqlitedb.Query<Flight> ("select * from Flight where Date >= ? order by Date desc", since);
 		}
 		
 		/// <summary>
@@ -289,10 +313,7 @@ namespace FlightLog {
 		/// </param>
 		public static IEnumerable<Flight> GetFlights (string tailNumber)
 		{
-			return from flight in sqlitedb.Table<Flight> ()
-				   where flight.Aircraft == tailNumber
-				   orderby flight.Date
-				   select flight;
+			return sqlitedb.Query<Flight> ("select * from Flight where Aircraft = ? order by Date desc", tailNumber);
 		}
 		
 		/// <summary>
@@ -309,11 +330,8 @@ namespace FlightLog {
 		/// </param>
 		public static IEnumerable<Flight> GetFlights (string tailNumber, DateTime since)
 		{
-			return from flight in sqlitedb.Table<Flight> ()
-				   where flight.Aircraft == tailNumber
-				   where flight.Date >= since
-				   orderby flight.Date
-				   select flight;
+			return sqlitedb.Query<Flight> ("select * from Flight where Aircraft = ? and Date >= ? order by Date desc",
+				tailNumber, since);
 		}
 		#endregion
 	}
