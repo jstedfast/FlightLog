@@ -137,17 +137,25 @@ namespace FlightLog {
 			/// <param name='flightTime'>
 			/// Flight time in seconds.
 			/// </param>
-			string FormatFlightTime (int flightTime)
+			string FormatFlightTime (int flightTime, bool simulator)
 			{
-				if (flightTime == 0)
-					return "No time logged for this aircraft.";
+				if (flightTime == 0) {
+					if (simulator)
+						return "No time logged in this simulator.";
+					else
+						return "No time logged in this aircraft.";
+				}
 				
 				double hours = Math.Round (flightTime / 3600.0, 1);
 				
-				if (hours == 1.0)
-					return "1 hour logged in this aircraft.";
+				if (hours == 1.0) {
+					if (simulator)
+						return "1 hour logged in this simulator.";
+					else
+						return "1 hour logged in this aircraft.";
+				}
 				
-				return string.Format ("{0} hours logged in this aircraft.", hours);
+				return string.Format ("{0} hours logged in this {1}.", hours, simulator ? "simulator" : "aircraft");
 			}
 			
 			public override void Draw (RectangleF rect)
@@ -195,7 +203,8 @@ namespace FlightLog {
 				DrawString (aircraft.Model ?? "", modelBounds, AircraftModelFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				DrawString (aircraft.Make ?? "", makeBounds, AircraftMakeFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				
-				DrawString (FormatFlightTime (flightTime), timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
+				string logged = FormatFlightTime (flightTime, Aircraft.IsSimulator);
+				DrawString (logged, timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
 				
 				UIImage photo = PhotoManager.Load (aircraft.TailNumber, true);
 				if (photo == null)
@@ -285,12 +294,17 @@ namespace FlightLog {
 		
 		public event EventHandler<EventArgs> Changed;
 		
-		void OnAircraftUpdated (object sender, EventArgs args)
+		void EmitChanged ()
 		{
 			var handler = Changed;
 			
 			if (handler != null)
 				handler (this, EventArgs.Empty);
+		}
+		
+		void OnAircraftUpdated (object sender, EventArgs args)
+		{
+			EmitChanged ();
 		}
 		
 		void OnFlightAdded (object sender, FlightEventArgs args)
@@ -301,8 +315,10 @@ namespace FlightLog {
 			flightTime += args.Flight.FlightTime;
 			
 			var cell = GetActiveCell () as AircraftCell;
-			if (cell != null)
+			if (cell != null) {
 				cell.FlightTime = flightTime;
+				EmitChanged ();
+			}
 		}
 		
 		void OnFlightUpdated (object sender, FlightEventArgs args)
@@ -314,6 +330,7 @@ namespace FlightLog {
 			if (cell != null) {
 				flightTime = GetFlightTime (Aircraft);
 				cell.FlightTime = flightTime;
+				EmitChanged ();
 			} else {
 				flightTime = -1;
 			}
@@ -327,8 +344,10 @@ namespace FlightLog {
 			flightTime -= args.Flight.FlightTime;
 			
 			var cell = GetActiveCell () as AircraftCell;
-			if (cell != null)
+			if (cell != null) {
 				cell.FlightTime = flightTime;
+				EmitChanged ();
+			}
 		}
 		
 		static int GetFlightTime (Aircraft aircraft)

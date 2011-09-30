@@ -231,7 +231,7 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Event that gets emitted when aFlight is updated in the LogBook.
+		/// Event that gets emitted when a Flight is updated in the LogBook.
 		/// </summary>
 		public static event EventHandler<FlightEventArgs> FlightUpdated;
 		

@@ -29,6 +29,7 @@ using System;
 using SQLite;
 
 namespace FlightLog {
+#if false
 	// List from http://www.highwayhome.com/corporate/aircraftmanufacturers.html
 	public enum AircraftManufacturer {
 		[HumanReadableName ("AAR Corporation")]
@@ -150,6 +151,7 @@ namespace FlightLog {
 		[HumanReadableName ("Wilson Aircraft")]
 		WilsonAircraft
 	}
+#endif
 	
 	public enum AircraftCategory {
 		Airplane           = 0,
@@ -320,6 +322,16 @@ namespace FlightLog {
 		/// <c>true</c> if this aircraft is a tail-dragger; otherwise, <c>false</c>.
 		/// </value>
 		public bool IsTailDragger {
+			get; set;
+		}
+		
+		/// <summary>
+		/// Gets or sets a value indicating whether this aircraft is a simulator.
+		/// </summary>
+		/// <value>
+		/// <c>true</c> if this aircraft is a simulator; otherwise, <c>false</c>.
+		/// </value>
+		public bool IsSimulator {
 			get; set;
 		}
 		

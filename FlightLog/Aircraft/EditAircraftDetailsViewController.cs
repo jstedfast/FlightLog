@@ -38,7 +38,7 @@ namespace FlightLog
 	public class EditAircraftDetailsViewController : DialogViewController
 	{
 		RadioGroup classes = new RadioGroup ("AircraftClassification", 0);
-		BooleanElement isComplex, isHighPerformance, isTailDragger;
+		BooleanElement isComplex, isHighPerformance, isTailDragger, isSimulator;
 		RootElement category, classification;
 		EditAircraftProfileView profile;
 		UIBarButtonItem cancel, save;
@@ -126,6 +126,7 @@ namespace FlightLog
 				(isComplex = new BooleanElement ("Complex", Aircraft.IsComplex)),
 				(isHighPerformance = new BooleanElement ("High Performance", Aircraft.IsHighPerformance)),
 				(isTailDragger = new BooleanElement ("Tail Dragger", Aircraft.IsTailDragger)),
+				(isSimulator = new BooleanElement ("Simulator", Aircraft.IsSimulator)),
 			};
 			
 			classification.RadioSelected = ClassificationToIndex (Aircraft.Classification);
@@ -172,21 +173,8 @@ namespace FlightLog
 			OnEditorClosed ();
 		}
 		
-		void FetchValues ()
-		{
-			// Make sure all entry elements sync their values from their UITextFields
-			foreach (Section s in Root) {
-				foreach (Element e in s) {
-					if (e is EntryElement)
-						((EntryElement) e).FetchValue ();
-				}
-			}
-		}
-		
 		void OnSaveClicked (object sender, EventArgs args)
 		{
-			FetchValues ();
-			
 			if (profile.TailNumber == null || profile.TailNumber.Length < 2)
 				return;
 			
@@ -214,6 +202,7 @@ namespace FlightLog
 			Aircraft.IsComplex = isComplex.Value;
 			Aircraft.IsHighPerformance = isHighPerformance.Value;
 			Aircraft.IsTailDragger = isTailDragger.Value;
+			Aircraft.IsSimulator = isSimulator.Value;
 			Aircraft.Notes = notes.Value;
 			
 			if (exists)

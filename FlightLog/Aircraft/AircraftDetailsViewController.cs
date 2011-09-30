@@ -35,7 +35,7 @@ namespace FlightLog {
 	public class AircraftDetailsViewController : DialogViewController
 	{
 		EditAircraftDetailsViewController editor;
-		StringElement isComplex, isHighPerformance, isTailDragger;
+		StringElement isComplex, isHighPerformance, isTailDragger, isSimulator;
 		StringElement category, classification;
 		AircraftProfileView profile;
 		UIBarButtonItem edit;
@@ -72,6 +72,7 @@ namespace FlightLog {
 			section.Add (isComplex = new StringElement ("Complex"));
 			section.Add (isHighPerformance = new StringElement ("High Performance"));
 			section.Add (isTailDragger = new StringElement ("Tail Dragger"));
+			section.Add (isSimulator = new StringElement ("Simulator"));
 			Root.Add (section);
 			
 			edit = new UIBarButtonItem (UIBarButtonSystemItem.Edit, OnEditClicked);
@@ -92,6 +93,7 @@ namespace FlightLog {
 			isComplex.Value = Aircraft.IsComplex ? "Yes" : "No";
 			isHighPerformance.Value = Aircraft.IsHighPerformance ? "Yes" : "No";
 			isTailDragger.Value = Aircraft.IsTailDragger ? "Yes" : "No";
+			isSimulator.Value = Aircraft.IsSimulator ? "Yes" : "No";
 			
 			foreach (var section in Root)
 				Root.Reload (section, UITableViewRowAnimation.None);

@@ -95,9 +95,6 @@ namespace FlightLog {
 				if (value == null || value.Length == 0)
 					return null;
 				
-				if (value.Length < 6 && value[0] != 'N' && value[0] != 'n')
-					return "N" + value.ToUpperInvariant ();
-				
 				return value;
 			}
 		}
