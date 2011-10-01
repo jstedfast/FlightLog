@@ -36,7 +36,7 @@ using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
-	public class AircraftCell : UITableViewCell
+	public class AircraftTableViewCell : UITableViewCell
 	{
 		const float AircraftModelFontSize = 18.0f;
 		const float AircraftMakeFontSize = 14.0f;
@@ -66,9 +66,9 @@ namespace FlightLog {
 		
 		public static float CellHeight = PhotoHeight + 2 * PhotoYPad;
 		
-		static AircraftCell ()
+		static AircraftTableViewCell ()
 		{
-			DefaultPhoto = UIImage.FromResource (typeof (AircraftCell).Assembly, "FlightLog.Images.mini-plane72.png");
+			DefaultPhoto = UIImage.FromResource (typeof (AircraftTableViewCell).Assembly, "FlightLog.Images.mini-plane72.png");
 			
 			//NSString ns = new NSString ("MMMMMM");
 			//Console.WriteLine ("Width needed is: {0}", ns.DrawString (new RectangleF (0, 0, 200, 30), TailNumberFont).Width);
@@ -216,7 +216,7 @@ namespace FlightLog {
 		
 		AircraftCellView view;
 		
-		public AircraftCell (Aircraft aircraft, NSString key) : base (UITableViewCellStyle.Default, key)
+		public AircraftTableViewCell (Aircraft aircraft, NSString key) : base (UITableViewCellStyle.Default, key)
 		{
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			ContentView.ClipsToBounds = true;
@@ -314,7 +314,7 @@ namespace FlightLog {
 			
 			flightTime += args.Flight.FlightTime;
 			
-			var cell = GetActiveCell () as AircraftCell;
+			var cell = GetActiveCell () as AircraftTableViewCell;
 			if (cell != null) {
 				cell.FlightTime = flightTime;
 				EmitChanged ();
@@ -326,7 +326,7 @@ namespace FlightLog {
 			if (flightTime == -1 || args.Flight.Aircraft != Aircraft.TailNumber)
 				return;
 			
-			var cell = GetActiveCell () as AircraftCell;
+			var cell = GetActiveCell () as AircraftTableViewCell;
 			if (cell != null) {
 				flightTime = GetFlightTime (Aircraft);
 				cell.FlightTime = flightTime;
@@ -343,7 +343,7 @@ namespace FlightLog {
 			
 			flightTime -= args.Flight.FlightTime;
 			
-			var cell = GetActiveCell () as AircraftCell;
+			var cell = GetActiveCell () as AircraftTableViewCell;
 			if (cell != null) {
 				cell.FlightTime = flightTime;
 				EmitChanged ();
@@ -362,10 +362,10 @@ namespace FlightLog {
 		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
-			AircraftCell cell = tv.DequeueReusableCell (key) as AircraftCell;
+			AircraftTableViewCell cell = tv.DequeueReusableCell (key) as AircraftTableViewCell;
 			
 			if (cell == null)
-				cell = new AircraftCell (Aircraft, key);
+				cell = new AircraftTableViewCell (Aircraft, key);
 			else
 				cell.Aircraft = Aircraft;
 			
@@ -387,7 +387,7 @@ namespace FlightLog {
 		#region IElementSizing implementation
 		public float GetHeight (UITableView tableView, NSIndexPath indexPath)
 		{
-			return AircraftCell.CellHeight;
+			return AircraftTableViewCell.CellHeight;
 		}
 		#endregion
 		

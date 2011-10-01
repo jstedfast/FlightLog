@@ -52,7 +52,7 @@ namespace FlightLog {
 		}
 	}
 	
-	public class FlightCell : UITableViewCell
+	public class FlightTableViewCell : UITableViewCell
 	{
 		const float AirportFontSize = 17.0f;
 		const float AircraftFontSize = 14.0f;
@@ -80,9 +80,9 @@ namespace FlightLog {
 		
 		public static float CellHeight;
 		
-		static FlightCell ()
+		static FlightTableViewCell ()
 		{
-			Calendar = UIImage.FromResource (typeof (FlightCell).Assembly, "FlightLog.Images.calendar.png");
+			Calendar = UIImage.FromResource (typeof (FlightTableViewCell).Assembly, "FlightLog.Images.calendar.png");
 			
 			CellHeight = Calendar.Size.Height + ImagePadding * 2;
 			
@@ -335,7 +335,7 @@ namespace FlightLog {
 		
 		FlightCellView view;
 		
-		public FlightCell (Flight flight, NSString key) : base (UITableViewCellStyle.Default, key)
+		public FlightTableViewCell (Flight flight, NSString key) : base (UITableViewCellStyle.Default, key)
 		{
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			Accessory = UITableViewCellAccessory.None;
@@ -405,10 +405,10 @@ namespace FlightLog {
 		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
-			FlightCell cell = tv.DequeueReusableCell (key) as FlightCell;
+			FlightTableViewCell cell = tv.DequeueReusableCell (key) as FlightTableViewCell;
 			
 			if (cell == null)
-				cell = new FlightCell (Flight, key);
+				cell = new FlightTableViewCell (Flight, key);
 			else
 				cell.Flight = Flight;
 			
@@ -439,7 +439,7 @@ namespace FlightLog {
 		#region IElementSizing implementation
 		public float GetHeight (UITableView tableView, NSIndexPath indexPath)
 		{
-			return FlightCell.CellHeight;
+			return FlightTableViewCell.CellHeight;
 		}
 		#endregion
 		

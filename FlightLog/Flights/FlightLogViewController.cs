@@ -77,7 +77,7 @@ namespace FlightLog {
 		{
 			tableView = base.MakeTableView (bounds, style);
 			
-			tableView.RowHeight = FlightCell.CellHeight;
+			tableView.RowHeight = FlightTableViewCell.CellHeight;
 			tableView.AllowsSelection = true;
 			
 			return tableView;
