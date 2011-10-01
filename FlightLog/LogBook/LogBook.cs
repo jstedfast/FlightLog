@@ -386,7 +386,7 @@ namespace FlightLog {
 			
 			object[] args = new object [aircraft.Count + 2];
 			for (i = 0; i < aircraft.Count; i++)
-				args[i] = aircraft[i];
+				args[i] = aircraft[i].TailNumber;
 			
 			args[i++] = earliest;
 			args[i++] = limit;
