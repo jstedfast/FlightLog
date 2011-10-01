@@ -27,6 +27,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -144,14 +145,28 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets all of the registered aircraft.
+		/// Gets a list of all of the registered aircraft.
 		/// </summary>
 		/// <returns>
-		/// All of the registered aircraft.
+		/// A list of all of the registered aircraft.
 		/// </returns>
-		public static IEnumerable<Aircraft> GetAllAircraft ()
+		public static List<Aircraft> GetAllAircraft ()
 		{
-			return sqlitedb.Table<Aircraft> ();
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft");
+		}
+		
+		/// <summary>
+		/// Gets a list of aircraft of the specified classification.
+		/// </summary>
+		/// <returns>
+		/// A list of aircraft.
+		/// </returns>
+		/// <param name='classification'>
+		/// The classification of aircraft being requested.
+		/// </param>
+		public static List<Aircraft> GetAircraft (AircraftClassification classification)
+		{
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification = ?", (int) classification);
 		}
 		
 		/// <summary>
@@ -261,21 +276,21 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets all of the logged flights.
+		/// Gets a list of all of the logged flights.
 		/// </summary>
 		/// <returns>
-		/// All of the logged flights.
+		/// A list of all of the logged flights.
 		/// </returns>
-		public static IEnumerable<Flight> GetAllFlights ()
+		public static List<Flight> GetAllFlights ()
 		{
 			return sqlitedb.Query<Flight> ("select * from Flight order by Date desc");
 		}
 		
 		/// <summary>
-		/// Gets the logged flight between the specified dates.
+		/// Gets a list of the logged flights between the specified dates.
 		/// </summary>
 		/// <returns>
-		/// The logged flights between the specified dates.
+		/// A list of the logged flights between the specified dates.
 		/// </returns>
 		/// <param name='start'>
 		/// The start date.
@@ -283,55 +298,100 @@ namespace FlightLog {
 		/// <param name='end'>
 		/// The end date.
 		/// </param>
-		public static IEnumerable<Flight> GetFlights (DateTime start, DateTime end)
+		public static List<Flight> GetFlights (DateTime start, DateTime end)
 		{
 			return sqlitedb.Query<Flight> ("select * from Flight where Date between ? and ? order by Date desc", start, end);
 		}
 		
 		/// <summary>
-		/// Gets the logged flights since the specified date.
+		/// Gets a list of the logged flights since the specified date.
 		/// </summary>
 		/// <returns>
-		/// The logged flights since the specified date.
+		/// A list of the logged flights since the specified date.
 		/// </returns>
 		/// <param name='since'>
 		/// The start date.
 		/// </param>
-		public static IEnumerable<Flight> GetFlights (DateTime since)
+		public static List<Flight> GetFlights (DateTime since)
 		{
 			return sqlitedb.Query<Flight> ("select * from Flight where Date >= ? order by Date desc", since);
 		}
 		
 		/// <summary>
-		/// Gets the logged flights flown with the specified aircraft.
+		/// Gets a list of the logged flights flown with the specified aircraft.
 		/// </summary>
 		/// <returns>
-		/// The logged flights flown with the specified aircraft.
+		/// A list of the logged flights flown with the specified aircraft.
 		/// </returns>
-		/// <param name='tailNumber'>
-		/// The tail number of the aircraft.
+		/// <param name='aircraft'>
+		/// The aircraft of interest.
 		/// </param>
-		public static IEnumerable<Flight> GetFlights (string tailNumber)
+		public static List<Flight> GetFlights (Aircraft aircraft)
 		{
-			return sqlitedb.Query<Flight> ("select * from Flight where Aircraft = ? order by Date desc", tailNumber);
+			return sqlitedb.Query<Flight> ("select * from Flight where Aircraft = ? order by Date desc", aircraft.TailNumber);
 		}
 		
 		/// <summary>
-		/// Gets the logged flights flown with the specified aircraft since the specified date.
+		/// Gets a list of the logged flights flown with the specified aircraft since the specified date.
 		/// </summary>
 		/// <returns>
-		/// The logged flights flown with the specified aircraft since the specified date.
+		/// A list of the logged flights flown with the specified aircraft since the specified date.
 		/// </returns>
-		/// <param name='tailNumber'>
-		/// The tail number of the aircraft.
+		/// <param name='aircraft'>
+		/// The aircraft of interest.
 		/// </param>
 		/// <param name='since'>
 		/// The start date.
 		/// </param>
-		public static IEnumerable<Flight> GetFlights (string tailNumber, DateTime since)
+		public static List<Flight> GetFlights (Aircraft aircraft, DateTime since)
 		{
 			return sqlitedb.Query<Flight> ("select * from Flight where Aircraft = ? and Date >= ? order by Date desc",
-				tailNumber, since);
+				aircraft.TailNumber, since);
+		}
+		
+		/// <summary>
+		/// Gets the most recent flights flown with the specified list of aircraft,
+		/// going back no farther than the specified date.
+		/// </summary>
+		/// <returns>
+		/// The flights matching the criterian provided.
+		/// </returns>
+		/// <param name='aircraft'>
+		/// The list of aircraft.
+		/// </param>
+		/// <param name='earliest'>
+		/// The earliest date to match back to.
+		/// </param>
+		/// <param name='limit'>
+		/// The maximum number of matches to return.
+		/// </param>
+		public static List<Flight> GetFlights (List<Aircraft> aircraft, DateTime earliest, int limit)
+		{
+			if (aircraft.Count == 0)
+				return new List<Flight> ();
+			
+			StringBuilder query = new StringBuilder ("select * from Flight where ");
+			int i;
+			
+			if (aircraft.Count > 1) {
+				query.Append ("Aircraft in (?");
+				for (i = 1; i < aircraft.Count; i++)
+					query.Append (", ?");
+				query.Append (")");
+			} else {
+				query.Append ("Aircraft = ?");
+			}
+			
+			query.Append (" and Date >= ? order by Date desc limit ?");
+			
+			object[] args = new object [aircraft.Count + 2];
+			for (i = 0; i < aircraft.Count; i++)
+				args[i] = aircraft[i];
+			
+			args[i++] = earliest;
+			args[i++] = limit;
+			
+			return sqlitedb.Query<Flight> (query.ToString (), args);
 		}
 		#endregion
 	}

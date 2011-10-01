@@ -354,7 +354,7 @@ namespace FlightLog {
 		{
 			int total = 0;
 			
-			foreach (Flight flight in LogBook.GetFlights (aircraft.TailNumber))
+			foreach (Flight flight in LogBook.GetFlights (aircraft))
 				total += flight.FlightTime;
 			
 			return total;
