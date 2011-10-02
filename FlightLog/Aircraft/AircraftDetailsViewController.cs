@@ -26,6 +26,8 @@
 
 using System;
 using System.Drawing;
+using System.Collections;
+using System.Collections.Generic;
 
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
@@ -102,6 +104,12 @@ namespace FlightLog {
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
+			
+			if (aircraft == null) {
+				List<Aircraft> list = LogBook.GetAircraft (1);
+				aircraft = list != null && list.Count > 0 ? list[0] : null;
+			}
+			
 			if (aircraft != null)
 				UpdateDetails ();
 		}
