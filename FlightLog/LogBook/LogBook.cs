@@ -156,17 +156,111 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Gets a list of all of the registered aircraft.
+		/// </summary>
+		/// <returns>
+		/// A list of all of the registered aircraft.
+		/// </returns>
+		/// <param name='includeSimulators'>
+		/// Specifies whether or not simulators should be included.
+		/// </param>
+		public static List<Aircraft> GetAllAircraft (bool includeSimulators)
+		{
+			if (includeSimulators)
+				return GetAllAircraft ();
+			
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft where IsSimulator = ?", false);
+		}
+		
+		/// <summary>
+		/// Gets a list of aircraft up to a specified limit.
+		/// </summary>
+		/// <returns>
+		/// A list of aircraft, up to the specified limit.
+		/// </returns>
+		/// <param name='limit'>
+		/// The number of aircraft to limit the results to.
+		/// </param>
+		public static List<Aircraft> GetAircraft (int limit)
+		{
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft limit ?", limit);
+		}
+		
+		/// <summary>
+		/// Gets a list of all of the aircraft of the specified category.
+		/// </summary>
+		/// <returns>
+		/// A list of all of the aircraft of the specified category
+		/// </returns>
+		/// <param name='category'>
+		/// The category of aircraft requested.
+		/// </param>
+		public static List<Aircraft> GetAircraft (AircraftCategory category)
+		{
+			AircraftClassification firstClass = (AircraftClassification) (int) category;
+			AircraftClassification lastClass = firstClass + Aircraft.CategoryStep;
+			
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification between ? and ?",
+				firstClass, lastClass);
+		}
+		
+		/// <summary>
+		/// Gets a list of all of the aircraft of the specified category.
+		/// </summary>
+		/// <returns>
+		/// A list of all of the aircraft of the specified category
+		/// </returns>
+		/// <param name='category'>
+		/// The category of aircraft requested.
+		/// </param>
+		/// <param name='includeSimulators'>
+		/// Specifies whether or not simulators should be included.
+		/// </param>
+		public static List<Aircraft> GetAircraft (AircraftCategory category, bool includeSimulators)
+		{
+			if (includeSimulators)
+				return GetAircraft (category);
+			
+			AircraftClassification firstClass = (AircraftClassification) (int) category;
+			AircraftClassification lastClass = firstClass + Aircraft.CategoryStep;
+			
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification between ? and ? and IsSimulator = ?",
+				firstClass, lastClass, false);
+		}
+		
+		/// <summary>
 		/// Gets a list of aircraft of the specified classification.
 		/// </summary>
 		/// <returns>
 		/// A list of aircraft.
 		/// </returns>
 		/// <param name='classification'>
-		/// The classification of aircraft being requested.
+		/// The classification of aircraft requested.
 		/// </param>
 		public static List<Aircraft> GetAircraft (AircraftClassification classification)
 		{
-			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification = ?", (int) classification);
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification = ?", classification);
+		}
+		
+		/// <summary>
+		/// Gets a list of aircraft of the specified classification.
+		/// </summary>
+		/// <returns>
+		/// A list of aircraft.
+		/// </returns>
+		/// <param name='classification'>
+		/// The classification of aircraft requested.
+		/// </param>
+		/// <param name='includeSimulators'>
+		/// Specifies whether or not simulators should be included.
+		/// </param>
+		public static List<Aircraft> GetAircraft (AircraftClassification classification, bool includeSimulators)
+		{
+			if (includeSimulators)
+				return GetAircraft (classification);
+			
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification = ? and IsSimulator = ?",
+				classification, false);
 		}
 		
 		/// <summary>
@@ -287,6 +381,20 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Gets a list of logged flights, up to the specified limit.
+		/// </summary>
+		/// <returns>
+		/// A list of logged flights, up to the specified limit.
+		/// </returns>
+		/// <param name='limit'>
+		/// The limit.
+		/// </param>
+		public static List<Flight> GetFlights (int limit)
+		{
+			return sqlitedb.Query<Flight> ("select * from Flight order by Date desc limit ?", limit);
+		}
+		
+		/// <summary>
 		/// Gets a list of the logged flights between the specified dates.
 		/// </summary>
 		/// <returns>
@@ -390,6 +498,125 @@ namespace FlightLog {
 			
 			args[i++] = earliest;
 			args[i++] = limit;
+			
+			return sqlitedb.Query<Flight> (query.ToString (), args);
+		}
+		
+		static DateTime GetNinetyDaysAgo ()
+		{
+			DateTime today = DateTime.Today;
+			
+			return today.Subtract (new TimeSpan (90, 0, 0, 0, 0));
+		}
+		
+		/// <summary>
+		/// Gets a list of flights useful for checking FAA passenger currency requirements.
+		/// </summary>
+		/// <returns>
+		/// The flights for passenger currency requirements.
+		/// </returns>
+		/// <param name='aircraft'>
+		/// The list of aircraft that can count towards the requirements.
+		/// </param>
+		/// <param name='night'>
+		/// Specifies whether or not the query should only include night landings.
+		/// </param>
+		public static List<Flight> GetFlightsForPassengerCurrencyRequirements (List<Aircraft> aircraft, bool night)
+		{
+			StringBuilder query = new StringBuilder ("select * from Flight where ");
+			object[] args = new object [aircraft.Count + 3 + (night ? 0 : 1)];
+			DateTime ninetyDaysAgo = GetNinetyDaysAgo ();
+			int i = 1;
+			
+			args[0] = aircraft[0].TailNumber;
+			
+			if (aircraft.Count > 1) {
+				query.Append ("Aircraft in (?");
+				for (i = 1; i < aircraft.Count; i++) {
+					args[i] = aircraft[i].TailNumber;
+					query.Append (", ?");
+				}
+				query.Append (")");
+			} else {
+				query.Append ("Aircraft = ?");
+			}
+			
+			query.Append (" and Date >= ?");
+			args[i++] = ninetyDaysAgo;
+			
+			query.Append (" and (NightLandings > ?");
+			args[i++] = 0;
+			
+			if (!night) {
+				query.Append (" or DayLandings > ?");
+				args[i++] = 0;
+			}
+			
+			query.Append (") order by Date desc limit ?");
+			// We only need 3 landings, which means at most 3 flights with 1 or more landings
+			args[i++] = 3;
+			
+			return sqlitedb.Query<Flight> (query.ToString (), args);
+		}
+		
+		// This actually gets the start of the month six months prior to the current month
+		static DateTime GetSixMonthsAgo ()
+		{
+			DateTime today = DateTime.Today;
+			TimeSpan thisMonth = new TimeSpan (today.Day - 1, 0, 0, 0, 0);
+			TimeSpan oneDay = new TimeSpan (24, 0, 0);
+			int months = 0;
+			
+			DateTime date = today.Subtract (thisMonth);
+			
+			while (months < 6) {
+				date = date.Subtract (oneDay);
+				thisMonth = new TimeSpan (date.Day - 1, 0, 0, 0, 0);
+				date = date.Subtract (thisMonth);
+				months++;
+			}
+			
+			return date;
+		}
+		
+		/// <summary>
+		/// Gets a list of flights useful for checking FAA instrument currency requirements.
+		/// </summary>
+		/// <returns>
+		/// The flights for instrument currency requirements.
+		/// </returns>
+		/// <param name='aircraft'>
+		/// The list of aircraft that can count toward the requirements.
+		/// </param>
+		public static List<Flight> GetFlightsForInstrumentCurrencyRequirements (List<Aircraft> aircraft)
+		{
+			StringBuilder query = new StringBuilder ("select * from Flight where ");
+			object[] args = new object [aircraft.Count + 3];
+			DateTime sixMonthsAgo = GetSixMonthsAgo ();
+			int i = 1;
+			
+			args[0] = aircraft[0].TailNumber;
+			
+			if (aircraft.Count > 1) {
+				query.Append ("Aircraft in (?");
+				for (i = 1; i < aircraft.Count; i++) {
+					args[i] = aircraft[i].TailNumber;
+					query.Append (", ?");
+				}
+				query.Append (")");
+			} else {
+				query.Append ("Aircraft = ?");
+			}
+			
+			query.Append (" and Date >= ?");
+			args[i++] = sixMonthsAgo;
+			
+			query.Append (" and InstrumentApproaches > ?");
+			args[i++] = 0;
+			
+			query.Append (" order by Date desc limit ?");
+			// We only need 6 approaches, which means at most 6 flights
+			args[i++] = 6;
 			
 			return sqlitedb.Query<Flight> (query.ToString (), args);
 		}
