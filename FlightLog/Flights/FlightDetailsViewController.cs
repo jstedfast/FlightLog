@@ -79,7 +79,7 @@ namespace FlightLog {
 			return time.ToString () + " hours";
 		}
 		
-		static void SetCaptionAndValue (Section section, int index, ref bool reload, string caption, string value)
+		void SetCaptionAndValue (Section section, int index, ref bool reload, string caption, string value)
 		{
 			if (index >= section.Count) {
 				section.Insert (index, UITableViewRowAnimation.None, new StringElement (caption, value));
@@ -88,6 +88,7 @@ namespace FlightLog {
 				StringElement element = section[index] as StringElement;
 				element.Caption = caption;
 				element.Value = value;
+				Root.Reload (element, UITableViewRowAnimation.None);
 			}
 		}
 		
