@@ -60,8 +60,18 @@ namespace FlightLog {
 		
 		public override void LoadView ()
 		{
-			Root.Add (new Section ("Flight"));
-			Root.Add (new Section ("Flight Experience"));
+			Section section;
+			
+			section = new Section ("Flight");
+			section.Add (new StringElement ("Date"));
+			section.Add (new StringElement ("Aircraft"));
+			section.Add (new StringElement ("Departed"));
+			section.Add (new StringElement ("Arrived"));
+			Root.Add (section);
+			
+			section = new Section ("Flight Experience");
+			section.Add (new StringElement ("Flight Time"));
+			Root.Add (section);
 			
 			edit = new UIBarButtonItem (UIBarButtonSystemItem.Edit, OnEditClicked);
 			NavigationItem.LeftBarButtonItem = edit;
