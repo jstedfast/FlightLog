@@ -36,13 +36,58 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class FlightDetailsViewController : DialogViewController
 	{
+		static string[] SectionNames = new string[] { "Flight", "Flight Experience", "Instrument Experience" };
+		
+		delegate string FlightDetailGetValue (Flight flight);
+		
+		class FlightDetails {
+			public string Detail;
+			public FlightDetailGetValue GetValue;
+			
+			public FlightDetails (string detail, FlightDetailGetValue getValue)
+			{
+				Detail = detail;
+				GetValue = getValue;
+			}
+		}
+		
 		EditFlightDetailsViewController editor;
+		List<List<FlightDetails>> sections;
 		UIBarButtonItem edit;
 		Flight flight;
 		
 		public FlightDetailsViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
 			Autorotate = true;
+			
+			List<FlightDetails> basic = new List<FlightDetails> ();
+			basic.Add (new FlightDetails ("Date", GetFlightDate));
+			basic.Add (new FlightDetails ("Aircraft", GetFlightAircraft));
+			basic.Add (new FlightDetails ("Departed", GetFlightAirportDeparted));
+			basic.Add (new FlightDetails ("Visited", GetFlightAirportVisited));
+			basic.Add (new FlightDetails ("Arrived", GetFlightAirportArrived));
+			
+			List<FlightDetails> xp = new List<FlightDetails> ();
+			xp.Add (new FlightDetails ("Flight Time", GetFlightFlightTime));
+			xp.Add (new FlightDetails ("Certified Flight Instructor", GetFlightCertifiedFlightInstructor));
+			xp.Add (new FlightDetails ("Dual Received", GetFlightDualReceived));
+			xp.Add (new FlightDetails ("Pilot in Command", GetFlightPilotInCommand));
+			xp.Add (new FlightDetails ("Second in Command", GetFlightSecondInCommand));
+			xp.Add (new FlightDetails ("Cross Country", GetFlightCrossCountry));
+			xp.Add (new FlightDetails ("Night Flying", GetFlightNight));
+			xp.Add (new FlightDetails ("Day Landings", GetFlightDayLandings));
+			xp.Add (new FlightDetails ("Night Landings", GetFlightNightLandings));
+			
+			List<FlightDetails> inst = new List<FlightDetails> ();
+			inst.Add (new FlightDetails ("Actual Time", GetFlightInstrumentActual));
+			inst.Add (new FlightDetails ("Hood Time", GetFlightInstrumentHood));
+			inst.Add (new FlightDetails ("Simulator Time", GetFlightInstrumentSimulator));
+			inst.Add (new FlightDetails ("Approaches", GetFlightInstrumentApproaches));
+			
+			sections = new List<List<FlightDetails>> ();
+			sections.Add (basic);
+			sections.Add (xp);
+			sections.Add (inst);
 		}
 		
 		public Flight Flight {
@@ -79,14 +124,121 @@ namespace FlightLog {
 			base.LoadView ();
 		}
 		
-		static string FormatFlightTime (int seconds)
+		static string FormatFlightTime (int seconds, bool force)
 		{
+			if (seconds == 0 && !force)
+				return null;
+			
 			double time = Math.Round (seconds / 3600.0, 1);
 			
 			if (time > 0.9 && time < 1.1)
 				return "1 hour";
 			
 			return time.ToString () + " hours";
+		}
+		
+		static string GetFlightDate (Flight flight)
+		{
+			return flight != null ? flight.Date.ToLongDateString () : string.Empty;
+		}
+		
+		static string GetFlightAircraft (Flight flight)
+		{
+			return flight != null ? flight.Aircraft : string.Empty;
+		}
+		
+		static string GetFlightAirportDeparted (Flight flight)
+		{
+			return flight != null ? flight.AirportDeparted : string.Empty;
+		}
+		
+		static string GetFlightAirportVisited (Flight flight)
+		{
+			if (flight == null)
+				return null;
+			
+			List<string> visited = new List<string> ();
+			if (flight.AirportVisited1 != null && flight.AirportVisited1.Length > 0)
+				visited.Add (flight.AirportVisited1);
+			if (flight.AirportVisited2 != null && flight.AirportVisited2.Length > 0)
+				visited.Add (flight.AirportVisited2);
+			if (flight.AirportVisited3 != null && flight.AirportVisited3.Length > 0)
+				visited.Add (flight.AirportVisited3);
+			
+			if (visited.Count == 0)
+				return null;
+			
+			return string.Join (", ", visited.ToArray ());
+		}
+		
+		static string GetFlightAirportArrived (Flight flight)
+		{
+			return flight != null ? flight.AirportArrived : string.Empty;
+		}
+		
+		static string GetFlightFlightTime (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.FlightTime, true) : string.Empty;
+		}
+		
+		static string GetFlightCertifiedFlightInstructor (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.CertifiedFlightInstructor, false) : null;
+		}
+		
+		static string GetFlightDualReceived (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.DualReceived, false) : null;
+		}
+		
+		static string GetFlightPilotInCommand (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.PilotInCommand, false) : null;
+		}
+		
+		static string GetFlightSecondInCommand (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.SecondInCommand, false) : null;
+		}
+		
+		static string GetFlightCrossCountry (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.CrossCountry, false) : null;
+		}
+		
+		static string GetFlightNight (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.Night, false) : null;
+		}
+		
+		static string GetFlightNightLandings (Flight flight)
+		{
+			return flight != null && flight.NightLandings > 0 ? flight.NightLandings.ToString () : null;
+		}
+		
+		static string GetFlightDayLandings (Flight flight)
+		{
+			return flight != null && flight.DayLandings > 0 ? flight.DayLandings.ToString () : null;
+		}
+		
+		static string GetFlightInstrumentActual (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.InstrumentActual, false) : null;
+		}
+		
+		static string GetFlightInstrumentHood (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.InstrumentHood, false) : null;
+		}
+		
+		static string GetFlightInstrumentSimulator (Flight flight)
+		{
+			return flight != null ? FormatFlightTime (flight.InstrumentSimulator, false) : null;
+		}
+		
+		static string GetFlightInstrumentApproaches (Flight flight)
+		{
+			return flight != null && flight.InstrumentApproaches > 0 ? flight.InstrumentApproaches.ToString () : null;
 		}
 		
 		void SetCaptionAndValue (Section section, int index, ref bool reload, string caption, string value)
@@ -112,106 +264,113 @@ namespace FlightLog {
 			Title = string.Format ("{0} to {1} on {2}", Flight.AirportDeparted,
 				Flight.AirportArrived, Flight.Date.ToShortDateString ());
 			
-			List<string> visited = new List<string> ();
-			if (Flight.AirportVisited1 != null && Flight.AirportVisited1.Length > 0)
-				visited.Add (Flight.AirportVisited1);
-			if (Flight.AirportVisited2 != null && Flight.AirportVisited2.Length > 0)
-				visited.Add (Flight.AirportVisited2);
-			if (Flight.AirportVisited3 != null && Flight.AirportVisited3.Length > 0)
-				visited.Add (Flight.AirportVisited3);
+			List<NSIndexPath> updated = new List<NSIndexPath> ();
+			Section section;
+			int reload = -1;
+			int sect = 0;
 			
-			bool reload = true;
-			int s = 0, row = 0;
+			//TableView.BeginUpdates ();
 			
-			SetCaptionAndValue (Root[s], row++, ref reload, "Date", Flight.Date.ToLongDateString ());
-			SetCaptionAndValue (Root[s], row++, ref reload, "Aircraft", Flight.Aircraft);
-			SetCaptionAndValue (Root[s], row++, ref reload, "Departed", Flight.AirportDeparted);
-			if (visited.Count > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Visited", string.Join (", ", visited.ToArray ()));
-			SetCaptionAndValue (Root[s], row++, ref reload, "Arrived", Flight.AirportArrived);
-			if (row < Root[s].Count)
-				Root[s].RemoveRange (row, Root[s].Count - row, UITableViewRowAnimation.Fade);
-			else if (reload)
-				Root.Reload (Root[s], UITableViewRowAnimation.None);
-			
-			reload = true;
-			row = 0;
-			s++;
-			
-			SetCaptionAndValue (Root[s], row++, ref reload, "Flight Time", FormatFlightTime (Flight.FlightTime));
-			if (Flight.CertifiedFlightInstructor > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Certified Flight Instructor", FormatFlightTime (Flight.CertifiedFlightInstructor));
-			if (Flight.PilotInCommand > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Pilot in Command", FormatFlightTime (Flight.PilotInCommand));
-			if (Flight.SecondInCommand > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Second in Command", FormatFlightTime (Flight.SecondInCommand));
-			if (Flight.DualReceived > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Dual Received", FormatFlightTime (Flight.DualReceived));
-			if (Flight.CrossCountry > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Cross Country", FormatFlightTime (Flight.CrossCountry));
-			if (Flight.Night > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Night Flying", FormatFlightTime (Flight.Night));
-			if (Flight.DayLandings > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Day Landings", Flight.DayLandings.ToString ());
-			if (Flight.NightLandings > 0)
-				SetCaptionAndValue (Root[s], row++, ref reload, "Night Landings", Flight.NightLandings.ToString ());
-			if (row < Root[s].Count)
-				Root[s].RemoveRange (row, Root[s].Count - row, UITableViewRowAnimation.Fade);
-			else if (reload)
-				Root.Reload (Root[s], UITableViewRowAnimation.None);
-			
-			if (HasInstrumentExperience (Flight)) {
-				row = 0;
-				s++;
+			for (int s = 0; s < sections.Count; s++) {
+				List<FlightDetails> details = sections[s];
+				string[] values = new string[details.Count];
+				int first = -1, last = -1;
+				int n = 0;
 				
-				if (s == Root.Count || Root[s].Caption == "Remarks") {
-					Root.Insert (s, UITableViewRowAnimation.Fade, new Section ("Instrument Experience"));
-					reload = false;
-				} else {
-					reload = true;
+				for (int i = 0; i < details.Count; i++) {
+					values[i] = details[i].GetValue (Flight);
+					if (values[i] != null) {
+						if (first == -1)
+							first = i;
+						last = i;
+						n++;
+					}
 				}
 				
-				if (Flight.InstrumentActual > 0)
-					SetCaptionAndValue (Root[s], row++, ref reload, "Actual Time", FormatFlightTime (Flight.InstrumentActual));
-				if (Flight.InstrumentHood > 0)
-					SetCaptionAndValue (Root[s], row++, ref reload, "Hood Time", FormatFlightTime (Flight.InstrumentHood));
-				if (Flight.InstrumentSimulator > 0)
-					SetCaptionAndValue (Root[s], row++, ref reload, "Simulator Time", FormatFlightTime (Flight.InstrumentSimulator));
-				if (Flight.InstrumentApproaches > 0)
-					SetCaptionAndValue (Root[s], row++, ref reload, "Approaches", Flight.InstrumentApproaches.ToString ());
-				
-				if (row < Root[s].Count)
-					Root[s].RemoveRange (row, Root[s].Count - row, UITableViewRowAnimation.Fade);
-				else if (reload)
-					Root.Reload (Root[s], UITableViewRowAnimation.None);
+				if (n > 0) {
+					if (sect >= Root.Count) {
+						section = new Section (SectionNames[s]);
+						Root.Insert (sect, UITableViewRowAnimation.Automatic /*Top*/, section);
+						Console.WriteLine ("Adding section @ {0} {1}", sect, section.Caption);
+					} else {
+						section = Root[sect];
+						if (section.Caption != SectionNames[s]) {
+							section = new Section (SectionNames[s]);
+							Root.Insert (sect, UITableViewRowAnimation.Automatic /*Top*/, section);
+							Console.WriteLine ("Inserting section @ {0} {1}", sect, section.Caption);
+						} else {
+							Console.WriteLine ("Updating section @ {0} {1}", sect, section.Caption);
+						}
+					}
+					
+					for (int i = 0, row = 0; i < values.Length; i++) {
+						StringElement se;
+						
+						if (values[i] != null) {
+							if (row >= section.Count) {
+								se = new StringElement (details[i].Detail, values[i]);
+								section.Insert (row, UITableViewRowAnimation.Middle, se);
+								Console.WriteLine ("\tAdding row @ {0} {1}", row, se.Caption);
+							} else {
+								se = section[row] as StringElement;
+								if (se.Caption != details[i].Detail) {
+									se = new StringElement (details[i].Detail, values[i]);
+									section.Insert (row, UITableViewRowAnimation.Middle, se);
+									Console.WriteLine ("\tInserting row @ {0} {1}", row, se.Caption);
+								} else {
+									Console.WriteLine ("\tUpdating row @ {0} {1}", row, se.Caption);
+									updated.Add (NSIndexPath.FromRowSection (row, sect));
+									se.Value = values[i];
+								}
+							}
+							
+							row++;
+						} else if (row < section.Count) {
+							se = section[row] as StringElement;
+							if (se.Caption == details[i].Detail) {
+								//if (i > last) {
+								//	int count = section.Count - row;
+								//	section.RemoveRange (row, count, UITableViewRowAnimation.Automatic);
+								//	Console.WriteLine ("\tDeleting rows @ {0}-{1} {2}", row, section.Count - 1, se.Caption);
+								//	break;
+								//}
+								
+								section.RemoveRange (row, 1, UITableViewRowAnimation.Middle);
+								Console.WriteLine ("\tDeleting row @ {0} {1}", row, se.Caption);
+							}
+						}
+					}
+					
+					sect++;
+				} else if (sect < Root.Count) {
+					section = Root[sect];
+					if (section.Caption == SectionNames[s]) {
+						Root.RemoveAt (sect, UITableViewRowAnimation.Automatic);
+						Console.WriteLine ("Deleting section @ {0} {1}", sect, section.Caption);
+					}
+				}
 			}
-			
-			reload = true;
-			row = 0;
-			s++;
 			
 			if (Flight.Remarks != null && Flight.Remarks.Length > 0) {
-				while (s < Root.Count && Root[s].Caption != "Remarks") {
-					if (Root[s].Count > 0)
-						Root[s].RemoveRange (0, Root[s].Count, UITableViewRowAnimation.Fade);
-					Root.RemoveAt (s, UITableViewRowAnimation.Fade);
-				}
-				
-				if (s == Root.Count) {
-					Root.Insert (s, UITableViewRowAnimation.Fade, new Section ("Remarks", Flight.Remarks));
+				if (sect >= Root.Count) {
+					section = new Section ("Remarks", Flight.Remarks);
+					Root.Insert (sect, UITableViewRowAnimation.Automatic, section);
 				} else {
-					Root[s].Footer = Flight.Remarks;
-					Root.Reload (Root[s], UITableViewRowAnimation.None);
+					section = Root[sect];
+					section.Footer = Flight.Remarks;
+					reload = sect;
 				}
-				
-				s++;
+			} else if (sect < Root.Count) {
+				Root.RemoveAt (sect, UITableViewRowAnimation.Automatic);
 			}
 			
-			while (s < Root.Count) {
-				if (Root[s].Count > 0)
-					Root[s].RemoveRange (0, Root[s].Count, UITableViewRowAnimation.Fade);
-				Root.RemoveAt (s, UITableViewRowAnimation.Fade);
-			}
+			//TableView.EndUpdates ();
+			
+			if (updated.Count > 0)
+				TableView.ReloadRows (updated.ToArray (), UITableViewRowAnimation.None);
+			
+			if (reload != -1)
+				TableView.ReloadSections (NSIndexSet.FromIndex (reload), UITableViewRowAnimation.None);
 		}
 		
 		public override void ViewWillAppear (bool animated)
