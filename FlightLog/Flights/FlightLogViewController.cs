@@ -61,7 +61,7 @@ namespace FlightLog {
 			foreach (var flight in LogBook.GetAllFlights ()) {
 				if (flight.Date.Year != year) {
 					year = flight.Date.Year;
-					section = new Section (year.ToString ());
+					section = new YearSection (year);
 					Root.Add (section);
 				}
 				
@@ -93,46 +93,80 @@ namespace FlightLog {
 			tableView.Source.RowSelected (tableView, path);
 		}
 		
+		YearSection GetSectionForYear (int year)
+		{
+			int lo = 0, hi = Root.Count;
+			YearSection section;
+			int mid = 0;
+			
+			if (hi > 0) {
+				do {
+					mid = lo + (hi - lo) / 2;
+					
+					section = Root[mid] as YearSection;
+					
+					if (year == section.Year)
+						return section;
+					
+					// Note: Sections are in reverse chronological order
+					if (year < section.Year) {
+						lo = mid + 1;
+						mid++;
+					} else {
+						hi = mid;
+					}
+				} while (lo < hi);
+			}
+			
+			section = new YearSection (year);
+			Root.Insert (mid, UITableViewRowAnimation.Automatic, section);
+			
+			return section;
+		}
+		
 		void InsertFlightElement (FlightElement element)
 		{
-			int year = element.Flight.Date.Year;
-			Section section = null;
-			int value, i;
+			Flight flight = element.Flight;
+			int year = flight.Date.Year;
+			YearSection section;
+			FlightElement fe;
+			int lo, hi, mid;
 			
-			// FIXME: use a binary search for this...
-			if (Root.Count > 0) {
-				// Scan for the appropriate section to add this flight to...
-				for (i = 0; i < Root.Count; i++) {
-					Int32.TryParse (Root[i].Caption, out value);
-					if (year == value) {
-						section = Root[i];
+			// Scan for the appropriate section to add this flight to...
+			section = GetSectionForYear (year);
+			hi = section.Count;
+			mid = 0;
+			lo = 0;
+			
+			// Scan for the right place to insert this flight
+			if (hi > 0) {
+				do {
+					mid = lo + (hi - lo) / 2;
+					
+					fe = section[mid] as FlightElement;
+					
+					if (flight.Date == fe.Flight.Date) {
+						// Note: Flights marked with the same date appear in reverse order
+						while (mid > 0) {
+							fe = section[mid] as FlightElement;
+							if (fe.Flight.Date > flight.Date)
+								break;
+							mid--;
+						}
 						break;
-					} else if (year > value) {
-						break;
-					}
-				}
-				
-				if (section != null) {
-					// Scan for the right place to insert this flight
-					for (i = 0; i < section.Count; i++) {
-						FlightElement fe = section[i] as FlightElement;
-						if (element.Flight.Date >= fe.Flight.Date)
-							break;
 					}
 					
-					section.Insert (i, UITableViewRowAnimation.Fade, element);
-				} else {
-					// New year, new section...
-					section = new Section (year.ToString ());
-					section.Add (element);
-					Root.Insert (i, UITableViewRowAnimation.Fade, section);
-				}
-			} else {
-				// This is the first flight entered
-				section = new Section (year.ToString ());
-				section.Add (element);
-				Root.Insert (0, UITableViewRowAnimation.Top, section);
+					// Note: flights are in reverse chronological order
+					if (flight.Date < fe.Flight.Date) {
+						lo = mid + 1;
+						mid++;
+					} else {
+						hi = mid;
+					}
+				} while (lo < hi);
 			}
+			
+			section.Insert (mid, UITableViewRowAnimation.Automatic, element);
 			
 			// Select the flight we just added
 			SelectRow (element.IndexPath, true, UITableViewScrollPosition.Middle);
@@ -158,7 +192,6 @@ namespace FlightLog {
 		
 		void OnFlightAdded (object sender, FlightEventArgs added)
 		{
-			// FIXME: what should we do if a search is engaged?
 			FlightElement element = new FlightElement (added.Flight);
 			
 			element.Changed += OnFlightElementChanged;
