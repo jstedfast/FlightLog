@@ -51,21 +51,23 @@ namespace FlightLog {
 		/// visible.
 		/// </summary>
 		/// <remarks>
-		/// You have 5 seconds to return from this method, or iOS will terminate your application.
+		/// You have 17 seconds to return from this method, or iOS will terminate your application.
 		/// </remarks>
 		public override bool FinishedLaunching (UIApplication app, NSDictionary options)
 		{
 			// create a new window instance based on the screen size
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 			
-			var viewController0 = new FlightLogSplitViewController ();
-			var viewController1 = new AircraftSplitViewController ();
-			var viewController2 = new AirportViewController ();
+			var viewController0 = new SummarySplitViewController ();
+			var viewController1 = new FlightLogSplitViewController ();
+			var viewController2 = new AircraftSplitViewController ();
+			var viewController3 = new AirportViewController ();
 			tabBarController = new UITabBarController ();
 			tabBarController.ViewControllers = new UIViewController [] {
 				viewController0,
 				viewController1,
 				viewController2,
+				viewController3
 			};
 			
 			window.RootViewController = tabBarController;

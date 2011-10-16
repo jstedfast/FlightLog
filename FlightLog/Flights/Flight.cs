@@ -65,6 +65,18 @@ namespace FlightLog {
 			get; set;
 		}
 		
+#if false
+		/// <summary>
+		/// Gets or sets the date that this flight was last updated in the database.
+		/// </summary>
+		/// <value>
+		/// The date that this flight was last updated.
+		/// </value>
+		public DateTime LastUpdated {
+			get; set;
+		}
+#endif
+		
 		/// <summary>
 		/// Gets or sets the date of the flight.
 		/// </summary>
