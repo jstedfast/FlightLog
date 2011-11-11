@@ -120,7 +120,7 @@ namespace FlightLog {
 		
 		void OnAddClicked (object sender, EventArgs args)
 		{
-			if (editor != null && !details.EditorEngaged)
+			if (editor != null || details.EditorEngaged)
 				return;
 			
 			editor = new EditAircraftDetailsViewController (new Aircraft (), false);
