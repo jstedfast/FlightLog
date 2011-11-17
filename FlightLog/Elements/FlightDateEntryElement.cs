@@ -146,7 +146,7 @@ namespace FlightLog {
 				//editTime = new UIBarButtonItem ("Time", UIBarButtonItemStyle.Plain, OnEditClicked);
 				//NavigationItem.RightBarButtonItem = editTime;
 				
-				done = new UIBarButtonItem (UIBarButtonSystemItem.Action);
+				done = new UIBarButtonItem (UIBarButtonSystemItem.Done);
 				NavigationItem.RightBarButtonItem = done;
 				done.Clicked += OnDoneClicked;
 			}
