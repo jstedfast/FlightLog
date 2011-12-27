@@ -205,6 +205,10 @@ namespace FlightLog
 			Aircraft.IsSimulator = isSimulator.Value;
 			Aircraft.Notes = notes.Value;
 			
+			// We'll treat this as a special case for now...
+			if (Aircraft.Make == null && Aircraft.IsSimulator)
+				Aircraft.Make = "Simulator";
+			
 			if (exists)
 				LogBook.Update (Aircraft);
 			else
