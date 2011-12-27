@@ -97,7 +97,7 @@ namespace FlightLog {
 			
 			// If the aircraft that was modified was selected, re-select it.
 			NSIndexPath path = element.IndexPath;
-			if (path != null && path.Row == selected)
+			if (path.Row == selected)
 				SelectRow (path, true, UITableViewScrollPosition.None);
 			path.Dispose ();
 		}
