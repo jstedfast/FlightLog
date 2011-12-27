@@ -232,6 +232,8 @@ namespace FlightLog
 				classes.Selected = 0;
 				
 				Root.Reload (Root[index.Section], UITableViewRowAnimation.Right);
+				
+				index.Dispose ();
 			}
 			
 			base.ViewWillAppear (animated);
