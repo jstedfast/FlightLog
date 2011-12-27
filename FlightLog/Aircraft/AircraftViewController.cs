@@ -3,7 +3,7 @@
 //  
 // Author: Jeffrey Stedfast <jeff@xamarin.com>
 // 
-// Copyright (c) 2011 Xamarin Inc.
+// Copyright (c) 2011 Jeffrey Stedfast
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -94,6 +94,12 @@ namespace FlightLog {
 			AircraftElement element = (AircraftElement) sender;
 			
 			Root.Reload (element, UITableViewRowAnimation.None);
+			
+			// If the aircraft that was modified was selected, re-select it.
+			NSIndexPath path = element.IndexPath;
+			if (path != null && path.Row == selected)
+				SelectRow (path, true, UITableViewScrollPosition.None);
+			path.Dispose ();
 		}
 		
 		void OnAircraftAdded (object sender, AircraftEventArgs added)
