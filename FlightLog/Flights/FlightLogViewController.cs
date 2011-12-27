@@ -93,6 +93,13 @@ namespace FlightLog {
 			tableView.Source.RowSelected (tableView, path);
 		}
 		
+		void SelectElement (Element element, bool animated, UITableViewScrollPosition scroll)
+		{
+			NSIndexPath path = element.IndexPath;
+			SelectRow (path, animated, scroll);
+			path.Dispose ();
+		}
+		
 		YearSection GetSectionForYear (int year)
 		{
 			int lo = 0, hi = Root.Count;
@@ -169,7 +176,7 @@ namespace FlightLog {
 			section.Insert (mid, UITableViewRowAnimation.Automatic, element);
 			
 			// Select the flight we just added
-			SelectRow (element.IndexPath, true, UITableViewScrollPosition.Middle);
+			SelectElement (element, true, UITableViewScrollPosition.Middle);
 		}
 		
 		void OnFlightElementChanged (object sender, FlightElementChangedEventArgs args)
@@ -188,6 +195,12 @@ namespace FlightLog {
 			} else {
 				Root.Reload (element, UITableViewRowAnimation.None);
 			}
+			
+			path.Dispose ();
+			
+			// If the flight element was the currently selected element, re-select it.
+			if (element == selected)
+				SelectElement (element, true, UITableViewScrollPosition.None);
 		}
 		
 		void OnFlightAdded (object sender, FlightEventArgs added)
@@ -290,16 +303,17 @@ namespace FlightLog {
 		void OnElementDeleted (object sender, ElementEventArgs args)
 		{
 			FlightElement deleted = args.Element as FlightElement;
-			NSIndexPath path = deleted.IndexPath;
-			int n = GetElementOffsetFromPath (path);
 			
 			if (LogBook.Delete (deleted.Flight)) {
+				NSIndexPath path = deleted.IndexPath;
+				
 				deleted.Changed -= OnFlightElementChanged;
 				Root[path.Section].Remove (path.Row);
 				if (Root[path.Section].Count == 0)
 					Root.RemoveAt (path.Section, UITableViewRowAnimation.Fade);
 				
-				SelectOrAdd (n);
+				SelectOrAdd (GetElementOffsetFromPath (path));
+				path.Dispose ();
 			}
 		}
 		
