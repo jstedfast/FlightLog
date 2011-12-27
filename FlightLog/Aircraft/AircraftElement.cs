@@ -379,9 +379,13 @@ namespace FlightLog {
 		
 		public override bool Matches (string text)
 		{
-			return (Aircraft.TailNumber.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1) || 
-				(Aircraft.Make.IndexOf (text, StringComparison.InvariantCultureIgnoreCase) != -1) || 
-					(Aircraft.Model.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1);
+			string tailNumber = Aircraft.TailNumber ?? "";
+			string model = Aircraft.Model ?? "";
+			string make = Aircraft.Make ?? "";
+			
+			return (tailNumber.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1) || 
+				(make.IndexOf (text, StringComparison.InvariantCultureIgnoreCase) != -1) || 
+					(model.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1);
 		}
 		
 		#region IElementSizing implementation
