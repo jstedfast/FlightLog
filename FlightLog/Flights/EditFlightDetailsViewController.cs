@@ -29,8 +29,10 @@ using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 
+using MonoTouch.CoreLocation;
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
+using MonoTouch.MapKit;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -138,6 +140,26 @@ namespace FlightLog {
 			}
 		}
 		
+		static string GetAirportCode (string value)
+		{
+			List<Airport> airports;
+			Airport airport;
+			
+			if (value == null)
+				return null;
+			
+			// First, try looking up the airport by (any) airport code.
+			if ((airport = Airports.GetAirport (value, AirportCode.Any)) != null)
+				return airport.FAA;
+			
+			// Next, try matching the common name of the airport.
+			if ((airport = Airports.GetAirportByName (value)) != null)
+				return airport.FAA;
+			
+			// Unknown airport... just return the provided string.
+			return value;
+		}
+		
 		void OnSaveClicked (object sender, EventArgs args)
 		{
 			FetchValues ();
@@ -146,14 +168,19 @@ namespace FlightLog {
 			if (aircraft.Value == null || aircraft.Value.Length < 2)
 				return;
 			
+			// We need at least a departure airport
+			string departed = GetAirportCode (departed.Value);
+			if (departed == null)
+				return;
+			
 			// Save the values back to the Flight record
 			Flight.Date = date.DateValue;
 			Flight.Aircraft = aircraft.Value;
-			Flight.AirportDeparted = departed.Value;
-			Flight.AirportVisited1 = visited1.Value;
-			Flight.AirportVisited2 = visited2.Value;
-			Flight.AirportVisited3 = visited3.Value;
-			Flight.AirportArrived = arrived.Value;
+			Flight.AirportDeparted = departed;
+			Flight.AirportVisited1 = GetAirportCode (visited1.Value);
+			Flight.AirportVisited2 = GetAirportCode (visited2.Value);
+			Flight.AirportVisited3 = GetAirportCode (visited3.Value);
+			Flight.AirportArrived = GetAirportCode (arrived.Value);
 			
 			if (Flight.AirportArrived == null)
 				Flight.AirportArrived = Flight.AirportDeparted;
