@@ -31,10 +31,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+using MonoTouch.CoreLocation;
 using MonoTouch.MapKit;
 using SQLite;
 
 namespace FlightLog {
+	public enum AirportCode {
+		FAA,
+		IATA,
+		ICAO,
+		Any
+	}
+	
 	public static class Airports
 	{
 		static SQLiteConnection sqlitedb;
@@ -54,17 +62,53 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets the airport specified by the given by FAA code.
+		/// Gets the airport specified by the given airport code.
 		/// </summary>
 		/// <returns>
-		/// The airport specified by the given FAA code.
+		/// The airport specified by the given airport code.
 		/// </returns>
 		/// <param name="code">
-		/// The FAA code of the desired airport.
+		/// The airport code of the desired airport.
 		/// </param>
-		public static Airport GetAirport (string code)
+		/// <param name="type">
+		/// The type of airport code given.
+		/// </param>
+		public static Airport GetAirport (string code, AirportCode type)
 		{
-			var results = sqlitedb.Query<Airport> ("select * from Airport where FAA = ?", code);
+			List<Airport> results;
+			
+			switch (type) {
+			case AirportCode.FAA:
+				results = sqlitedb.Query<Airport> ("select * from Airport where FAA = ?", code);
+				break;
+			case AirportCode.IATA:
+				results = sqlitedb.Query<Airport> ("select * from Airport where IATA = ?", code);
+				break;
+			case AirportCode.ICAO:
+				results = sqlitedb.Query<Airport> ("select * from Airport where ICAO = ?", code);
+				break;
+			case AirportCode.Any:
+				results = sqlitedb.Query<Airport> ("select * from Airport where FAA = ? or IATA = ? or ICAO = ?", code, code, code);
+				break;
+			default:
+				return null;
+			}
+			
+			return results.Count > 0 ? results[0] : null;
+		}
+		
+		/// <summary>
+		/// Gets the airport specified by the given name.
+		/// </summary>
+		/// <returns>
+		/// The airport by name.
+		/// </returns>
+		/// <param name='name'>
+		/// The name of the airport.
+		/// </param>
+		public static Airport GetAirportByName (string name)
+		{
+			var results = qlitedb.Query<Airport> ("select * from Airport where Name = ?", name);
 			
 			return results.Count > 0 ? results[0] : null;
 		}
