@@ -108,7 +108,7 @@ namespace FlightLog {
 		/// </param>
 		public static Airport GetAirportByName (string name)
 		{
-			var results = qlitedb.Query<Airport> ("select * from Airport where Name = ?", name);
+			var results = sqlitedb.Query<Airport> ("select * from Airport where Name = ?", name);
 			
 			return results.Count > 0 ? results[0] : null;
 		}
@@ -221,5 +221,43 @@ namespace FlightLog {
 				return sqlitedb.Query<Airport> ("select * from Airport where Name like ?", pattern);
 			}
 		}
+		
+		const double MetersPerNauticalMile = 1852;
+		const double MeanEarthRadius = 6371009;
+		
+		static double ToRadians (double degrees)
+		{
+			return degrees * Math.PI / 180;
+		}
+		
+		public static double GetDistanceBetween (Airport depart, Airport arrive)
+		{
+			// Calculates distance between 2 locations on Earth using the Haversine formula.
+			// http://www.movable-type.co.uk/scripts/latlong.html
+			double distLongitude = ToRadians (arrive.Longitude - depart.Longitude);
+			double distLatitude = ToRadians (arrive.Latitude - depart.Latitude);
+			
+			double a = Math.Pow (Math.Sin (distLatitude / 2), 2) +
+				Math.Pow (Math.Sin (distLongitude / 2), 2) *
+				Math.Cos (ToRadians (depart.Latitude)) *
+				Math.Cos (ToRadians (arrive.Latitude));
+			
+			double c = 2 * Math.Atan2 (Math.Sqrt (a), Math.Sqrt (1 - a));
+			
+			return c * MeanEarthRadius / MetersPerNauticalMile;
+		}
+		
+#if false
+		// MapKit alternative
+		public static double MKGetDistanceBetween (Airport airport1, Airport airport2)
+		{
+			CLLocationCoordinate2D loc1 = new CLLocationCoordinate2D (airport1.Latitude, airport1.Longitude);
+			CLLocationCoordinate2D loc2 = new CLLocationCoordinate2D (airport2.Latitude, airport2.Longitude);
+			MKMapPoint point1 = MKMapPoint.FromCoordinate (loc1);
+			MKMapPoint point2 = MKMapPoint.FromCoordinate (loc2);
+			
+			return MKGeometry.MetersBetweenMapPoints (point1, point2) / MetersPerNauticalMile;
+		}
+#endif
 	}
 }
