@@ -203,7 +203,7 @@ namespace FlightLog {
 		
 		static string GetFlightCrossCountry (Flight flight)
 		{
-			return flight != null ? FormatFlightTime (flight.CrossCountry, false) : null;
+			return flight != null && flight.IsCrossCountry ? "true" : "false";
 		}
 		
 		static string GetFlightNight (Flight flight)

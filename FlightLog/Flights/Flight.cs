@@ -65,18 +65,6 @@ namespace FlightLog {
 			get; set;
 		}
 		
-#if false
-		/// <summary>
-		/// Gets or sets the date that this flight was last updated in the database.
-		/// </summary>
-		/// <value>
-		/// The date that this flight was last updated.
-		/// </value>
-		public DateTime LastUpdated {
-			get; set;
-		}
-#endif
-		
 		/// <summary>
 		/// Gets or sets the date of the flight.
 		/// </summary>
@@ -154,6 +142,16 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Gets or sets whether this flight counts as a cross-country flight.
+		/// </summary>
+		/// <value>
+		/// <c>true</c> if this flight was a cross-country flight; or <c>false</c> otherwise.
+		/// </value>
+		public bool IsCrossCountry {
+			get; set;
+		}
+		
+		/// <summary>
 		/// Gets or sets the number of day landings.
 		/// </summary>
 		/// <value>
@@ -225,28 +223,6 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets the time spent flying cross country.
-		/// </summary>
-		/// <value>
-		/// The time spent flying cross country, in seconds.
-		/// </value>
-		public int CrossCountry {
-			get; set;
-		}
-		
-#if false
-		/// <summary>
-		/// Gets or sets whether this <see cref="FlightLog.Flight"/> was a cross-country flight.
-		/// </summary>
-		/// <value>
-		/// <c>true</c> if this flight was a cross-country flight; or <c>false</c> otherwise.
-		/// </value>
-		public bool CrossCountry {
-			get; set;
-		}
-#endif
-		
-		/// <summary>
 		/// Gets or sets the time spent flying during the night.
 		/// </summary>
 		/// <value>
@@ -279,6 +255,16 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Gets or sets whether or not the pilot performed holding procedures during any of the approaches.
+		/// </summary>
+		/// <value>
+		/// <c>true</c> if holding procedures were performed; otherwise, <c>false</c>.
+		/// </value>
+		public bool IntrumentHoldingProcedures {
+			get; set;
+		}
+		
+		/// <summary>
 		/// Gets or sets the time spent actually flying by instruments.
 		/// </summary>
 		/// <value>
@@ -305,6 +291,27 @@ namespace FlightLog {
 		/// The time spent flying by instruments in a simulator, in seconds.
 		/// </value>
 		public int InstrumentSimulator {
+			get; set;
+		}
+		
+		/// <summary>
+		/// Gets or sets whether the pilot was the acting instrument safety pilot.
+		/// </summary>
+		/// <value>
+		/// <c>true</c> if the pilot was the acting instrument safety pilot; otherwise, <c>false</c>.
+		/// </value>
+		public bool ActingInstrumentSafetyPilot {
+			get; set;
+		}
+		
+		/// <summary>
+		/// Gets or sets the name of the safety pilot.
+		/// </summary>
+		/// <value>
+		/// The instrument safety pilot.
+		/// </value>
+		[Indexed][MaxLength (40)]
+		public string InstrumentSafetyPilot {
 			get; set;
 		}
 		#endregion

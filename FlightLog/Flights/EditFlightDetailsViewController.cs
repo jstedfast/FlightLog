@@ -25,6 +25,7 @@
 // 
 
 using System;
+using System.Text;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,14 +39,17 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class EditFlightDetailsViewController : DialogViewController
 	{
-		HobbsMeterEntryElement total, dual, xc, night, pic, sic, cfi, actual, hood, simulator;
+		HobbsMeterEntryElement total, dual, night, pic, sic, cfi, actual, hood, simulator;
 		NumericEntryElement landDay, landNight, approaches;
 		AirportEntryElement visited1, visited2, visited3;
 		AirportEntryElement departed, arrived;
 		AircraftEntryElement aircraft;
-		LimitedEntryElement remarks;
+		LimitedEntryElement remarks, safetyPilot;
 		UIBarButtonItem cancel, save;
 		FlightDateEntryElement date;
+		BooleanElement actingSafety;
+		UIAlertViewDelegate del;
+		UIAlertView alert;
 		bool exists;
 		
 		public EditFlightDetailsViewController (Flight flight, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
@@ -84,7 +88,6 @@ namespace FlightLog {
 				(pic = new HobbsMeterEntryElement ("P.I.C.", "Time spent as Pilot in Command.", Flight.PilotInCommand)),
 				(sic = new HobbsMeterEntryElement ("S.I.C.", "Time spent as Second in Command.", Flight.SecondInCommand)),
 				(dual = new HobbsMeterEntryElement ("Dual Received", "Time spent in training with an instructor.", Flight.DualReceived)),
-				(xc = new HobbsMeterEntryElement ("Cross-Country", "Time spent flying cross-country.", Flight.CrossCountry)),
 				(night = new HobbsMeterEntryElement ("Night Flying", "Time spent flying after dark.", Flight.Night)),
 				(landDay = new NumericEntryElement ("Day Landings", "Number of landings made during daylight hours.", Flight.DayLandings, 1, 99)),
 				(landNight = new NumericEntryElement ("Night Landings", "Number of landings made after dark.", Flight.NightLandings, 1, 99))
@@ -98,6 +101,8 @@ namespace FlightLog {
 				(hood = new HobbsMeterEntryElement ("Hood Time", "Time spent flying under a hood.", Flight.InstrumentHood)),
 				(simulator = new HobbsMeterEntryElement ("Simulator Time", "Time spent practicing in a simulator.", Flight.InstrumentSimulator)),
 				(approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99)),
+				(actingSafety = new BooleanElement ("Acting Safety Pilot", false)),
+				(safetyPilot = new LimitedEntryElement ("Safety Pilot", "The name of your safety pilot.", 40)),
 			};
 		}
 		
@@ -140,24 +145,109 @@ namespace FlightLog {
 			}
 		}
 		
-		static string GetAirportCode (string value)
+		static bool IsCrossCountry (List<Airport> airports)
 		{
-			List<Airport> airports;
+			if (airports.Count < 2)
+				return false;
+			
+			Airport origin = airports[0];
+			
+			for (int i = 1; i < airports.Count; i++) {
+				double distance = Airports.GetDistanceBetween (origin, airports[i]);
+				
+				// The FAA only classifies flights where the pilot touches down
+				// at one or more airports that are greater than 50 nautical miles
+				// from the point of origin.
+				if (distance > 50.0)
+					return true;
+			}
+			
+			return false;
+		}
+		
+		static string GetAirportCode (string value, List<Airport> airports, List<string> missing)
+		{
 			Airport airport;
 			
-			if (value == null)
+			if (string.IsNullOrEmpty (value))
 				return null;
 			
 			// First, try looking up the airport by (any) airport code.
-			if ((airport = Airports.GetAirport (value, AirportCode.Any)) != null)
+			if ((airport = Airports.GetAirport (value, AirportCode.Any)) != null) {
+				airports.Add (airport);
 				return airport.FAA;
+			}
 			
 			// Next, try matching the common name of the airport.
-			if ((airport = Airports.GetAirportByName (value)) != null)
+			if ((airport = Airports.GetAirportByName (value)) != null) {
+				airports.Add (airport);
 				return airport.FAA;
+			}
 			
 			// Unknown airport... just return the provided string.
+			missing.Add (value);
+			
 			return value;
+		}
+		
+		class CrossCountryAlertDelegate : UIAlertViewDelegate {
+			EditFlightDetailsViewController editor;
+			
+			public CrossCountryAlertDelegate (EditFlightDetailsViewController editor)
+			{
+				this.editor = editor;
+			}
+			
+			public override void Clicked (UIAlertView alertview, int buttonIndex)
+			{
+				if (buttonIndex == 1 /* Yes */)
+					editor.Flight.IsCrossCountry = true;
+				
+				editor.SaveAndClose ();
+			}
+		}
+		
+		void ShowCrossCountryAlert (List<string> missing)
+		{
+			string title = missing.Count > 1 ? "Missing Airports" : "Missing Airport";
+			StringBuilder message = new StringBuilder ();
+			
+			if (missing.Count > 1)
+				message.Append ("The following airports are unknown: ");
+			else
+				message.Append ("The following airport is unknown: ");
+			
+			for (int i = 0; i < missing.Count; i++) {
+				if (i > 0) {
+					if (i + 1 == missing.Count)
+						message.Append (" and ");
+					else
+						message.Append (", ");
+				}
+				
+				message.Append (missing[i]);
+			}
+			
+			message.AppendLine (".");
+			message.AppendLine ();
+			
+			message.AppendLine ("Was this flight a Cross-Country flight?");
+			
+			del = new CrossCountryAlertDelegate (this);
+			alert = new UIAlertView (title, message.ToString (), del, "No", "Yes");
+			alert.Show ();
+		}
+		
+		void SaveAndClose ()
+		{
+			if (exists)
+				LogBook.Update (Flight);
+			else
+				LogBook.Add (Flight);
+			
+			NavigationController.PopViewControllerAnimated (true);
+			
+			OnEditorClosed ();
 		}
 		
 		void OnSaveClicked (object sender, EventArgs args)
@@ -169,18 +259,21 @@ namespace FlightLog {
 				return;
 			
 			// We need at least a departure airport
-			string departed = GetAirportCode (departed.Value);
-			if (departed == null)
+			List<Airport> airports = new List<Airport> ();
+			List<string> missing = new List<string> ();
+			string airport;
+			
+			if ((airport = GetAirportCode (departed.Value, airports, missing)) == null)
 				return;
 			
 			// Save the values back to the Flight record
 			Flight.Date = date.DateValue;
 			Flight.Aircraft = aircraft.Value;
-			Flight.AirportDeparted = departed;
-			Flight.AirportVisited1 = GetAirportCode (visited1.Value);
-			Flight.AirportVisited2 = GetAirportCode (visited2.Value);
-			Flight.AirportVisited3 = GetAirportCode (visited3.Value);
-			Flight.AirportArrived = GetAirportCode (arrived.Value);
+			Flight.AirportDeparted = airport;
+			Flight.AirportVisited1 = GetAirportCode (visited1.Value, airports, missing);
+			Flight.AirportVisited2 = GetAirportCode (visited2.Value, airports, missing);
+			Flight.AirportVisited3 = GetAirportCode (visited3.Value, airports, missing);
+			Flight.AirportArrived = GetAirportCode (arrived.Value, airports, missing);
 			
 			if (Flight.AirportArrived == null)
 				Flight.AirportArrived = Flight.AirportDeparted;
@@ -194,7 +287,6 @@ namespace FlightLog {
 			Flight.SecondInCommand = sic.ValueAsSeconds;
 			Flight.PilotInCommand = pic.ValueAsSeconds;
 			Flight.DualReceived = dual.ValueAsSeconds;
-			Flight.CrossCountry = xc.ValueAsSeconds;
 			Flight.Night = night.ValueAsSeconds;
 			
 			Flight.Day = Flight.FlightTime - Flight.Night;
@@ -204,17 +296,30 @@ namespace FlightLog {
 			Flight.NightLandings = landNight.Value;
 			Flight.DayLandings = landDay.Value;
 			
+			// Safety Pilot info
+			Flight.ActingInstrumentSafetyPilot = actingSafety.Value;
+			Flight.InstrumentSafetyPilot = safetyPilot.Value;
+			
 			// Remarks
 			Flight.Remarks = remarks.Value;
 			
-			if (exists)
-				LogBook.Update (Flight);
-			else
-				LogBook.Add (Flight);
+			// Note: This needs to be done last in case we are forced to pop up
+			// an alert dialog.
 			
-			NavigationController.PopViewControllerAnimated (true);
+			// Cross-Country Flight
+			if (!actingSafety.Value) {
+				Flight.IsCrossCountry = IsCrossCountry (airports);
+				if (!Flight.IsCrossCountry && missing.Count > 0) {
+					ShowCrossCountryAlert (missing);
+					return;
+				}
+			} else {
+				// Doesn't count as Cross-Country if you are the acting Safety-Pilot
+				// for another pilot who is under the hood.
+				Flight.IsCrossCountry = false;
+			}
 			
-			OnEditorClosed ();
+			SaveAndClose ();
 		}
 		
 		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
