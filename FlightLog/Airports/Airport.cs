@@ -36,13 +36,17 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets the ICAO airport code.
+		/// Gets or sets the FAA airport code.
+		/// 
+		/// Note: There is an FAA code for all aiports in the U.S.
+		/// If the ICAO code exists, it will typically be identical
+		/// to the FAA code with a prefix of 'K'.
 		/// </summary>
 		/// <value>
-		/// The ICAO airport code.
+		/// The FAA airport code.
 		/// </value>
-		[Indexed][MaxLength (4)]
-		public string ICAO {
+		[PrimaryKey][Indexed][MaxLength (4)]
+		public string FAA {
 			get; set;
 		}
 		
@@ -58,17 +62,13 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets the FAA airport code.
-		/// 
-		/// Note: There is an FAA code for all aiports in the U.S.
-		/// If the ICAO code exists, it will typically be identical
-		/// to the FAA code with a prefix of 'K'.
+		/// Gets or sets the ICAO airport code.
 		/// </summary>
 		/// <value>
-		/// The FAA airport code.
+		/// The ICAO airport code.
 		/// </value>
-		[PrimaryKey][Indexed][MaxLength (4)]
-		public string FAA {
+		[Indexed][MaxLength (4)]
+		public string ICAO {
 			get; set;
 		}
 		
