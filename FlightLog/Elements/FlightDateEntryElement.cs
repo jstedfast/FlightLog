@@ -38,6 +38,7 @@ namespace FlightLog {
 		static SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
 		DatePickerController picker;
 		UIPopoverController popover;
+		UINavigationController nav;
 		
 		public FlightDateEntryElement (string caption, DateTime date) : base (caption)
 		{
@@ -225,6 +226,17 @@ namespace FlightLog {
 			}
 		}
 		
+		class DatePickerNavigationDelegate : UINavigationControllerDelegate {
+			public DatePickerNavigationDelegate ()
+			{
+			}
+			
+			public override void WillShowViewController (UINavigationController navController, UIViewController viewController, bool animated)
+			{
+				viewController.ContentSizeForViewInPopover = DatePickerSize;
+			}
+		}
+		
 		void OnDatePicked (object sender, EventArgs args)
 		{
 			DateValue = ((DatePickerController) sender).DateValue;
@@ -235,19 +247,25 @@ namespace FlightLog {
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
 			picker = new DatePickerController (DateValue);
-			popover = new UIPopoverController (new UINavigationController (picker));
+			nav = new UINavigationController (picker);
+			popover = new UIPopoverController (nav);
+			
 			picker.ContentSizeForViewInPopover = DatePickerSize;
+			nav.ContentSizeForViewInPopover = DatePickerSize;
+			popover.PopoverContentSize = DatePickerSize;
+			
+			nav.Delegate = new DatePickerNavigationDelegate ();
 			picker.DatePicked += OnDatePicked;
 			picker.Popover = popover;
 			
 			var cell = GetActiveCell ();
 			
-			popover.DidDismiss += (sender, e) => {
-				popover.Dispose ();
-				popover = null;
-				picker.Dispose ();
-				picker = null;
-			};
+			//popover.DidDismiss += (sender, e) => {
+			//	popover.Dispose ();
+			//	popover = null;
+			//	picker.Dispose ();
+			//	picker = null;
+			//};
 			
 			popover.PresentFromRect (cell.Frame, tableView, UIPopoverArrowDirection.Up, true);
 		}
