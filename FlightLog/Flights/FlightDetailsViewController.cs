@@ -382,7 +382,8 @@ namespace FlightLog {
 		
 		void OnEditorClosed (object sender, EventArgs args)
 		{
-			UpdateDetails ();
+			if (flight != null)
+				UpdateDetails ();
 			editor = null;
 		}
 		
