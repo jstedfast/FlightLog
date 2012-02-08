@@ -71,7 +71,6 @@
     <Compile Include="Aircraft\Aircraft.cs" />
     <Compile Include="Airports\Airport.cs" />
     <Compile Include="Airports\AirportAnnotation.cs" />
-    <Compile Include="Airports\AirportParseException.cs" />
     <Compile Include="Airports\Airports.cs" />
     <Compile Include="Airports\AirportViewController.cs" />
     <Compile Include="Airports\AirportViewController.designer.cs">
