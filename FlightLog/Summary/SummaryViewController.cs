@@ -114,10 +114,10 @@ namespace FlightLog {
 		
 		static DateTime GetInstrumentCurrencyExipirationDate (DateTime oldest)
 		{
-			DateTime expires = oldest.AddMonths (6);
-			TimeSpan rewind = new TimeSpan (expires.Day, expires.Hour, expires.Minute, expires.Second, expires.Millisecond);
+			TimeSpan offset = new TimeSpan (oldest.Day, oldest.Hour, oldest.Minute, oldest.Second, oldest.Millisecond);
+			DateTime expires = oldest.Subtract (offset).AddMonths (7);
 			
-			return expires.Subtract (rewind);
+			return expires;
 		}
 		
 		void AddInstrumentCurrency (Section section, List<Aircraft> list, AircraftCategory category)
