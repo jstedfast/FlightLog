@@ -124,9 +124,13 @@ namespace FlightLog {
 			if (result.Length == 0)
 				return true;
 			
+			// If the user backspaced, allow the change to go through.
+			if (replacementText.Length == 0)
+				return true;
+			
 			// Validate according to http://en.wikipedia.org/wiki/Aircraft_registration
 			
-			// First step is to validate that all characters are ASCII AlphaNumeric
+			// First step is to validate that all characters are ASCII AlphaNumeric.
 			for (i = 0; i < replacementText.Length; i++) {
 				if ((replacementText[i] >= 'A' && replacementText[i] <= 'Z') ||
 					(replacementText[i] >= 'a' && replacementText[i] <= 'z') ||
@@ -137,7 +141,7 @@ namespace FlightLog {
 			}
 			
 #if ENABLE_GLOBAL_SUPPORT
-			// If the resulting tail number begins with a digit, make sure it is valid
+			// If the resulting tail number begins with a digit, make sure it is valid.
 			if (result[0] >= '0' && result[0] <= '9') {
 				bool matched = false;
 				
@@ -165,14 +169,25 @@ namespace FlightLog {
 			if (result.Length == 1)
 				return true;
 			
-			// Verify that the text length does not exceed the max length for a tail number
+			// Verify that the text length does not exceed the max length for a tail number.
 			if (result.Length > GetMaxLength (result[0], result[1]))
 				return false;
 			
-			// If this is a U.S. tail number, verify that it doesn't contain an I or O
+			// If this is a U.S. tail number, verify that it doesn't contain an I or O.
 			if (result[0] == 'N') {
 				if (result.IndexOfAny (NotAllowedInTheUS) != -1)
 					return false;
+			}
+			
+			if (result.Length > 2) {
+				// Try to auto-complete the registration number from the database of known aircraft.
+				var matches = LogBook.GetMatchingAircraft (result);
+				
+				// If we've only got 1 match, auto-complete for the user.
+				if (matches != null && matches.Count == 1) {
+					Value = matches[0].TailNumber;
+					return false;
+				}
 			}
 			
 			return true;

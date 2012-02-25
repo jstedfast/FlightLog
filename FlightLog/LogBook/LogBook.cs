@@ -275,6 +275,20 @@ namespace FlightLog {
 			
 			return results.Count > 0 ? results[0] : null;
 		}
+		
+		/// <summary>
+		/// Gets the aircraft matching the provided string.
+		/// </summary>
+		/// <returns>
+		/// The list of matching aircraft.
+		/// </returns>
+		/// <param name='text'>
+		/// The text to match against.
+		/// </param>
+		public static List<Aircraft> GetMatchingAircraft (string text)
+		{
+			return sqlitedb.Query<Aircraft> ("select * from Aircraft where TailNumber like ?", "%" + text + "%");
+		}
 		#endregion
 		
 		#region Flight Entries
