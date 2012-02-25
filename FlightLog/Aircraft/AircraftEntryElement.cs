@@ -99,7 +99,7 @@ namespace FlightLog {
 			}
 		}
 		
-		static NSString aircraftKey = new NSString ("AircraftEntryELement");
+		static NSString aircraftKey = new NSString ("AircraftEntryElement");
 		protected override NSString EntryKey {
 			get {
 				return aircraftKey;
@@ -165,7 +165,7 @@ namespace FlightLog {
 			if (result.Length == 1)
 				return true;
 			
-			// Verify that the text length does nto exceed the max length for a tail number
+			// Verify that the text length does not exceed the max length for a tail number
 			if (result.Length > GetMaxLength (result[0], result[1]))
 				return false;
 			
