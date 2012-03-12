@@ -217,6 +217,8 @@ namespace FlightLog {
 	{
 		public static int CategoryStep = 10;
 		
+		int total = -1;
+		
 		public Aircraft ()
 		{
 		}
@@ -343,6 +345,24 @@ namespace FlightLog {
 		/// </value>
 		public string Notes {
 			get; set;
+		}
+		
+		[Ignore]
+		public int TotalFlightTime {
+			get {
+				if (total < 0) {
+					total = 0;
+					
+					foreach (Flight flight in LogBook.GetFlights (this))
+						total += flight.FlightTime;
+				}
+				
+				return total;
+			}
+			
+			set {
+				total = value;
+			}
 		}
 		
 		/// <summary>

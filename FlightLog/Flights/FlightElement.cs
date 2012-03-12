@@ -103,7 +103,7 @@ namespace FlightLog {
 			}
 		}
 		
-		public class FlightCellView : UIView
+		class FlightCellView : UIView
 		{
 			Flight flight;
 			
@@ -335,14 +335,13 @@ namespace FlightLog {
 		
 		FlightCellView view;
 		
-		public FlightTableViewCell (Flight flight, NSString key) : base (UITableViewCellStyle.Default, key)
+		public FlightTableViewCell (NSString key) : base (UITableViewCellStyle.Default, key)
 		{
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			Accessory = UITableViewCellAccessory.None;
 			ContentMode = UIViewContentMode.Left;
 			ContentView.ClipsToBounds = true;
 			view = new FlightCellView ();
-			view.Flight = flight;
 			
 			ContentView.Add (view);
 		}
@@ -408,10 +407,9 @@ namespace FlightLog {
 			FlightTableViewCell cell = tv.DequeueReusableCell (key) as FlightTableViewCell;
 			
 			if (cell == null)
-				cell = new FlightTableViewCell (Flight, key);
-			else
-				cell.Flight = Flight;
+				cell = new FlightTableViewCell (key);
 			
+			cell.Flight = Flight;
 			cell.Highlighted = selected;
 			cell.Selected = selected;
 			

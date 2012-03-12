@@ -92,7 +92,7 @@ namespace FlightLog {
 		/// <value>
 		/// The ICAO code of the airport departed.
 		/// </value>
-		[Indexed][MaxLength (4)]
+		[Indexed][MaxLength (4)][SQLiteSearchAlias ("departed")]
 		public string AirportDeparted {
 			get; set;
 		}
@@ -103,7 +103,7 @@ namespace FlightLog {
 		/// <value>
 		/// The ICAO code of the arrival airport.
 		/// </value>
-		[Indexed][MaxLength (4)]
+		[Indexed][MaxLength (4)][SQLiteSearchAlias ("arrived")]
 		public string AirportArrived {
 			get; set;
 		}
@@ -114,7 +114,7 @@ namespace FlightLog {
 		/// <value>
 		/// The ICAO code of the visited airport.
 		/// </value>
-		[Indexed][MaxLength (4)]
+		[Indexed][MaxLength (4)][SQLiteSearchAlias ("via")]
 		public string AirportVisited1 {
 			get; set;
 		}
@@ -125,7 +125,7 @@ namespace FlightLog {
 		/// <value>
 		/// The ICAO code of the visited airport.
 		/// </value>
-		[Indexed][MaxLength (4)]
+		[Indexed][MaxLength (4)][SQLiteSearchAlias ("via")]
 		public string AirportVisited2 {
 			get; set;
 		}
@@ -136,7 +136,7 @@ namespace FlightLog {
 		/// <value>
 		/// The ICAO code of the visited airport.
 		/// </value>
-		[Indexed][MaxLength (4)]
+		[Indexed][MaxLength (4)][SQLiteSearchAlias ("via")]
 		public string AirportVisited3 {
 			get; set;
 		}

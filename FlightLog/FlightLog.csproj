@@ -110,6 +110,10 @@
     <Compile Include="Summary\SummaryViewController.cs" />
     <Compile Include="Summary\CurrencyElement.cs" />
     <Compile Include="Elements\YearSection.cs" />
+    <Compile Include="Elements\TableViewController.cs" />
+    <Compile Include="Elements\SQLiteSearchExpression.cs" />
+    <Compile Include="Flights\FlightViewController.cs" />
+    <Compile Include="Elements\SQLiteTableModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />

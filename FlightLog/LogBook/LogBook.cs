@@ -48,6 +48,10 @@ namespace FlightLog {
 			sqlitedb.CreateTable<Aircraft> ();
 		}
 		
+		public static SQLiteConnection SQLiteDB {
+			get { return sqlitedb; }
+		}
+		
 		#region Aircraft
 		/// <summary>
 		/// Event that gets emitted when a new Aircraft is added to the LogBook.

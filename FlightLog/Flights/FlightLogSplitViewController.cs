@@ -35,7 +35,7 @@ namespace FlightLog {
 	public class FlightLogSplitViewController : UISplitViewController
 	{
 		FlightDetailsViewController details;
-		FlightLogViewController flights;
+		FlightViewController flights;
 		UIViewController[] controllers;
 		
 		public FlightLogSplitViewController ()
@@ -44,7 +44,7 @@ namespace FlightLog {
 			Title = "Flights";
 			
 			details = new FlightDetailsViewController ();
-			flights = new FlightLogViewController (details);
+			flights = new FlightViewController (details);
 			
 			controllers = new UIViewController[] {
 				new UINavigationController (flights),

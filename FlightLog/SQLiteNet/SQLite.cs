@@ -265,7 +265,7 @@ namespace SQLite
 		/// <returns>
 		/// A <see cref="SQLiteCommand"/>
 		/// </returns>
-		public SQLiteCommand CreateCommand (string cmdText, params object[] ps)
+		public SQLiteCommand CreateCommand (string cmdText, object[] ps)
 		{
 			if (!_open) {
 				throw SQLiteException.New (SQLite3.Result.Error, "Cannot create commands from unopened database");
@@ -831,7 +831,7 @@ namespace SQLite
 
 		public abstract class Column
 		{
-			public string Name { get; protected set; }
+			public string Name { get; set; }
 
 			public Type ColumnType { get; protected set; }
 
@@ -1116,8 +1116,7 @@ namespace SQLite
 				} else {
 					b.Index = nextIdx++;
 				}
-			}
-			foreach (var b in _bindings) {
+				
 				BindParameter (stmt, b.Index, b.Value);
 			}
 		}
