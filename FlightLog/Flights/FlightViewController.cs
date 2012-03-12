@@ -37,8 +37,8 @@ namespace FlightLog {
 		static string sectionExpr = "strftime ('%Y', Date)";
 		static NSString key = new NSString ("Flight");
 		
-		SQLiteTableModel<Flight> searchModel = new SQLiteTableModel<Flight> (LogBook.SQLiteDB, 10, orderBy, sectionExpr);
-		SQLiteTableModel<Flight> model = new SQLiteTableModel<Flight> (LogBook.SQLiteDB, 10, orderBy, sectionExpr);
+		SQLiteTableModel<Flight> searchModel = new SQLiteTableModel<Flight> (LogBook.SQLiteDB, 16, orderBy, sectionExpr);
+		SQLiteTableModel<Flight> model = new SQLiteTableModel<Flight> (LogBook.SQLiteDB, 16, orderBy, sectionExpr);
 		EditFlightDetailsViewController editor;
 		NSIndexPath selected, searchSelected;
 		FlightDetailsViewController details;
@@ -48,7 +48,6 @@ namespace FlightLog {
 		public FlightViewController (FlightDetailsViewController details) :
 			base (UITableViewStyle.Plain)
 		{
-			
 			SearchPlaceholder = "Search Flights";
 			AutoHideSearch = true;
 			Title = "Flights";
