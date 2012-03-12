@@ -290,13 +290,13 @@ namespace FlightLog {
 				if (n > 0) {
 					if (sect >= Root.Count) {
 						section = new Section (SectionNames[s]);
-						Root.Insert (sect, UITableViewRowAnimation.Automatic /*Top*/, section);
+						Root.Insert (sect, UITableViewRowAnimation.Top, section);
 						Console.WriteLine ("Adding section @ {0} {1}", sect, section.Caption);
 					} else {
 						section = Root[sect];
 						if (section.Caption != SectionNames[s]) {
 							section = new Section (SectionNames[s]);
-							Root.Insert (sect, UITableViewRowAnimation.Automatic /*Top*/, section);
+							Root.Insert (sect, UITableViewRowAnimation.Top, section);
 							Console.WriteLine ("Inserting section @ {0} {1}", sect, section.Caption);
 						} else {
 							Console.WriteLine ("Updating section @ {0} {1}", sect, section.Caption);
@@ -309,7 +309,7 @@ namespace FlightLog {
 						if (values[i] != null) {
 							if (row >= section.Count) {
 								se = new StringElement (details[i].Detail, values[i]);
-								section.Insert (row, UITableViewRowAnimation.Middle, se);
+								section.Insert (row, UITableViewRowAnimation.Fade, se);
 								Console.WriteLine ("\tAdding row @ {0} {1}", row, se.Caption);
 							} else {
 								se = section[row] as StringElement;
@@ -335,7 +335,7 @@ namespace FlightLog {
 								//	break;
 								//}
 								
-								section.RemoveRange (row, 1, UITableViewRowAnimation.Middle);
+								section.RemoveRange (row, 1, UITableViewRowAnimation.Bottom);
 								Console.WriteLine ("\tDeleting row @ {0} {1}", row, se.Caption);
 							}
 						}
@@ -345,7 +345,7 @@ namespace FlightLog {
 				} else if (sect < Root.Count) {
 					section = Root[sect];
 					if (section.Caption == SectionNames[s]) {
-						Root.RemoveAt (sect, UITableViewRowAnimation.Automatic);
+						Root.RemoveAt (sect, UITableViewRowAnimation.Middle);
 						Console.WriteLine ("Deleting section @ {0} {1}", sect, section.Caption);
 					}
 				}
@@ -354,14 +354,14 @@ namespace FlightLog {
 			if (Flight.Remarks != null && Flight.Remarks.Length > 0) {
 				if (sect >= Root.Count) {
 					section = new Section ("Remarks", Flight.Remarks);
-					Root.Insert (sect, UITableViewRowAnimation.Automatic, section);
+					Root.Insert (sect, UITableViewRowAnimation.Top, section);
 				} else {
 					section = Root[sect];
 					section.Footer = Flight.Remarks;
 					reload = sect;
 				}
 			} else if (sect < Root.Count) {
-				Root.RemoveAt (sect, UITableViewRowAnimation.Automatic);
+				Root.RemoveAt (sect, UITableViewRowAnimation.Middle);
 			}
 			
 			//TableView.EndUpdates ();

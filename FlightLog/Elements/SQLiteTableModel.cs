@@ -77,7 +77,6 @@ namespace FlightLog {
 			public string Title { get; set; }
 		}
 		
-		
 		Dictionary<string, List<string>> aliases = new Dictionary<string, List<string>> (StringComparer.InvariantCultureIgnoreCase);
 		Dictionary<string, Type> types = new Dictionary<string, Type> (StringComparer.InvariantCultureIgnoreCase);
 		SQLiteWhereExpression searchExpr = null;
@@ -93,6 +92,7 @@ namespace FlightLog {
 		{
 			List<string> list;
 			
+			// Generate a search-term alias mapping for all of the fields of 'T'
 			foreach (var prop in type.GetProperties (BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)) {
 				if (!prop.CanWrite)
 					continue;
@@ -138,25 +138,55 @@ namespace FlightLog {
 			}
 			
 			Initialize (typeof (T));
-			Refresh ();
+			ReloadData ();
 		}
 		
+		/// <summary>
+		/// Gets the SQLite connection used by the model.
+		/// </summary>
+		/// <value>
+		/// The SQLite connection used by the model.
+		/// </value>
 		public SQLiteConnection Connection {
 			get; private set;
 		}
 		
+		/// <summary>
+		/// Gets the section expression used by the model to query table sections.
+		/// </summary>
+		/// <value>
+		/// The section expression.
+		/// </value>
 		protected string SectionExpression {
 			get; private set;
 		}
 		
+		/// <summary>
+		/// Gets the sort order of the model.
+		/// </summary>
+		/// <value>
+		/// The sort order of the model.
+		/// </value>
 		public SQLiteOrderBy OrderBy {
 			get; private set;
 		}
 		
+		/// <summary>
+		/// Gets the page size (used for limiting the SQLite queries).
+		/// </summary>
+		/// <value>
+		/// The size of the page.
+		/// </value>
 		public int PageSize {
 			get; private set;
 		}
 		
+		/// <summary>
+		/// Gets or sets the current search expression.
+		/// </summary>
+		/// <value>
+		/// The search expression.
+		/// </value>
 		public SQLiteWhereExpression SearchExpression {
 			get { return searchExpr; }
 			set {
@@ -164,10 +194,17 @@ namespace FlightLog {
 					return;
 				
 				searchExpr = value;
-				Refresh ();
+				ReloadData ();
 			}
 		}
 		
+		/// <summary>
+		/// Gets or sets the search text. Setting this value will also update
+		/// <see cref="P:FlightLog.SQLiteTableModel.SearchExpression"/>.
+		/// </summary>
+		/// <value>
+		/// The search text.
+		/// </value>
 		public string SearchText {
 			get { return searchText; }
 			set {
@@ -179,19 +216,14 @@ namespace FlightLog {
 			}
 		}
 		
+		/// <summary>
+		/// Gets the name of the SQLite table.
+		/// </summary>
+		/// <value>
+		/// The name of the table.
+		/// </value>
 		public string TableName {
 			get { return Connection.Table<T> ().Table.TableName; }
-		}
-		
-		class SearchToken {
-			public string FieldName;
-			public string Match;
-			
-			public SearchToken (string field, string match)
-			{
-				FieldName = field;
-				Match = match;
-			}
 		}
 		
 		static string GetNextToken (string text, ref int i, bool allowField, out bool quoted)
@@ -248,10 +280,13 @@ namespace FlightLog {
 				string token = GetNextToken (text, ref i, true, out quoted);
 				
 				if (i < text.Length && text[i] == ':') {
+					// The user may have requested for a particular field be matched...
 					i++;
 					
-					if (string.IsNullOrEmpty (token))
+					if (string.IsNullOrEmpty (token)) {
+						// lone ':', just ignore...
 						continue;
+					}
 					
 					string match = GetNextToken (text, ref i, false, out quoted);
 					
@@ -259,6 +294,7 @@ namespace FlightLog {
 						if (aliases.TryGetValue (token, out fields)) {
 							SQLiteOrExpression or = new SQLiteOrExpression ();
 							
+							// Search only the aliased fields for the string token...
 							foreach (var field in fields)
 								or.Children.Add (new SQLiteLikeExpression (field, match));
 							
@@ -275,6 +311,7 @@ namespace FlightLog {
 						and.Children.Add (or);
 					}
 				} else if (token != null) {
+					// Search all fields for this string token...
 					SQLiteOrExpression or = new SQLiteOrExpression ();
 					
 					if (!quoted && aliases.TryGetValue (token, out fields)) {
@@ -301,6 +338,12 @@ namespace FlightLog {
 			return where;
 		}
 		
+		/// <summary>
+		/// Creates the command to get the number of sections.
+		/// </summary>
+		/// <returns>
+		/// The command to get the number of sections.
+		/// </returns>
 		protected virtual SQLiteCommand CreateSectionCountCommand ()
 		{
 			if (SectionExpression == null)
@@ -317,6 +360,12 @@ namespace FlightLog {
 			return Connection.CreateCommand (query, args);
 		}
 		
+		/// <summary>
+		/// Gets the section count.
+		/// </summary>
+		/// <value>
+		/// The section count.
+		/// </value>
 		public int SectionCount {
 			get {
 				if (sections == -1) {
@@ -331,6 +380,13 @@ namespace FlightLog {
 			}
 		}
 		
+		/// <summary>
+		/// Creates the command used to get the list of section titles.
+		/// </summary>
+		/// <returns>
+		/// The command to get the list of section titles or null if
+		/// the model does not have any sections or titles.
+		/// </returns>
 		protected virtual SQLiteCommand CreateSectionTitlesCommand ()
 		{
 			if (SectionExpression == null)
@@ -350,6 +406,12 @@ namespace FlightLog {
 			return Connection.CreateCommand (query, args);
 		}
 		
+		/// <summary>
+		/// Gets the section titles.
+		/// </summary>
+		/// <value>
+		/// The section titles or null if there are no titles.
+		/// </value>
 		public string[] SectionTitles {
 			get {
 				if (titles == null) {
@@ -362,6 +424,15 @@ namespace FlightLog {
 			}
 		}
 		
+		/// <summary>
+		/// Creates the command to get the number of rows in the given section.
+		/// </summary>
+		/// <returns>
+		/// The command to get the number of rows in the given section.
+		/// </returns>
+		/// <param name='section'>
+		/// The section to get the number of rows for.
+		/// </param>
 		protected virtual SQLiteCommand CreateRowCountCommand (int section)
 		{
 			string query = "select count (*) from \"" + TableName + "\"";
@@ -387,6 +458,15 @@ namespace FlightLog {
 			return Connection.CreateCommand (query, args);
 		}
 		
+		/// <summary>
+		/// Gets the number of rows in the given section.
+		/// </summary>
+		/// <returns>
+		/// The number of rows in the given section.
+		/// </returns>
+		/// <param name='section'>
+		/// The section to get the number of rows for.
+		/// </param>
 		public int GetRowCount (int section)
 		{
 			if (rows == null) {
@@ -406,7 +486,64 @@ namespace FlightLog {
 			return rows[section];
 		}
 		
-		int SectionAndRowToIndex (int section, int row)
+		/// <summary>
+		/// Maps the given index to a section and row. <seealso cref="SectionAndRowToIndex"/>
+		/// </summary>
+		/// <returns>
+		/// <c>true</c> if the index was successfully mapped to a section and row, or <c>false</c> otherwise.
+		/// </returns>
+		/// <param name='index'>
+		/// The index to map to a section and row.
+		/// </param>
+		/// <param name='section'>
+		/// The mapped section.
+		/// </param>
+		/// <param name='row'>
+		/// The mapped row.
+		/// </param>
+		public bool IndexToSectionAndRow (int index, out int section, out int row)
+		{
+			int curIndex = 0;
+			int count = 0;
+			int i;
+			
+			section = 0;
+			row = 0;
+			
+			for (i = 0; i < SectionCount; i++) {
+				count = GetRowCount (section);
+				if (curIndex + count > index)
+					break;
+				
+				section++;
+				
+				if (curIndex + count == index)
+					break;
+				
+				curIndex += count;
+			}
+			
+			if (i == SectionCount)
+				return false;
+			
+			row = index - curIndex;
+			
+			return true;
+		}
+		
+		/// <summary>
+		/// Maps a section and row to an index. <seealso cref="IndexToSectionAndRow"/>
+		/// </summary>
+		/// <returns>
+		/// The index.
+		/// </returns>
+		/// <param name='section'>
+		/// The section.
+		/// </param>
+		/// <param name='row'>
+		/// The row.
+		/// </param>
+		public int SectionAndRowToIndex (int section, int row)
 		{
 			int index = 0;
 			
@@ -416,6 +553,18 @@ namespace FlightLog {
 			return index + row;
 		}
 		
+		/// <summary>
+		/// Creates the command to get row data from the table using the current <see cref="SearchExpression"/>.
+		/// </summary>
+		/// <returns>
+		/// The query command.
+		/// </returns>
+		/// <param name='limit'>
+		/// The maximum number of items to fetch from the SQLite table.
+		/// </param>
+		/// <param name='offset'>
+		/// The offset of the first row in the table to fetch data for.
+		/// </param>
 		protected virtual SQLiteCommand CreateQueryCommand (int limit, int offset)
 		{
 			string query = "select * from \"" + TableName + "\"";
@@ -436,12 +585,24 @@ namespace FlightLog {
 			return Connection.CreateCommand (query, args.ToArray ());
 		}
 		
+		/// <summary>
+		/// Gets the item specified by the given section and row.
+		/// </summary>
+		/// <returns>
+		/// The requested item.
+		/// </returns>
+		/// <param name='section'>
+		/// The section containing the requested row.
+		/// </param>
+		/// <param name='row'>
+		/// The row of the requested item.
+		/// </param>
 		public T GetItem (int section, int row)
 		{
 			int index = SectionAndRowToIndex (section, row);
 			int limit = PageSize;
 			
-			Connection.Trace = true;
+			//Connection.Trace = true;
 			
 			if (index == offset - 1) {
 				// User is scrolling up. Fetch the previous page of items...
@@ -492,7 +653,7 @@ namespace FlightLog {
 				offset = first;
 			}
 			
-			Connection.Trace = false;
+			//Connection.Trace = false;
 			
 			index -= offset;
 			if (index < cache.Count)
@@ -501,7 +662,11 @@ namespace FlightLog {
 			return default (T);
 		}
 		
-		public virtual void Refresh ()
+		/// <summary>
+		/// Reloads the model. This should be called whenever the SQLite table changes
+		/// (e.g. whenever an item is added or removed).
+		/// </summary>
+		public virtual void ReloadData ()
 		{
 			cache.Clear ();
 			titles = null;
@@ -513,7 +678,7 @@ namespace FlightLog {
 		#region IDisposable implementation
 		public void Dispose ()
 		{
-			cache.Clear ();
+			ReloadData ();
 		}
 		#endregion
 	}
