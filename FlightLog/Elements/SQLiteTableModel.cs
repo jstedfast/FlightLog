@@ -1,5 +1,5 @@
 // 
-// SQLiteModel.cs
+// SQLiteTableModel.cs
 //  
 // Author: Jeffrey Stedfast <jeff@xamarin.com>
 // 
@@ -443,17 +443,27 @@ namespace FlightLog {
 			
 			Connection.Trace = true;
 			
-			if (index < offset) {
-				int start = Math.Max (index - PageSize, 0);
+			if (index == offset - 1) {
+				// User is scrolling up. Fetch the previous page of items...
+				int first = Math.Max (offset - PageSize, 0);
 				
-				limit = 2 * PageSize;
-				cache.Clear ();
+				// Calculate the number of items we need to fetch...
+				limit = offset - first;
 				
-				var cmd = CreateQueryCommand (limit, start);
-				cache = cmd.ExecuteQuery<T> ();
-				offset = start;
+				// Calculate the number of items we need to uncache...
+				int rem = limit - ((2 * PageSize) - cache.Count);
+				
+				if (rem > 0)
+					cache.RemoveRange (cache.Count - rem, rem);
+				
+				var cmd = CreateQueryCommand (limit, first);
+				var results = cmd.ExecuteQuery<T> ();
+				
+				// Insert our new items at the head of our cache list...
+				cache.InsertRange (0, results);
+				offset = first;
 			} else if (index == offset + cache.Count) {
-				// Remove all but the last page of items
+				// User is scrolling down. Fetch the next page of items...
 				if (cache.Count > PageSize)
 					cache.RemoveRange (0, cache.Count - PageSize);
 				
@@ -466,24 +476,20 @@ namespace FlightLog {
 				
 				offset = Math.Max (index - PageSize, 0);
 				cache.AddRange (results);
-			} else if (index > offset + cache.Count) {
-				// We want 1 page to either size of this index
-				int start = Math.Max (index - PageSize, 0);
+			} else if (index < offset || index > offset + cache.Count) {
+				// User is requesting an item in the middle of no-where...
+				// align to the page enclosing the given index.
+				// Note: this only works if PageSize is a power of 2.
+				//int first = ((index + (PageSize - 1)) & ~(PageSize - 1)) - PageSize;
+				int first = (index / PageSize) * PageSize;
 				
-				if (start >= offset && (start - offset) < cache.Count) {
-					cache.RemoveRange (0, start - offset);
-					offset = start;
-					
-					start += cache.Count;
-				} else {
-					limit = 2 * PageSize;
-					offset = start;
-					cache.Clear ();
-				}
+				limit = 2 * PageSize;
+				cache.Clear ();
 				
-				var cmd = CreateQueryCommand (limit, start);
+				var cmd = CreateQueryCommand (limit, first);
 				var results = cmd.ExecuteQuery<T> ();
 				cache.AddRange (results);
+				offset = first;
 			}
 			
 			Connection.Trace = false;
