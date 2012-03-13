@@ -53,12 +53,38 @@ namespace FlightLog {
 			Title = "Flights";
 			
 			this.details = details;
+			
+			LogBook.FlightAdded += OnFlightAdded;
+			LogBook.FlightUpdated += OnFlightUpdated;
+			LogBook.FlightDeleted += OnFlightDeleted;
 		}
 		
-		void OnFlightAdded (object sender, FlightEventArgs added)
+		void OnFlightAdded (object sender, FlightEventArgs e)
 		{
-			searchModel.Refresh ();
-			model.Refresh ();
+			searchModel.ReloadData ();
+			model.ReloadData ();
+			
+			if (searching)
+				SearchDisplayController.SearchResultsTableView.ReloadData ();
+			
+			TableView.ReloadData ();
+		}
+		
+		void OnFlightUpdated (object sender, FlightEventArgs e)
+		{
+			searchModel.ReloadData ();
+			model.ReloadData ();
+			
+			if (searching)
+				SearchDisplayController.SearchResultsTableView.ReloadData ();
+			
+			TableView.ReloadData ();
+		}
+		
+		void OnFlightDeleted (object sender, FlightEventArgs e)
+		{
+			searchModel.ReloadData ();
+			model.ReloadData ();
 			
 			if (searching)
 				SearchDisplayController.SearchResultsTableView.ReloadData ();
@@ -159,6 +185,11 @@ namespace FlightLog {
 			return true;
 		}
 		
+		protected override UITableViewCellEditingStyle EditingStyleForRow (UITableView tableView, NSIndexPath indexPath)
+		{
+			return UITableViewCellEditingStyle.Delete;
+		}
+		
 		protected override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
 		{
 			if (editingStyle != UITableViewCellEditingStyle.Delete)
@@ -167,8 +198,8 @@ namespace FlightLog {
 			Flight flight = GetFlight (tableView, indexPath);
 			
 			if (LogBook.Delete (flight)) {
-				searchModel.Refresh ();
-				model.Refresh ();
+				searchModel.ReloadData ();
+				model.ReloadData ();
 				
 				tableView.ReloadData ();
 			}
@@ -198,10 +229,10 @@ namespace FlightLog {
 		protected override NSIndexPath WillSelectRow (UITableView tableView, NSIndexPath indexPath)
 		{
 			if (tableView == SearchDisplayController.SearchResultsTableView) {
-				if (searchSelected != null)
+				if (searchSelected != null && !PathsEqual (searchSelected, indexPath))
 					tableView.DeselectRow (searchSelected, false);
 			} else {
-				if (selected != null)
+				if (selected != null && !PathsEqual (selected, indexPath))
 					tableView.DeselectRow (selected, false);
 			}
 			
@@ -222,6 +253,10 @@ namespace FlightLog {
 		protected override void Dispose (bool disposing)
 		{
 			base.Dispose (disposing);
+			
+			LogBook.FlightAdded -= OnFlightAdded;
+			LogBook.FlightUpdated -= OnFlightUpdated;
+			LogBook.FlightDeleted -= OnFlightDeleted;
 			
 			if (searchModel != null) {
 				searchModel.Dispose ();
