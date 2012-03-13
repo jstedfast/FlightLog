@@ -26,7 +26,7 @@
 
 using System;
 
-using SQLite;
+using MonoTouch.SQLite;
 
 namespace FlightLog {
 #if false

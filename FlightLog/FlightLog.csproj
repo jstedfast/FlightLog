@@ -77,7 +77,6 @@
       <DependentUpon>AirportViewController.cs</DependentUpon>
     </Compile>
     <Compile Include="LogBook\LogBook.cs" />
-    <Compile Include="SQLiteNet\SQLite.cs" />
     <Compile Include="Extensions\EnumExtension.cs" />
     <Compile Include="Aircraft\AircraftElement.cs" />
     <Compile Include="Utilities\LRUCache.cs" />
@@ -110,10 +109,7 @@
     <Compile Include="Summary\SummaryViewController.cs" />
     <Compile Include="Summary\CurrencyElement.cs" />
     <Compile Include="Elements\YearSection.cs" />
-    <Compile Include="Elements\TableViewController.cs" />
-    <Compile Include="Elements\SQLiteSearchExpression.cs" />
     <Compile Include="Flights\FlightViewController.cs" />
-    <Compile Include="Elements\SQLiteTableModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
@@ -145,6 +141,10 @@
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
       <Project>{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}</Project>
       <Name>MonoTouch.Dialog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MonoTouch.SQLite\MonoTouch.SQLite\MonoTouch.SQLite.csproj">
+      <Project>{4B622CAB-9463-4FAB-8EF8-CA82E221965E}</Project>
+      <Name>MonoTouch.SQLite</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

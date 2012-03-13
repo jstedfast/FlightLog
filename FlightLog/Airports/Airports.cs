@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 
 using MonoTouch.CoreLocation;
 using MonoTouch.MapKit;
-using SQLite;
+using MonoTouch.SQLite;
 
 namespace FlightLog {
 	public enum AirportCode {

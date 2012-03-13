@@ -30,15 +30,15 @@ using System.Drawing;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
+using MonoTouch.SQLite;
+
 namespace FlightLog {
-	public class FlightViewController : TableViewController
+	public class FlightViewController : SQLiteTableViewController<Flight>
 	{
 		static SQLiteOrderBy orderBy = new SQLiteOrderBy ("Date", SQLiteOrderByDirection.Descending);
 		static string sectionExpr = "strftime ('%Y', Date)";
 		static NSString key = new NSString ("Flight");
 		
-		SQLiteTableModel<Flight> searchModel = new SQLiteTableModel<Flight> (LogBook.SQLiteDB, 16, orderBy, sectionExpr);
-		SQLiteTableModel<Flight> model = new SQLiteTableModel<Flight> (LogBook.SQLiteDB, 16, orderBy, sectionExpr);
 		EditFlightDetailsViewController editor;
 		NSIndexPath selected, searchSelected;
 		FlightDetailsViewController details;
@@ -46,7 +46,7 @@ namespace FlightLog {
 		bool searching;
 		
 		public FlightViewController (FlightDetailsViewController details) :
-			base (UITableViewStyle.Plain)
+			base (LogBook.SQLiteDB, 16, orderBy, sectionExpr)
 		{
 			SearchPlaceholder = "Search Flights";
 			AutoHideSearch = true;
@@ -61,35 +61,17 @@ namespace FlightLog {
 		
 		void OnFlightAdded (object sender, FlightEventArgs e)
 		{
-			searchModel.ReloadData ();
-			model.ReloadData ();
-			
-			if (searching)
-				SearchDisplayController.SearchResultsTableView.ReloadData ();
-			
-			TableView.ReloadData ();
+			ReloadData ();
 		}
 		
 		void OnFlightUpdated (object sender, FlightEventArgs e)
 		{
-			searchModel.ReloadData ();
-			model.ReloadData ();
-			
-			if (searching)
-				SearchDisplayController.SearchResultsTableView.ReloadData ();
-			
-			TableView.ReloadData ();
+			ReloadData ();
 		}
 		
 		void OnFlightDeleted (object sender, FlightEventArgs e)
 		{
-			searchModel.ReloadData ();
-			model.ReloadData ();
-			
-			if (searching)
-				SearchDisplayController.SearchResultsTableView.ReloadData ();
-			
-			TableView.ReloadData ();
+			ReloadData ();
 		}
 		
 		void OnEditorClosed (object sender, EventArgs args)
@@ -137,45 +119,14 @@ namespace FlightLog {
 			}
 		}
 		
-		protected override int NumberOfSections (UITableView tableView)
-		{
-			if (tableView == SearchDisplayController.SearchResultsTableView)
-				return searchModel.SectionCount;
-			else
-				return model.SectionCount;
-		}
-		
-		protected override string TitleForHeader (UITableView tableView, int section)
-		{
-			if (tableView == SearchDisplayController.SearchResultsTableView)
-				return searchModel.SectionTitles[section];
-			else
-				return model.SectionTitles[section];
-		}
-		
-		protected override int RowsInSection (UITableView tableView, int section)
-		{
-			if (tableView == SearchDisplayController.SearchResultsTableView)
-				return searchModel.GetRowCount (section);
-			else
-				return model.GetRowCount (section);
-		}
-		
-		Flight GetFlight (UITableView tableView, NSIndexPath indexPath)
-		{
-			if (tableView == SearchDisplayController.SearchResultsTableView)
-				return searchModel.GetItem (indexPath.Section, indexPath.Row);
-			else
-				return model.GetItem (indexPath.Section, indexPath.Row);
-		}
-		
-		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
+		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, Flight flight)
 		{
 			FlightTableViewCell cell = tableView.DequeueReusableCell (key) as FlightTableViewCell;
+			
 			if (cell == null)
 				cell = new FlightTableViewCell (key);
 			
-			cell.Flight = GetFlight (tableView, indexPath);
+			cell.Flight = flight;
 			
 			return cell;
 		}
@@ -197,12 +148,7 @@ namespace FlightLog {
 			
 			Flight flight = GetFlight (tableView, indexPath);
 			
-			if (LogBook.Delete (flight)) {
-				searchModel.ReloadData ();
-				model.ReloadData ();
-				
-				tableView.ReloadData ();
-			}
+			LogBook.Delete (flight);
 		}
 		
 		protected override void DidBeginSearch (UISearchDisplayController controller)
@@ -213,12 +159,6 @@ namespace FlightLog {
 		protected override void DidEndSearch (UISearchDisplayController controller)
 		{
 			searching = false;
-		}
-		
-		protected override bool ShouldReloadForSearchString (UISearchDisplayController controller, string search)
-		{
-			searchModel.SearchText = search;
-			return true;
 		}
 		
 		static bool PathsEqual (NSIndexPath path0, NSIndexPath path1)
@@ -257,16 +197,6 @@ namespace FlightLog {
 			LogBook.FlightAdded -= OnFlightAdded;
 			LogBook.FlightUpdated -= OnFlightUpdated;
 			LogBook.FlightDeleted -= OnFlightDeleted;
-			
-			if (searchModel != null) {
-				searchModel.Dispose ();
-				searchModel = null;
-			}
-			
-			if (model != null) {
-				model.Dispose ();
-				model = null;
-			}
 		}
 	}
 }
