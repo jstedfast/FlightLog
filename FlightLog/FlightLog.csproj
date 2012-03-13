@@ -130,7 +130,6 @@
     <Folder Include="Aircraft\" />
     <Folder Include="Airports\" />
     <Folder Include="LogBook\" />
-    <Folder Include="SQLiteNet\" />
     <Folder Include="Extensions\" />
     <Folder Include="Utilities\" />
     <Folder Include="Elements\" />
