@@ -31,7 +31,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 
-using SQLite;
+using MonoTouch.SQLite;
 
 namespace FlightLog {
 	public static class LogBook

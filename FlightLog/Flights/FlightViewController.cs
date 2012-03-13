@@ -146,7 +146,7 @@ namespace FlightLog {
 			if (editingStyle != UITableViewCellEditingStyle.Delete)
 				return;
 			
-			Flight flight = GetFlight (tableView, indexPath);
+			Flight flight = GetItem (tableView, indexPath);
 			
 			LogBook.Delete (flight);
 		}
@@ -181,7 +181,7 @@ namespace FlightLog {
 		
 		protected override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 		{
-			details.Flight = GetFlight (tableView, indexPath);
+			details.Flight = GetItem (tableView, indexPath);
 			
 			if (tableView == SearchDisplayController.SearchResultsTableView) {
 				searchSelected = indexPath;
