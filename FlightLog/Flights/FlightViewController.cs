@@ -61,16 +61,20 @@ namespace FlightLog {
 		
 		void OnFlightAdded (object sender, FlightEventArgs e)
 		{
+			// FIXME: we probably want to select and scroll to this item
 			ReloadData ();
 		}
 		
 		void OnFlightUpdated (object sender, FlightEventArgs e)
 		{
-			ReloadData ();
+			ReloadRowForItem (SearchDisplayController.SearchResultsTableView, e.Flight);
+			ReloadRowForItem (TableView, e.Flight);
 		}
 		
 		void OnFlightDeleted (object sender, FlightEventArgs e)
 		{
+			// FIXME: instead of reloading the table data, we should probably
+			// find a more optimal solution...
 			ReloadData ();
 		}
 		
@@ -98,13 +102,9 @@ namespace FlightLog {
 			NavigationItem.LeftBarButtonItem = addFlight;
 			
 			SearchDisplayController.SearchResultsTableView.RowHeight = FlightTableViewCell.CellHeight;
-			SearchDisplayController.SearchResultsTableView.AllowsMultipleSelection = false;
-			SearchDisplayController.SearchResultsTableView.SectionFooterHeight = 0;
 			SearchDisplayController.SearchResultsTableView.AllowsSelection = true;
 			
 			TableView.RowHeight = FlightTableViewCell.CellHeight;
-			TableView.AllowsMultipleSelection = false;
-			TableView.SectionFooterHeight = 0;
 			TableView.AllowsSelection = true;
 		}
 		
