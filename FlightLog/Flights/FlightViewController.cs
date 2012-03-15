@@ -40,9 +40,9 @@ namespace FlightLog {
 		static NSString key = new NSString ("Flight");
 		
 		EditFlightDetailsViewController editor;
-		NSIndexPath selected, searchSelected;
 		FlightDetailsViewController details;
 		UIBarButtonItem addFlight;
+		bool searching;
 		
 		public FlightViewController (FlightDetailsViewController details) :
 			base (LogBook.SQLiteDB, 16, orderBy, sectionExpr)
@@ -107,15 +107,34 @@ namespace FlightLog {
 			TableView.AllowsSelection = true;
 		}
 		
+		void SelectFirstOrAdd ()
+		{
+			if (Model.SectionCount == 0) {
+				// Add new flight...
+				OnAddClicked (null, null);
+			} else {
+				// Select first flight...
+				var visible = TableView.IndexPathsForVisibleRows;
+				if (visible == null)
+					return;
+				
+				TableView.SelectRow (visible[0], false, UITableViewScrollPosition.None);
+				RowSelected (TableView, visible[0]);
+			}
+		}
+		
 		public override void ViewDidAppear (bool animated)
 		{
 			base.ViewDidAppear (animated);
 			
-			if (selected == null) {
-				// Try to select the first aircraft. If that fails, add a new one.
-				//selected = NSIndexPath.FromRowSection (0, 0);
-				//SelectOrAdd (0);
-			}
+			if (searching)
+				return;
+			
+			var path = TableView.IndexPathForSelectedRow;
+			if (path != null)
+				return;
+			
+			SelectFirstOrAdd ();
 		}
 		
 		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, Flight flight)
@@ -150,6 +169,16 @@ namespace FlightLog {
 			LogBook.Delete (flight);
 		}
 		
+		protected override void DidBeginSearch (UISearchDisplayController controller)
+		{
+			searching = true;
+		}
+		
+		protected override void DidEndSearch (UISearchDisplayController controller)
+		{
+			searching = false;
+		}
+		
 		static bool PathsEqual (NSIndexPath path0, NSIndexPath path1)
 		{
 			return path0.Section == path1.Section && path0.Row == path1.Row;
@@ -157,13 +186,9 @@ namespace FlightLog {
 		
 		protected override NSIndexPath WillSelectRow (UITableView tableView, NSIndexPath indexPath)
 		{
-			if (tableView == SearchDisplayController.SearchResultsTableView) {
-				if (searchSelected != null && !PathsEqual (searchSelected, indexPath))
-					tableView.DeselectRow (searchSelected, false);
-			} else {
-				if (selected != null && !PathsEqual (selected, indexPath))
-					tableView.DeselectRow (selected, false);
-			}
+			var selected = tableView.IndexPathForSelectedRow;
+			if (selected != null && !PathsEqual (selected, indexPath))
+				tableView.DeselectRow (selected, false);
 			
 			return indexPath;
 		}
@@ -171,12 +196,6 @@ namespace FlightLog {
 		protected override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 		{
 			details.Flight = GetItem (tableView, indexPath);
-			
-			if (tableView == SearchDisplayController.SearchResultsTableView) {
-				searchSelected = indexPath;
-			} else {
-				selected = indexPath;
-			}
 		}
 		
 		protected override void Dispose (bool disposing)
