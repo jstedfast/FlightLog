@@ -72,9 +72,65 @@ namespace FlightLog {
 		
 		void OnFlightDeleted (object sender, FlightEventArgs e)
 		{
-			// FIXME: instead of reloading the table data, we should probably
-			// find a more optimal solution...
+			var tableView = searching ? SearchDisplayController.SearchResultsTableView : TableView;
+			var path = tableView.IndexPathForSelectedRow;
+			var model = ModelForTableView (tableView);
+			Flight flight = null;
+			int index = -1;
+			
+			if (path != null) {
+				index = model.SectionAndRowToIndex (path.Section, path.Row);
+				flight = model.GetItem (path.Section, path.Row);
+			}
+			
+			// Reloading data resets selection state
 			ReloadData ();
+			
+			if (flight != null && flight.Id != e.Flight.Id) {
+				// Check visible elements to see if any of them are the same flight as was selected before...
+				foreach (var visiblePath in tableView.IndexPathsForVisibleRows) {
+					Flight visible = model.GetItem (visiblePath.Section, visiblePath.Row);
+					if (visible.Id == flight.Id) {
+						tableView.SelectRow (visiblePath, false, UITableViewScrollPosition.None);
+						return;
+					}
+				}
+			} else {
+				// The flight deleted was the one selected.
+			}
+			
+			if (model.SectionCount > 0) {
+				// Find the first valid row to select with an index that is <= to the previous index.
+				int section = 0, row = 0;
+				while (index >= 0 && !model.IndexToSectionAndRow (index, out section, out row))
+					index--;
+				
+				// If section count is > 0, then we are guaranteed to have a valid section & row.
+				
+				UITableViewScrollPosition scroll;
+				
+				if (index == 0) {
+					scroll = UITableViewScrollPosition.Top;
+				} else if (index == model.Count - 1) {
+					scroll = UITableViewScrollPosition.Bottom;
+				} else {
+					scroll = UITableViewScrollPosition.Middle;
+					
+					// If the row is already visible, then we don't want to scroll at all.
+					foreach (var visible in tableView.IndexPathsForVisibleRows) {
+						if (visible.Section == section && visible.Row == row) {
+							scroll = UITableViewScrollPosition.None;
+							break;
+						}
+					}
+				}
+				
+				path = NSIndexPath.FromRowSection (row, section);
+				tableView.SelectRow (path, true, scroll);
+				path.Dispose ();
+			} else if (!searching) {
+				SelectFirstOrAdd ();
+			}
 		}
 		
 		void OnEditorClosed (object sender, EventArgs args)
@@ -196,6 +252,17 @@ namespace FlightLog {
 		protected override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 		{
 			details.Flight = GetItem (tableView, indexPath);
+		}
+		
+		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
+		{
+			switch (toInterfaceOrientation) {
+			case UIInterfaceOrientation.LandscapeRight:
+			case UIInterfaceOrientation.LandscapeLeft:
+				return true;
+			default:
+				return false;
+			}
 		}
 		
 		protected override void Dispose (bool disposing)
