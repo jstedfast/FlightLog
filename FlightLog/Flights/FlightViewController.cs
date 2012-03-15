@@ -43,7 +43,6 @@ namespace FlightLog {
 		NSIndexPath selected, searchSelected;
 		FlightDetailsViewController details;
 		UIBarButtonItem addFlight;
-		bool searching;
 		
 		public FlightViewController (FlightDetailsViewController details) :
 			base (LogBook.SQLiteDB, 16, orderBy, sectionExpr)
@@ -149,16 +148,6 @@ namespace FlightLog {
 			Flight flight = GetItem (tableView, indexPath);
 			
 			LogBook.Delete (flight);
-		}
-		
-		protected override void DidBeginSearch (UISearchDisplayController controller)
-		{
-			searching = true;
-		}
-		
-		protected override void DidEndSearch (UISearchDisplayController controller)
-		{
-			searching = false;
 		}
 		
 		static bool PathsEqual (NSIndexPath path0, NSIndexPath path1)
