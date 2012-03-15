@@ -62,6 +62,9 @@ namespace FlightLog {
 		{
 			// FIXME: we probably want to select and scroll to this item
 			ReloadData ();
+			
+			if (!searching)
+				SelectFirstOrAdd ();
 		}
 		
 		void OnFlightUpdated (object sender, FlightEventArgs e)
@@ -83,7 +86,7 @@ namespace FlightLog {
 				flight = model.GetItem (path.Section, path.Row);
 			}
 			
-			// Reloading data resets selection state
+			// Reloading data resets selection state.
 			ReloadData ();
 			
 			if (flight != null && flight.Id != e.Flight.Id) {
