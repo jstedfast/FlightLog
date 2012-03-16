@@ -26,6 +26,7 @@
 
 using System;
 using System.Drawing;
+using System.Collections.Generic;
 
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
@@ -33,7 +34,7 @@ using MonoTouch.UIKit;
 using MonoTouch.SQLite;
 
 namespace FlightLog {
-	public class FlightViewController : SQLiteTableViewController<Flight>
+	public class FlightViewController : SQLiteTableViewController<Flight>, IComparer<Flight>
 	{
 		static SQLiteOrderBy orderBy = new SQLiteOrderBy ("Date", SQLiteOrderByDirection.Descending);
 		static string sectionExpr = "strftime ('%Y', Date)";
@@ -57,13 +58,75 @@ namespace FlightLog {
 			LogBook.FlightUpdated += OnFlightUpdated;
 		}
 		
+		#region IComparer[Flight] implementation
+		int IComparer<Flight>.Compare (Flight x, Flight y)
+		{
+			// If the Id's are identical, then they are the same flight log entry.
+			if (x.Id == y.Id)
+				return 0;
+			
+			int cmp = DateTime.Compare (y.Date, x.Date);
+			
+			if (cmp == 0)
+				return y.Id - x.Id;
+			
+			return cmp;
+		}
+		#endregion
+		
 		void OnFlightAdded (object sender, FlightEventArgs e)
 		{
-			// FIXME: we probably want to select and scroll to this item
-			ReloadData ();
+			var tableView = searching ? SearchDisplayController.SearchResultsTableView : TableView;
+			var model = ModelForTableView (tableView);
 			
-			if (!searching)
-				SelectFirstOrAdd ();
+			model.ReloadData ();
+			
+			int index = model.IndexOf (e.Flight, this);
+			
+			if (index == -1) {
+				// This suggests that we are probably displaying the search view and the
+				// newly added flight log entry does not match the search criteria.
+				
+				// Just reload the original TableView...
+				Model.ReloadData ();
+				TableView.ReloadData ();
+				return;
+			}
+			
+			int section, row;
+			if (!model.IndexToSectionAndRow (index, out section, out row)) {
+				// This shsouldn't happen...
+				model.ReloadData ();
+				tableView.ReloadData ();
+				return;
+			}
+			
+			NSIndexPath path = NSIndexPath.FromRowSection (row, section);
+			
+			if (model.GetRowCount (section) == 1) {
+				// The new flight entry is in a new section...
+				NSIndexSet sections = NSIndexSet.FromIndex (section);
+				tableView.InsertSections (sections, UITableViewRowAnimation.Automatic);
+				sections.Dispose ();
+			} else {
+				// Add the row for the new flight log entry...
+				NSIndexPath[] rows = new NSIndexPath[1];
+				rows[0] = path;
+				
+				tableView.InsertRows (rows, UITableViewRowAnimation.Automatic);
+			}
+			
+			// Select and scroll to the newly added flight log entry...
+			
+			// From Apple's documentation:
+			//
+			// To scroll to the newly selected row with minimum scrolling, select the row using
+			// selectRowAtIndexPath:animated:scrollPosition: with UITableViewScrollPositionNone,
+			// then call scrollToRowAtIndexPath:atScrollPosition:animated: with
+			// UITableViewScrollPositionNone.
+			tableView.SelectRow (path, true, UITableViewScrollPosition.None);
+			tableView.ScrollToRow (path, UITableViewScrollPosition.None, true);
+			path.Dispose ();
 		}
 		
 		void OnFlightUpdated (object sender, FlightEventArgs e)
@@ -95,6 +158,7 @@ namespace FlightLog {
 				Model.ReloadData ();
 				
 				tableView.DeleteSections (sections, UITableViewRowAnimation.Automatic);
+				sections.Dispose ();
 			}
 			
 			if (tableView != TableView) {
