@@ -55,7 +55,6 @@ namespace FlightLog {
 			
 			LogBook.FlightAdded += OnFlightAdded;
 			LogBook.FlightUpdated += OnFlightUpdated;
-			LogBook.FlightDeleted += OnFlightDeleted;
 		}
 		
 		void OnFlightAdded (object sender, FlightEventArgs e)
@@ -73,66 +72,37 @@ namespace FlightLog {
 			ReloadRowForItem (TableView, e.Flight);
 		}
 		
-		void OnFlightDeleted (object sender, FlightEventArgs e)
+		void OnFlightDeleted (UITableView tableView, NSIndexPath indexPath)
 		{
-			var tableView = searching ? SearchDisplayController.SearchResultsTableView : TableView;
-			var path = tableView.IndexPathForSelectedRow;
 			var model = ModelForTableView (tableView);
-			Flight flight = null;
-			int index = -1;
 			
-			if (path != null) {
-				index = model.SectionAndRowToIndex (path.Section, path.Row);
-				flight = model.GetItem (path.Section, path.Row);
-			}
-			
-			// Reloading data resets selection state.
-			ReloadData ();
-			
-			if (flight != null && flight.Id != e.Flight.Id) {
-				// Check visible elements to see if any of them are the same flight as was selected before...
-				foreach (var visiblePath in tableView.IndexPathsForVisibleRows) {
-					Flight visible = model.GetItem (visiblePath.Section, visiblePath.Row);
-					if (visible.Id == flight.Id) {
-						tableView.SelectRow (visiblePath, false, UITableViewScrollPosition.None);
-						return;
-					}
-				}
+			if (model.GetRowCount (indexPath.Section) > 1) {
+				// The section contains more than just this row, so delete only the row.
+				var rows = new NSIndexPath[1];
+				rows[0] = indexPath;
+				
+				// Reset the models...
+				SearchModel.ReloadData ();
+				Model.ReloadData ();
+				
+				tableView.DeleteRows (rows, UITableViewRowAnimation.Automatic);
 			} else {
-				// The flight deleted was the one selected.
+				// This section only has the row the user is deleting, so remove the entire section.
+				var sections = NSIndexSet.FromIndex (indexPath.Section);
+				
+				// Reset the models...
+				SearchModel.ReloadData ();
+				Model.ReloadData ();
+				
+				tableView.DeleteSections (sections, UITableViewRowAnimation.Automatic);
 			}
 			
-			if (model.SectionCount > 0) {
-				// Find the first valid row to select with an index that is <= to the previous index.
-				int section = 0, row = 0;
-				while (index >= 0 && !model.IndexToSectionAndRow (index, out section, out row))
-					index--;
-				
-				// If section count is > 0, then we are guaranteed to have a valid section & row.
-				
-				UITableViewScrollPosition scroll;
-				
-				if (index == 0) {
-					scroll = UITableViewScrollPosition.Top;
-				} else if (index == model.Count - 1) {
-					scroll = UITableViewScrollPosition.Bottom;
-				} else {
-					scroll = UITableViewScrollPosition.Middle;
-					
-					// If the row is already visible, then we don't want to scroll at all.
-					foreach (var visible in tableView.IndexPathsForVisibleRows) {
-						if (visible.Section == section && visible.Row == row) {
-							scroll = UITableViewScrollPosition.None;
-							break;
-						}
-					}
-				}
-				
-				path = NSIndexPath.FromRowSection (row, section);
-				tableView.SelectRow (path, true, scroll);
-				path.Dispose ();
-			} else if (!searching) {
-				SelectFirstOrAdd ();
+			if (tableView != TableView) {
+				// We've already deleted the item from the search model, but we
+				// have no way of knowing its section/row in the normal model.
+				TableView.ReloadData ();
+			} else if (Model.SectionCount == 0) {
+				OnAddClicked (null, null);
 			}
 		}
 		
@@ -225,7 +195,10 @@ namespace FlightLog {
 			
 			Flight flight = GetItem (tableView, indexPath);
 			
-			LogBook.Delete (flight);
+			if (!LogBook.Delete (flight))
+				return;
+			
+			OnFlightDeleted (tableView, indexPath);
 		}
 		
 		protected override void DidBeginSearch (UISearchDisplayController controller)
@@ -274,7 +247,6 @@ namespace FlightLog {
 			
 			LogBook.FlightAdded -= OnFlightAdded;
 			LogBook.FlightUpdated -= OnFlightUpdated;
-			LogBook.FlightDeleted -= OnFlightDeleted;
 		}
 	}
 }
