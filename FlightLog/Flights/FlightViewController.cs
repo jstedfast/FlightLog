@@ -65,6 +65,7 @@ namespace FlightLog {
 			if (x.Id == y.Id)
 				return 0;
 			
+			// Compare flight dates in descending order.
 			int cmp = DateTime.Compare (y.Date, x.Date);
 			
 			if (cmp == 0)
@@ -131,6 +132,7 @@ namespace FlightLog {
 		
 		void OnFlightUpdated (object sender, FlightEventArgs e)
 		{
+			// FIXME: need to handle cases where the flight was moved to a new/different section...
 			ReloadRowForItem (SearchDisplayController.SearchResultsTableView, e.Flight);
 			ReloadRowForItem (TableView, e.Flight);
 		}
