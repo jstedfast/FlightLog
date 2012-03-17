@@ -97,7 +97,6 @@
     <Compile Include="Flights\Flight.cs" />
     <Compile Include="Flights\FlightElement.cs" />
     <Compile Include="Flights\FlightEventArgs.cs" />
-    <Compile Include="Flights\FlightLogViewController.cs" />
     <Compile Include="Aircraft\AircraftSplitViewController.cs" />
     <Compile Include="Aircraft\AircraftViewController.cs" />
     <Compile Include="Flights\FlightLogSplitViewController.cs" />
