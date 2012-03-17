@@ -54,7 +54,7 @@ namespace FlightLog {
 		
 		#region Aircraft
 		/// <summary>
-		/// Event that gets emitted when a new Aircraft is added to the LogBook.
+		/// Event that occurs when a new Aircraft is added to the LogBook.
 		/// </summary>
 		public static event EventHandler<AircraftEventArgs> AircraftAdded;
 		
@@ -297,7 +297,7 @@ namespace FlightLog {
 		
 		#region Flight Entries
 		/// <summary>
-		/// Event that gets emitted when a new Flight is added to the LogBook.
+		/// Event that occurs when a new Flight is added to the LogBook.
 		/// </summary>
 		public static event EventHandler<FlightEventArgs> FlightAdded;
 		
@@ -326,7 +326,7 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Event that gets emitted when a Flight is deleted from the LogBook.
+		/// Event that occurs when a Flight is deleted from the LogBook.
 		/// </summary>
 		public static event EventHandler<FlightEventArgs> FlightDeleted;
 		
@@ -355,13 +355,40 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Event that gets emitted when a Flight is updated in the LogBook.
+		/// Event that occurs when a Flight will update. Always followed by either
+		/// <see cref="FlightUpdated"/> or <see cref="FlightUpdateFailed"/>.
+		/// </summary>
+		public static event EventHandler<FlightEventArgs> FlightWillUpdate;
+		
+		static void OnFlightWillUpdate (Flight flight)
+		{
+			var handler = FlightWillUpdate;
+			
+			if (handler != null)
+				handler (null, new FlightEventArgs (flight));
+		}
+		
+		/// <summary>
+		/// Event that occurs when a Flight is updated in the LogBook.
 		/// </summary>
 		public static event EventHandler<FlightEventArgs> FlightUpdated;
 		
 		static void OnFlightUpdated (Flight flight)
 		{
 			var handler = FlightUpdated;
+			
+			if (handler != null)
+				handler (null, new FlightEventArgs (flight));
+		}
+		
+		/// <summary>
+		/// Event that occurs when a Flight update fails.
+		/// </summary>
+		public static event EventHandler<FlightEventArgs> FlightUpdateFailed;
+		
+		static void OnFlightUpdateFailed (Flight flight)
+		{
+			var handler = FlightUpdateFailed;
 			
 			if (handler != null)
 				handler (null, new FlightEventArgs (flight));
@@ -375,10 +402,14 @@ namespace FlightLog {
 		/// </param>
 		public static bool Update (Flight flight)
 		{
+			OnFlightWillUpdate (flight);
+			
 			if (sqlitedb.Update (flight) > 0) {
 				OnFlightUpdated (flight);
 				flight.OnUpdated ();
 				return true;
+			} else {
+				OnFlightUpdateFailed (flight);
 			}
 			
 			return false;

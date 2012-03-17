@@ -43,7 +43,9 @@ namespace FlightLog {
 		EditFlightDetailsViewController editor;
 		FlightDetailsViewController details;
 		UIBarButtonItem addFlight;
+		NSIndexPath updating;
 		bool searching;
+		bool loner;
 		
 		public FlightViewController (FlightDetailsViewController details) :
 			base (LogBook.SQLiteDB, 16, orderBy, sectionExpr)
@@ -56,6 +58,8 @@ namespace FlightLog {
 			
 			LogBook.FlightAdded += OnFlightAdded;
 			LogBook.FlightUpdated += OnFlightUpdated;
+			LogBook.FlightWillUpdate += OnFlightWillUpdate;
+			LogBook.FlightUpdateFailed += OnFlightUpdateFailed;
 		}
 		
 		#region IComparer[Flight] implementation
@@ -75,9 +79,15 @@ namespace FlightLog {
 		}
 		#endregion
 		
+		UITableView CurrentTableView {
+			get {
+				return searching ? SearchDisplayController.SearchResultsTableView : TableView;
+			}
+		}
+		
 		void OnFlightAdded (object sender, FlightEventArgs e)
 		{
-			var tableView = searching ? SearchDisplayController.SearchResultsTableView : TableView;
+			var tableView = CurrentTableView;
 			var model = ModelForTableView (tableView);
 			
 			model.ReloadData ();
@@ -96,7 +106,7 @@ namespace FlightLog {
 			
 			int section, row;
 			if (!model.IndexToSectionAndRow (index, out section, out row)) {
-				// This shsouldn't happen...
+				// This shouldn't happen...
 				model.ReloadData ();
 				tableView.ReloadData ();
 				return;
@@ -130,11 +140,92 @@ namespace FlightLog {
 			path.Dispose ();
 		}
 		
+		void OnFlightWillUpdate (object sender, FlightEventArgs e)
+		{
+			var tableView = CurrentTableView;
+			var model = ModelForTableView (tableView);
+			
+			updating = PathForVisibleItem (e.Flight);
+			if (updating != null) {
+				// We're done.
+				loner = model.GetRowCount (updating.Section) == 1;
+				return updating;
+			}
+			
+			// Otherwise we gotta do things the hard way...
+			int index = model.IndexOf (e.Flight, this);
+			int section, row;
+			
+			if (index == -1 || !model.IndexToSectionAndRow (index, out section, out row))
+				return;
+			
+			updating = NSIndexPath.FromRowSection (row, section);
+			loner = model.GetRowCount (section) == 1;
+		}
+		
+		void OnFlightUpdateFailed (object sender, FlightEventArgs e)
+		{
+			if (updating != null) {
+				updating.Dispose ();
+				updating = null;
+			}
+		}
+		
 		void OnFlightUpdated (object sender, FlightEventArgs e)
 		{
-			// FIXME: need to handle cases where the flight was moved to a new/different section...
-			ReloadRowForItem (SearchDisplayController.SearchResultsTableView, e.Flight);
-			ReloadRowForItem (TableView, e.Flight);
+			if (updating == null) {
+				// The user probably just saved a flight which doesn't match the search criteria.
+				Model.ReloadData ();
+				TableView.ReloadData ();
+				return;
+			}
+			
+			// No matter what, reload the main model.
+			Model.ReloadData ();
+			
+			// Now update the UITableView that is currently being displayed.
+			var tableView = CurrentTableView;
+			var model = ModelForTableView (tableView);
+			
+			// The date may have changed, which means the position may have changed.
+			model.ReloadData ();
+			
+			// Find the new position of the flight log entry.
+			int index = model.IndexOf (e.Flight, this);
+			int section, row;
+			
+			if (index == -1 || !model.IndexToSectionAndRow (index, out section, out row)) {
+				// The flight no longer exists in this model/view...
+				if (loner) {
+					// The flight log entry was a 'loner', e.g. it was the only flight in its section.
+					NSIndexSet sections = NSIndexSet.FromIndex (updating.Section);
+					tableView.DeleteSections (sections, UITableViewRowAnimation.Automatic);
+					sections.Dispose ();
+				} else {
+					NSIndexPath[] rows = new NSIndexPath[1];
+					rows[0] = updating;
+					
+					tableView.DeleteRows (rows, UITableViewRowAnimation.Automatic);
+				}
+			} else if (updating.Section != section || updating.Row != row) {
+				// The flight changed position in the current table view - need to move it.
+				NSIndexPath path = NSIndexPath.FromRowSection (row, section);
+				tableView.MoveRow (updating, path);
+				path.Dispose ();
+			} else {
+				// Flight is in the same location, just needs to update its values...
+				NSIndexPath[] rows = new NSIndexPath[1];
+				rows[0] = updating;
+				
+				tableView.ReloadRows (rows, UITableViewRowAnimation.None);
+			}
+			
+			// If the currently displayed UITableView isn't the main view, reset state of the main tableview.
+			if (tableView != TableView)
+				TableView.ReloadData ();
+			
+			updating.Dispose ();
+			updating = null;
 		}
 		
 		void OnFlightDeleted (UITableView tableView, NSIndexPath indexPath)
@@ -311,8 +402,15 @@ namespace FlightLog {
 		{
 			base.Dispose (disposing);
 			
+			if (updating != null) {
+				updating.Dispose ();
+				updating = null;
+			}
+			
 			LogBook.FlightAdded -= OnFlightAdded;
 			LogBook.FlightUpdated -= OnFlightUpdated;
+			LogBook.FlightWillUpdate -= OnFlightWillUpdate;
+			LogBook.FlightUpdateFailed -= OnFlightUpdateFailed;
 		}
 	}
 }
