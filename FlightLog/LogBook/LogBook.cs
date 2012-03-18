@@ -114,6 +114,19 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Event that occurs when an Aircraft is deleted from the LogBook.
+		/// </summary>
+		public static event EventHandler<AircraftEventArgs> AircraftDeleted;
+		
+		static void OnAircraftDeleted (Aircraft aircraft)
+		{
+			var handler = AircraftDeleted;
+			
+			if (handler != null)
+				handler (null, new AircraftEventArgs (aircraft));
+		}
+		
+		/// <summary>
 		/// Delete the specified aircraft from the LogBook.
 		/// </summary>
 		/// <param name='aircraft'>
@@ -124,9 +137,53 @@ namespace FlightLog {
 			if (!CanDelete (aircraft))
 				return false;
 			
-			PhotoManager.Delete (aircraft.TailNumber);
+			if (sqlitedb.Delete<Aircraft> (aircraft) > 0) {
+				PhotoManager.Delete (aircraft.TailNumber);
+				OnAircraftDeleted (aircraft);
+				return true;
+			}
 			
-			return sqlitedb.Delete<Aircraft> (aircraft) > 0;
+			return false;
+		}
+		
+		/// <summary>
+		/// Event that occurs when an Aircraft will update. Always followed by either
+		/// <see cref="AircraftUpdated"/> or <see cref="AircraftUpdateFailed"/>.
+		/// </summary>
+		public static event EventHandler<AircraftEventArgs> AircraftWillUpdate;
+		
+		static void OnAircraftWillUpdate (Aircraft aircraft)
+		{
+			var handler = AircraftWillUpdate;
+			
+			if (handler != null)
+				handler (null, new AircraftEventArgs (aircraft));
+		}
+		
+		/// <summary>
+		/// Event that occurs when an Aircraft is updated in the LogBook.
+		/// </summary>
+		public static event EventHandler<AircraftEventArgs> AircraftUpdated;
+		
+		static void OnAircraftUpdated (Aircraft aircraft)
+		{
+			var handler = AircraftUpdated;
+			
+			if (handler != null)
+				handler (null, new AircraftEventArgs (aircraft));
+		}
+		
+		/// <summary>
+		/// Event that occurs when an Aircraft update fails.
+		/// </summary>
+		public static event EventHandler<AircraftEventArgs> AircraftUpdateFailed;
+		
+		static void OnAircraftUpdateFailed (Aircraft aircraft)
+		{
+			var handler = AircraftUpdateFailed;
+			
+			if (handler != null)
+				handler (null, new AircraftEventArgs (aircraft));
 		}
 		
 		/// <summary>
@@ -137,9 +194,14 @@ namespace FlightLog {
 		/// </param>
 		public static bool Update (Aircraft aircraft)
 		{
+			OnAircraftWillUpdate (aircraft);
+			
 			if (sqlitedb.Update (aircraft) > 0) {
+				OnAircraftUpdated (aircraft);
 				aircraft.OnUpdated ();
 				return true;
+			} else {
+				OnAircraftUpdateFailed (aircraft);
 			}
 			
 			return false;
