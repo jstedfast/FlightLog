@@ -145,11 +145,11 @@ namespace FlightLog {
 			var tableView = CurrentTableView;
 			var model = ModelForTableView (tableView);
 			
-			updating = PathForVisibleItem (e.Flight);
+			updating = PathForVisibleItem (tableView, e.Flight);
 			if (updating != null) {
 				// We're done.
 				loner = model.GetRowCount (updating.Section) == 1;
-				return updating;
+				return;
 			}
 			
 			// Otherwise we gotta do things the hard way...
