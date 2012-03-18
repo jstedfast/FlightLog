@@ -29,9 +29,8 @@ using System.Drawing;
 using System.Collections.Generic;
 
 using MonoTouch.Foundation;
-using MonoTouch.UIKit;
-
 using MonoTouch.SQLite;
+using MonoTouch.UIKit;
 
 namespace FlightLog {
 	public class FlightViewController : SQLiteTableViewController<Flight>, IComparer<Flight>
@@ -90,6 +89,7 @@ namespace FlightLog {
 			var tableView = CurrentTableView;
 			var model = ModelForTableView (tableView);
 			
+			details.Flight = e.Flight;
 			model.ReloadData ();
 			
 			int index = model.IndexOf (e.Flight, this);
@@ -301,7 +301,7 @@ namespace FlightLog {
 			} else {
 				// Select first flight...
 				var visible = TableView.IndexPathsForVisibleRows;
-				if (visible == null)
+				if (visible == null || visible.Length == 0)
 					return;
 				
 				TableView.SelectRow (visible[0], false, UITableViewScrollPosition.None);

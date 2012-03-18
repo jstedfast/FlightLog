@@ -224,12 +224,25 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
+		/// Gets or sets the LogBook entry identifier.
+		/// 
+		/// Note: This value is set by the LogBook on insertion.
+		/// </summary>
+		/// <value>
+		/// The identifier.
+		/// </value>
+		[PrimaryKey][AutoIncrement]
+		public int Id {
+			get; set;
+		}
+		
+		/// <summary>
 		/// Gets or sets the aircraft's tail number.
 		/// </summary>
 		/// <value>
 		/// The aircraft's tail number.
 		/// </value>
-		[PrimaryKey][Indexed][MaxLength (9)]
+		[Indexed][MaxLength (9)][Unique]
 		public string TailNumber {
 			get; set;
 		}
