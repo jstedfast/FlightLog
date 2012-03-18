@@ -201,12 +201,11 @@ namespace FlightLog {
 		
 		AircraftCellView view;
 		
-		public AircraftTableViewCell (Aircraft aircraft, NSString key) : base (UITableViewCellStyle.Default, key)
+		public AircraftTableViewCell (NSString key) : base (UITableViewCellStyle.Default, key)
 		{
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			ContentView.ClipsToBounds = true;
 			view = new AircraftCellView ();
-			view.Aircraft = aircraft;
 			ContentView.Add (view);
 		}
 		
@@ -318,9 +317,9 @@ namespace FlightLog {
 			AircraftTableViewCell cell = tv.DequeueReusableCell (key) as AircraftTableViewCell;
 			
 			if (cell == null)
-				cell = new AircraftTableViewCell (Aircraft, key);
-			else
-				cell.Aircraft = Aircraft;
+				cell = new AircraftTableViewCell (key);
+			
+			cell.Aircraft = Aircraft;
 			
 			return cell;
 		}
