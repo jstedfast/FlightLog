@@ -87,6 +87,10 @@ namespace FlightLog {
 			KeyboardType = UIKeyboardType.Default;
 		}
 		
+		public bool AutoComplete {
+			get; set;
+		}
+		
 		public new string Value {
 			set { base.Value = value; }
 			get {
@@ -179,7 +183,7 @@ namespace FlightLog {
 					return false;
 			}
 			
-			if (result.Length > 2) {
+			if (AutoComplete && result.Length > 2) {
 				// Try to auto-complete the registration number from the database of known aircraft.
 				var matches = LogBook.GetMatchingAircraft (result);
 				

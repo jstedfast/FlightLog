@@ -71,7 +71,7 @@ namespace FlightLog {
 		{
 			return new Section ("Flight") {
 				(date = new FlightDateEntryElement ("Date", Flight.Date)),
-				(aircraft = new AircraftEntryElement (Flight.Aircraft)),
+				(aircraft = new AircraftEntryElement (Flight.Aircraft) { AutoComplete = true }),
 				(departed = new AirportEntryElement ("Departed", Flight.AirportDeparted)),
 				(visited1 = new AirportEntryElement ("Visited", Flight.AirportVisited1)),
 				(visited2 = new AirportEntryElement ("Visited", Flight.AirportVisited2)),
