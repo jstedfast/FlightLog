@@ -35,7 +35,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class FlightViewController : SQLiteTableViewController<Flight>, IComparer<Flight>
 	{
-		static SQLiteOrderBy orderBy = new SQLiteOrderBy ("Date", SQLiteOrderByDirection.Descending);
+		static SQLiteOrderBy orderBy = new SQLiteOrderBy ("Date", SQLiteSortOrder.Descending);
 		static string sectionExpr = "strftime ('%Y', Date)";
 		static NSString key = new NSString ("Flight");
 		
