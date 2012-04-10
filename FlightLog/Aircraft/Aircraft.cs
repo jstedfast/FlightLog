@@ -242,7 +242,7 @@ namespace FlightLog {
 		/// <value>
 		/// The aircraft's tail number.
 		/// </value>
-		[Indexed][MaxLength (9)][Unique]
+		[Unique][MaxLength (9)]
 		public string TailNumber {
 			get; set;
 		}
