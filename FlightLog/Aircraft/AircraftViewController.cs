@@ -43,8 +43,7 @@ namespace FlightLog {
 		NSIndexPath updating;
 		bool searching;
 		
-		public AircraftViewController (AircraftDetailsViewController details) :
-			base (LogBook.SQLiteDB, 16)
+		public AircraftViewController (AircraftDetailsViewController details)
 		{
 			SearchPlaceholder = "Search Aircraft";
 			AutoHideSearch = true;
@@ -229,6 +228,13 @@ namespace FlightLog {
 			details.NavigationController.PushViewController (editor, true);
 		}
 		
+		protected override SQLiteTableModel<Aircraft> CreateModel (bool forSearching)
+		{
+			var model = new SQLiteTableModel<Aircraft> (LogBook.SQLiteDB, 16);
+			
+			return model;
+		}
+		
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
@@ -237,10 +243,7 @@ namespace FlightLog {
 			NavigationItem.LeftBarButtonItem = addAircraft;
 			
 			SearchDisplayController.SearchResultsTableView.RowHeight = AircraftTableViewCell.CellHeight;
-			SearchDisplayController.SearchResultsTableView.AllowsSelection = true;
-			
 			TableView.RowHeight = AircraftTableViewCell.CellHeight;
-			TableView.AllowsSelection = true;
 		}
 		
 		void SelectFirstOrAdd ()

@@ -35,8 +35,6 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class FlightViewController : SQLiteTableViewController<Flight>, IComparer<Flight>
 	{
-		static SQLiteOrderBy orderBy = new SQLiteOrderBy ("Date", SQLiteSortOrder.Descending);
-		static string sectionExpr = "strftime ('%Y', Date)";
 		static NSString key = new NSString ("Flight");
 		
 		EditFlightDetailsViewController editor;
@@ -46,8 +44,7 @@ namespace FlightLog {
 		bool searching;
 		bool loner;
 		
-		public FlightViewController (FlightDetailsViewController details) :
-			base (LogBook.SQLiteDB, 16, orderBy, sectionExpr)
+		public FlightViewController (FlightDetailsViewController details)
 		{
 			SearchPlaceholder = "Search Flights";
 			AutoHideSearch = true;
@@ -279,6 +276,18 @@ namespace FlightLog {
 			details.NavigationController.PushViewController (editor, true);
 		}
 		
+		protected override SQLiteTableModel<Flight> CreateModel (bool forSearching)
+		{
+			var model = new SQLiteTableModel<Flight> (LogBook.SQLiteDB, 16);
+			
+			model.OrderBy.Add (new SQLiteOrderBy ("Date", SQLiteSortOrder.Descending));
+			model.OrderBy.Add (new SQLiteOrderBy ("Id", SQLiteSortOrder.Descending));
+			
+			model.SectionExpression = "strftime ('%Y', Date)";
+			
+			return model;
+		}
+		
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
@@ -287,10 +296,7 @@ namespace FlightLog {
 			NavigationItem.LeftBarButtonItem = addFlight;
 			
 			SearchDisplayController.SearchResultsTableView.RowHeight = FlightTableViewCell.CellHeight;
-			SearchDisplayController.SearchResultsTableView.AllowsSelection = true;
-			
 			TableView.RowHeight = FlightTableViewCell.CellHeight;
-			TableView.AllowsSelection = true;
 		}
 		
 		void SelectFirstOrAdd ()
