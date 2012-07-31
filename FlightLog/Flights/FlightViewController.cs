@@ -298,6 +298,11 @@ namespace FlightLog {
 			SearchDisplayController.SearchResultsTableView.RowHeight = FlightTableViewCell.CellHeight;
 			TableView.RowHeight = FlightTableViewCell.CellHeight;
 		}
+
+		protected override float GetHeightForRow (UITableView tableView, NSIndexPath indexPath)
+		{
+			return FlightTableViewCell.CellHeight;
+		}
 		
 		void SelectFirstOrAdd ()
 		{

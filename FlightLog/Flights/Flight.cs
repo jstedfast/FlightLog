@@ -81,7 +81,7 @@ namespace FlightLog {
 		/// <value>
 		/// The aircraft's tail number.
 		/// </value>
-		[Indexed][MaxLength (9)]
+		[Indexed][MaxLength (9)][SQLiteSearchAlias ("tail")]
 		public string Aircraft {
 			get; set;
 		}
@@ -147,6 +147,7 @@ namespace FlightLog {
 		/// <value>
 		/// <c>true</c> if this flight was a cross-country flight; or <c>false</c> otherwise.
 		/// </value>
+		[SQLiteSearchAlias ("xc")]
 		public bool IsCrossCountry {
 			get; set;
 		}
@@ -250,6 +251,7 @@ namespace FlightLog {
 		/// <value>
 		/// The number of IFR approaches.
 		/// </value>
+		[SQLiteSearchAlias ("approaches")]
 		public int InstrumentApproaches {
 			get; set;
 		}
@@ -260,6 +262,8 @@ namespace FlightLog {
 		/// <value>
 		/// <c>true</c> if holding procedures were performed; otherwise, <c>false</c>.
 		/// </value>
+		[SQLiteSearchAlias ("holdings")]
+		[SQLiteSearchAlias ("procedures")]
 		public bool IntrumentHoldingProcedures {
 			get; set;
 		}
@@ -270,6 +274,7 @@ namespace FlightLog {
 		/// <value>
 		/// The time spent actually flying by instruments, in seconds.
 		/// </value>
+		[SQLiteSearchAlias ("ifr")]
 		public int InstrumentActual {
 			get; set;
 		}
@@ -280,6 +285,7 @@ namespace FlightLog {
 		/// <value>
 		/// The time spent flying while under a hood, in seconds.
 		/// </value>
+		[SQLiteSearchAlias ("hood")]
 		public int InstrumentHood {
 			get; set;
 		}
@@ -290,6 +296,7 @@ namespace FlightLog {
 		/// <value>
 		/// The time spent flying by instruments in a simulator, in seconds.
 		/// </value>
+		[SQLiteSearchAlias ("sim")]
 		public int InstrumentSimulator {
 			get; set;
 		}
