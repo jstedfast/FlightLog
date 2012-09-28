@@ -45,6 +45,7 @@ namespace FlightLog {
 		
 		public AircraftViewController (AircraftDetailsViewController details)
 		{
+			RowHeight = AircraftTableViewCell.CellHeight;
 			SearchPlaceholder = "Search Aircraft";
 			AutoHideSearch = true;
 			Title = "Aircraft";
@@ -241,9 +242,6 @@ namespace FlightLog {
 			
 			addAircraft = new UIBarButtonItem (UIBarButtonSystemItem.Add, OnAddClicked);
 			NavigationItem.LeftBarButtonItem = addAircraft;
-			
-			SearchDisplayController.SearchResultsTableView.RowHeight = AircraftTableViewCell.CellHeight;
-			TableView.RowHeight = AircraftTableViewCell.CellHeight;
 		}
 		
 		void SelectFirstOrAdd ()

@@ -46,6 +46,7 @@ namespace FlightLog {
 		
 		public FlightViewController (FlightDetailsViewController details)
 		{
+			RowHeight = FlightTableViewCell.CellHeight;
 			SearchPlaceholder = "Search Flights";
 			AutoHideSearch = true;
 			Title = "Flights";
@@ -294,14 +295,6 @@ namespace FlightLog {
 			
 			addFlight = new UIBarButtonItem (UIBarButtonSystemItem.Add, OnAddClicked);
 			NavigationItem.LeftBarButtonItem = addFlight;
-			
-			SearchDisplayController.SearchResultsTableView.RowHeight = FlightTableViewCell.CellHeight;
-			TableView.RowHeight = FlightTableViewCell.CellHeight;
-		}
-
-		protected override float GetHeightForRow (UITableView tableView, NSIndexPath indexPath)
-		{
-			return FlightTableViewCell.CellHeight;
 		}
 		
 		void SelectFirstOrAdd ()
