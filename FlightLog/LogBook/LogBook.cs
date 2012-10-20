@@ -43,7 +43,7 @@ namespace FlightLog {
 			string docsDir = Environment.GetFolderPath (Environment.SpecialFolder.Personal);
 			string logbook = Path.Combine (docsDir, "LogBook.sqlite");
 			
-			sqlitedb = new SQLiteConnection (logbook, true);
+			sqlitedb = new SQLiteConnection (logbook);
 			sqlitedb.CreateTable<Flight> ();
 			sqlitedb.CreateTable<Aircraft> ();
 		}
