@@ -51,6 +51,9 @@ namespace FlightLog {
 		const float AddPhotoYOffset = YBorderPadding + (PhotoHeight / 2.0f) - (AddPhotoFontSize / 2.0f) - 1.0f;
 		const float TableViewOffset = XBorderPadding + PhotoWidth + 20.0f;
 		const float ProfileHeight = PhotoHeight + YBorderPadding * 2;
+
+		const int ChoosePhoto = 0;
+		const int TakePhoto = 1;
 		
 		static RectangleF PhotoRect = new RectangleF (XBorderPadding, YBorderPadding, PhotoWidth, PhotoHeight);
 		static CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
@@ -279,11 +282,11 @@ namespace FlightLog {
 			picker.Delegate = new PhotoPickerDelegate (this);
 			
 			switch (buttonIndex) {
-			case 0: // Choose Photo
+			case ChoosePhoto:
 				picker.SourceType = UIImagePickerControllerSourceType.PhotoLibrary;
 				picker.AllowsEditing = true;
 				break;
-			case 1: // Take Photo
+			case TakePhoto:
 				picker.SourceType = UIImagePickerControllerSourceType.Camera;
 				picker.CameraDevice = UIImagePickerControllerCameraDevice.Rear;
 				picker.CameraCaptureMode = UIImagePickerControllerCameraCaptureMode.Photo;
@@ -303,7 +306,7 @@ namespace FlightLog {
 		{
 			// If the device (such as the simulator) doesn't have a camera, don't present that option.
 			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)) {
-				OnActionSheetDismissed (null, 0);
+				OnActionSheetDismissed (null, ChoosePhoto);
 				return;
 			}
 			
