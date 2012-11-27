@@ -26,6 +26,8 @@
 
 using System;
 using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
 
 using MonoTouch.CoreGraphics;
 using MonoTouch.Foundation;
@@ -59,12 +61,14 @@ namespace FlightLog {
 		
 		LimitedEntryElement make, model;
 		AircraftEntryElement tailNumber;
+		CancellationTokenSource cancel;
 		UIImagePickerController picker;
 		UIPopoverController popover;
 		UIActionSheet sheet;
 		UIImage photograph;
 		DialogView dialog;
 		bool pressed;
+		Task task;
 		
 		public EditAircraftProfileView (float width) : this (new RectangleF (0.0f, 0.0f, width, ProfileHeight)) { }
 		
@@ -103,12 +107,47 @@ namespace FlightLog {
 			get { return tailNumber.Value; }
 			set { tailNumber.Value = value; }
 		}
+
+		void SetAircraftDetails (AircraftDetails details)
+		{
+			if (string.IsNullOrEmpty (Make) && details.Make != null)
+				Make = details.Make;
+
+			if (string.IsNullOrEmpty (Model) && details.Model != null)
+				Model = details.Model;
+		}
+
+		void OnTailNumberEntered (object sender, EventArgs e)
+		{
+			if (!string.IsNullOrEmpty (Make) && !string.IsNullOrEmpty (Model))
+				return;
+
+			if (string.IsNullOrEmpty (TailNumber))
+				return;
+
+			if (task != null) {
+				cancel.Cancel ();
+				task.Wait ();
+			}
+
+			cancel = new CancellationTokenSource ();
+			task = FAARegistry.GetAircraftDetails (TailNumber, cancel.Token).ContinueWith (t => {
+				try {
+					SetAircraftDetails (t.Result);
+				} catch {
+				} finally {
+					cancel = null;
+					task = null;
+				}
+			}, TaskScheduler.FromCurrentSynchronizationContext ());
+		}
 		
 		Section CreateTailNumberSection ()
 		{
-			return new Section () {
-				(tailNumber = new AircraftEntryElement ("")),
-			};
+			tailNumber = new AircraftEntryElement ("");
+			tailNumber.EditingCompleted += OnTailNumberEntered;
+
+			return new Section () { tailNumber };
 		}
 		
 		Section CreateMakeAndModelSection ()
@@ -359,6 +398,13 @@ namespace FlightLog {
 		
 		protected override void Dispose (bool disposing)
 		{
+			if (task != null) {
+				cancel.Cancel ();
+				cancel = null;
+				task.Wait ();
+				task = null;
+			}
+
 			if (photograph != null) {
 				photograph.Dispose ();
 				photograph = null;

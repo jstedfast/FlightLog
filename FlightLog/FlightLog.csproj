@@ -66,6 +66,7 @@
     <ConsolePause>False</ConsolePause>
     <BuildIpa>True</BuildIpa>
     <CodesignKey>iPhone Distribution</CodesignKey>
+    <CodesignProvision>Automatic:AdHoc</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <DebugType>none</DebugType>
@@ -75,6 +76,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Distribution</CodesignKey>
+    <CodesignProvision>Automatic:AppStore</CodesignProvision>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -129,6 +131,7 @@
     <Compile Include="Summary\CurrencyElement.cs" />
     <Compile Include="Elements\YearSection.cs" />
     <Compile Include="Flights\FlightViewController.cs" />
+    <Compile Include="Aircraft\FAARegistry.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
@@ -163,6 +166,10 @@
     <ProjectReference Include="..\..\MonoTouch.SQLite\MonoTouch.SQLite\MonoTouch.SQLite.csproj">
       <Project>{4B622CAB-9463-4FAB-8EF8-CA82E221965E}</Project>
       <Name>MonoTouch.SQLite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HtmlAgilityPack\HtmlAgilityPack.MonoMobile\HtmlAgilityPack.MonoMobile.csproj">
+      <Project>{121A166C-C2E0-485C-A13E-011E2EA8BBD2}</Project>
+      <Name>HtmlAgilityPack.MonoMobile</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

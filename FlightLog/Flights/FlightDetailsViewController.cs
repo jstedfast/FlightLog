@@ -261,6 +261,9 @@ namespace FlightLog {
 		
 		void UpdateDetails ()
 		{
+			MonoTouch.CoreLocation.CLLocationCoordinate2D coordinate = new MonoTouch.CoreLocation.CLLocationCoordinate2D (52.123, 52.123);
+			decimal lat = System.Convert.ToDecimal (coordinate.Latitude);
+
 			Title = string.Format ("{0} to {1} on {2}", Flight.AirportDeparted,
 				Flight.AirportArrived, Flight.Date.ToShortDateString ());
 			

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoTouch.Dialog", "..\Mono
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoTouch.SQLite", "..\MonoTouch.SQLite\MonoTouch.SQLite\MonoTouch.SQLite.csproj", "{4B622CAB-9463-4FAB-8EF8-CA82E221965E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HtmlAgilityPack.MonoMobile", "..\HtmlAgilityPack\HtmlAgilityPack.MonoMobile\HtmlAgilityPack.MonoMobile.csproj", "{121A166C-C2E0-485C-A13E-011E2EA8BBD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|iPhoneSimulator = Debug|iPhoneSimulator
@@ -17,6 +19,18 @@ Global
 		AppStore|iPhone = AppStore|iPhone
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Ad-Hoc|iPhone.Build.0 = Release|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.AppStore|iPhone.ActiveCfg = Release|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.AppStore|iPhone.Build.0 = Release|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Release|iPhone.Build.0 = Release|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{121A166C-C2E0-485C-A13E-011E2EA8BBD2}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Ad-Hoc|iPhone.ActiveCfg = Ad-Hoc|iPhone
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Ad-Hoc|iPhone.Build.0 = Ad-Hoc|iPhone
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.AppStore|iPhone.ActiveCfg = AppStore|iPhone

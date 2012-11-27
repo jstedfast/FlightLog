@@ -94,6 +94,7 @@ namespace FlightLog {
 			entry.ShouldChangeCharacters += OnShouldChangeCharacters;
 			entry.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
 			entry.AdjustsFontSizeToFitWidth = true;
+			entry.Ended += OnEditingCompleted;
 			
 			return entry;
 		}
@@ -134,5 +135,13 @@ namespace FlightLog {
 			
 			return true;
 		}
+
+		void OnEditingCompleted (object sender, EventArgs e)
+		{
+			if (EditingCompleted != null)
+				EditingCompleted (this, EventArgs.Empty);
+		}
+
+		public event EventHandler EditingCompleted;
 	}
 }
