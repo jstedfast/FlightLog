@@ -94,7 +94,7 @@ namespace FlightLog {
 			}
 			
 			if (added.Count > 0) {
-				mapView.AddAnnotation (added.ToArray ());
+				mapView.AddAnnotations (added.ToArray ());
 				added.Clear ();
 			}
 			
