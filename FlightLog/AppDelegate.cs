@@ -46,7 +46,7 @@ namespace FlightLog {
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
 		{
-			return UIInterfaceOrientationMask.Landscape;
+			return UIInterfaceOrientationMask.LandscapeLeft | UIInterfaceOrientationMask.LandscapeRight;
 		}
 
 		public override UIInterfaceOrientation PreferredInterfaceOrientationForPresentation ()

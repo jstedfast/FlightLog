@@ -37,6 +37,12 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class EditAircraftProfileView : UIView
 	{
+		enum PhotoResponse {
+			CapturePhoto,
+			ChoosePhoto,
+			DefaultPhoto
+		}
+
 		enum TableSections {
 			TailNumber,
 			MakeAndModel
@@ -51,9 +57,6 @@ namespace FlightLog {
 		const float AddPhotoYOffset = YBorderPadding + (PhotoHeight / 2.0f) - (AddPhotoFontSize / 2.0f) - 1.0f;
 		const float TableViewOffset = XBorderPadding + PhotoWidth + 20.0f;
 		const float ProfileHeight = PhotoHeight + YBorderPadding * 2;
-
-		const int ChoosePhoto = 0;
-		const int TakePhoto = 1;
 		
 		static RectangleF PhotoRect = new RectangleF (XBorderPadding, YBorderPadding, PhotoWidth, PhotoHeight);
 		static CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
@@ -61,17 +64,18 @@ namespace FlightLog {
 		static UIColor AddPhotoTextColor = UIColor.FromRGB (76, 86, 108);
 		static UIColor HighlightedButtonColor = UIColor.LightGray;
 		static UIColor NormalButtonColor = UIColor.White;
-		
+
+		CancellationTokenSource cancelMakeModel, cancelPhoto;
+		PhotoResponse[] buttons = new PhotoResponse[3];
+		Task taskMakeModel, taskPhoto;
 		LimitedEntryElement make, model;
 		AircraftEntryElement tailNumber;
-		CancellationTokenSource cancel;
 		UIImagePickerController picker;
 		UIPopoverController popover;
 		UIActionSheet sheet;
 		UIImage photograph;
 		DialogView dialog;
 		bool pressed;
-		Task task;
 		
 		public EditAircraftProfileView (float width) : this (new RectangleF (0.0f, 0.0f, width, ProfileHeight)) { }
 		
@@ -120,6 +124,40 @@ namespace FlightLog {
 				Model = details.Model;
 		}
 
+		void FetchMakeAndModel ()
+		{
+			CancelMakeModelTask ();
+
+			cancelMakeModel = new CancellationTokenSource ();
+			taskMakeModel = FAARegistry.GetAircraftDetails (TailNumber, cancelMakeModel.Token).ContinueWith (t => {
+				try {
+					SetAircraftDetails (t.Result);
+				} catch {
+				} finally {
+					cancelMakeModel = null;
+					taskMakeModel = null;
+				}
+			}, TaskScheduler.FromCurrentSynchronizationContext ());
+		}
+
+		void FetchPhotograph ()
+		{
+			CancelPhotoTask ();
+
+			cancelPhoto = new CancellationTokenSource ();
+			taskPhoto = FlightAware.GetAircraftPhoto (TailNumber, cancelPhoto.Token).ContinueWith (t => {
+				try {
+					using (var data = t.Result) {
+						Photograph = UIImage.LoadFromData (data);
+					}
+				} catch {
+				} finally {
+					cancelPhoto = null;
+					taskPhoto = null;
+				}
+			}, TaskScheduler.FromCurrentSynchronizationContext ());
+		}
+
 		void OnTailNumberEntered (object sender, EventArgs e)
 		{
 			if (!string.IsNullOrEmpty (Make) && !string.IsNullOrEmpty (Model))
@@ -128,21 +166,10 @@ namespace FlightLog {
 			if (string.IsNullOrEmpty (TailNumber))
 				return;
 
-			if (task != null) {
-				cancel.Cancel ();
-				task.Wait ();
-			}
+			FetchMakeAndModel ();
 
-			cancel = new CancellationTokenSource ();
-			task = FAARegistry.GetAircraftDetails (TailNumber, cancel.Token).ContinueWith (t => {
-				try {
-					SetAircraftDetails (t.Result);
-				} catch {
-				} finally {
-					cancel = null;
-					task = null;
-				}
-			}, TaskScheduler.FromCurrentSynchronizationContext ());
+			if (Photograph == null)
+				FetchPhotograph ();
 		}
 		
 		Section CreateTailNumberSection ()
@@ -242,11 +269,32 @@ namespace FlightLog {
 				DrawPhoto (ctx);
 			}
 		}
+
+		class AircraftPhotoPickerController : UIImagePickerController {
+			public AircraftPhotoPickerController ()
+			{
+			}
+
+			public override bool ShouldAutorotate ()
+			{
+				return true;
+			}
+
+			public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
+			{
+				return UIInterfaceOrientationMask.All;
+			}
+
+			public override UIInterfaceOrientation PreferredInterfaceOrientationForPresentation ()
+			{
+				return UIInterfaceOrientation.Portrait;
+			}
+		}
 		
-		class PhotoPickerDelegate : UIImagePickerControllerDelegate {
+		class AircraftPhotoPickerDelegate : UIImagePickerControllerDelegate {
 			EditAircraftProfileView profile;
 			
-			public PhotoPickerDelegate (EditAircraftProfileView profile)
+			public AircraftPhotoPickerDelegate (EditAircraftProfileView profile)
 			{
 				this.profile = profile;
 			}
@@ -273,20 +321,25 @@ namespace FlightLog {
 		
 		void OnActionSheetDismissed (UIActionSheet sheet, int buttonIndex)
 		{
-			if (sheet != null) {
-				sheet.Dispose ();
-				sheet = null;
-			}
-			
-			picker = new UIImagePickerController ();
-			picker.Delegate = new PhotoPickerDelegate (this);
-			
-			switch (buttonIndex) {
-			case ChoosePhoto:
+			sheet.Dispose ();
+
+			picker = null;
+
+			if (buttonIndex == -1)
+				return;
+
+			CancelPhotoTask ();
+
+			switch (buttons[buttonIndex]) {
+			case PhotoResponse.ChoosePhoto:
+				picker = new AircraftPhotoPickerController ();
+				picker.Delegate = new AircraftPhotoPickerDelegate (this);
 				picker.SourceType = UIImagePickerControllerSourceType.PhotoLibrary;
 				picker.AllowsEditing = true;
 				break;
-			case TakePhoto:
+			case PhotoResponse.CapturePhoto:
+				picker = new AircraftPhotoPickerController ();
+				picker.Delegate = new AircraftPhotoPickerDelegate (this);
 				picker.SourceType = UIImagePickerControllerSourceType.Camera;
 				picker.CameraDevice = UIImagePickerControllerCameraDevice.Rear;
 				picker.CameraCaptureMode = UIImagePickerControllerCameraCaptureMode.Photo;
@@ -294,26 +347,44 @@ namespace FlightLog {
 				picker.ShowsCameraControls = true;
 				picker.AllowsEditing = true;
 				break;
+			default:
+				FetchPhotograph ();
+				break;
 			}
-			
-			popover = new UIPopoverController (picker);
-			popover.DidDismiss += OnPopoverDismissed;
-			
-			popover.PresentFromRect (PhotoRect, this, UIPopoverArrowDirection.Any, true);
+
+			if (picker != null) {
+				popover = new UIPopoverController (picker);
+				popover.DidDismiss += OnPopoverDismissed;
+
+				popover.PresentFromRect (PhotoRect, this, UIPopoverArrowDirection.Any, true);
+			}
 		}
 		
 		void ShowPhotoPickerOptions ()
 		{
+			int index = 0;
+
+			sheet = new UIActionSheet ("Aircraft Photo");
+
 			// If the device (such as the simulator) doesn't have a camera, don't present that option.
-			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)) {
-				OnActionSheetDismissed (null, ChoosePhoto);
+			if (UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)) {
+				buttons[index++] = PhotoResponse.CapturePhoto;
+				sheet.AddButton ("Capture Photo");
+			}
+
+			buttons[index++] = PhotoResponse.ChoosePhoto;
+			sheet.AddButton ("Choose Photo");
+
+			//if (!string.IsNullOrEmpty (TailNumber)) {
+			//	buttons[index++] = PhotoResponse.DefaultPhoto;
+			//	sheet.AddButton ("Default Photo");
+			//}
+
+			if (index == 1) {
+				OnActionSheetDismissed (sheet, 0);
 				return;
 			}
-			
-			sheet = new UIActionSheet ("Aircraft Photo");
-			sheet.AddButton ("Choose Photo");
-			sheet.AddButton ("Take Photo");
-			
+
 			sheet.Delegate = new PhotoActionSheetDelegate (this);
 			
 			sheet.ShowFrom (PhotoRect, this, true);
@@ -398,15 +469,37 @@ namespace FlightLog {
 			SetNeedsDisplay ();
 			pressed = false;
 		}
+
+		void CancelMakeModelTask ()
+		{
+			if (cancelMakeModel != null) {
+				cancelMakeModel.Cancel ();
+				cancelMakeModel = null;
+			}
+
+			if (taskMakeModel != null) {
+				taskMakeModel.Wait ();
+				taskMakeModel = null;
+			}
+		}
+
+		void CancelPhotoTask ()
+		{
+			if (cancelPhoto != null) {
+				cancelPhoto.Cancel ();
+				cancelPhoto = null;
+			}
+
+			if (taskPhoto != null) {
+				taskPhoto.Wait ();
+				taskPhoto = null;
+			}
+		}
 		
 		protected override void Dispose (bool disposing)
 		{
-			if (task != null) {
-				cancel.Cancel ();
-				cancel = null;
-				task.Wait ();
-				task = null;
-			}
+			CancelMakeModelTask ();
+			CancelPhotoTask ();
 
 			if (photograph != null) {
 				photograph.Dispose ();

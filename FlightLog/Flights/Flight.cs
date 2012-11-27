@@ -29,19 +29,6 @@ using System;
 using MonoTouch.SQLite;
 
 namespace FlightLog {
-#if false
-	public enum LoggedAs {
-		[HumanReadableName ("Pilot in Command")]
-		PilotInCommand,
-		[HumanReadableName ("Second in Command")]
-		SecondInCommand,
-		[HumanReadableName ("Certified Flight Instructor")]
-		CertifiedFlightInstructor,
-		[HumanReadableName ("Dual Received")]
-		DualReceived
-	}
-#endif
-	
 	public class Flight {
 		public Flight (DateTime date)
 		{

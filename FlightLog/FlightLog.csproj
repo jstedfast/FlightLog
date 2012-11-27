@@ -132,6 +132,7 @@
     <Compile Include="Elements\YearSection.cs" />
     <Compile Include="Flights\FlightViewController.cs" />
     <Compile Include="Aircraft\FAARegistry.cs" />
+    <Compile Include="Aircraft\FlightAware.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />

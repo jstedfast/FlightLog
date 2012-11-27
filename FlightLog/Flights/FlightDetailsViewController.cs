@@ -351,7 +351,7 @@ namespace FlightLog {
 				}
 			}
 			
-			if (Flight.Remarks != null && Flight.Remarks.Length > 0) {
+			if (!string.IsNullOrEmpty (Flight.Remarks)) {
 				if (sect >= Root.Count) {
 					section = new Section ("Remarks", Flight.Remarks);
 					Root.Insert (sect, UITableViewRowAnimation.Top, section);

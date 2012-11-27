@@ -1,5 +1,5 @@
 //
-// FederalAviationAdministration.cs
+// FlightAware.cs
 //
 // Author: Jeffrey Stedfast <jeff@xamarin.com>
 //
@@ -36,34 +36,16 @@ using System.Collections.Generic;
 
 using MonoTouch.SystemConfiguration;
 using MonoTouch.CoreFoundation;
+using MonoTouch.Foundation;
 
 using HtmlAgilityPack;
 
 namespace FlightLog
 {
-	public class AircraftDetails
-	{
-		internal AircraftDetails (string make, string model)
-		{
-			Make = make;
-			Model = model;
-		}
-
-		public string Make {
-			get; private set;
-		}
-
-		public string Model {
-			get; private set;
-		}
-	}
-
-	public static class FAARegistry
+	public static class FlightAware
 	{
 		const string UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:17.0) Gecko/20100101 Firefox/17.0";
-		const string ManufacturerKey = "Manufacturer Name";
-		const string ModelKey = "Model";
-		const string HostName = "registry.faa.gov";
+		const string HostName = "flightaware.com";
 
 		static NetworkReachability reachability = null;
 		static NetworkReachabilityFlags flags;
@@ -71,7 +53,7 @@ namespace FlightLog
 
 		static void ReachabilityChanged (NetworkReachabilityFlags flags)
 		{
-			FAARegistry.flags = flags;
+			FlightAware.flags = flags;
 			haveFlags = true;
 		}
 
@@ -98,110 +80,114 @@ namespace FlightLog
 			}
 		}
 
-		static string Normalize (string name)
+		static string ScrapeHtmlForPhotoPageUrl (Stream stream)
 		{
-			StringBuilder sb = new StringBuilder (name.Length);
-
-			sb.Append (char.ToUpperInvariant (name[0]));
-			for (int i = 1; i < name.Length; i++)
-				sb.Append (char.ToLowerInvariant (name[i]));
-
-			return sb.ToString ();
-		}
-
-		static AircraftDetails ParseAircraftDetails (Stream stream)
-		{
-			Dictionary<string, string> metadata = new Dictionary<string, string> (StringComparer.InvariantCultureIgnoreCase);
 			HtmlDocument doc = new HtmlDocument ();
-			HtmlNode description = null;
-			string key = null;
 
 			doc.Load (stream);
 
-			foreach (var h3 in doc.DocumentNode.SelectNodes ("//h3")) {
-				if (h3.InnerText == "Aircraft Description" && h3.ParentNode.Name == "div") {
-					var table = h3.ParentNode.ChildNodes.Where (tag => tag.Name == "table").FirstOrDefault ();
-					if (table == null)
-						continue;
+			foreach (var div in doc.DocumentNode.SelectNodes ("//div").Where (tag => tag.HasAttributes)) {
+				var attr = div.Attributes.Where (x => x.Name == "class").FirstOrDefault ();
 
-					description = table;
-					break;
-				}
+				if (attr == null || attr.Value != "track-panel-header")
+					continue;
+
+				var a = div.ChildNodes.Where (tag => tag.Name == "a" && tag.HasChildNodes && tag.FirstChild.Name == "img").FirstOrDefault ();
+				if (a == null || !a.HasAttributes)
+					continue;
+
+				var href = a.Attributes.Where (x => x.Name == "href").FirstOrDefault ();
+				if (href == null)
+					continue;
+
+				var url = href.Value;
+				if (url[0] == '/')
+					url = "http://" + HostName + url;
+
+				return url;
 			}
 
-			if (description == null)
-				throw new Exception ("Could not locate Aircraft Description table.");
-
-			foreach (var tr in description.ChildNodes.Where (tag => tag.Name == "tr")) {
-				foreach (var td in tr.ChildNodes.Where (tag => tag.Name == "td")) {
-					string value;
-
-					if (td.HasChildNodes) {
-						var span = td.ChildNodes.Where (tag => tag.Name == "span" || tag.Name == "strong").FirstOrDefault ();
-						value = span != null ? span.InnerText.Trim () : td.InnerText.Trim ();
-					} else {
-						value = td.InnerText.Trim ();
-					}
-
-					if (key != null) {
-						metadata.Add (key, value);
-						key = null;
-					} else {
-						key = value;
-					}
-				}
-			}
-
-			string make, model;
-
-			if (metadata.TryGetValue (ManufacturerKey, out make))
-				make = Normalize (make);
-			else
-				make = null;
-
-			if (!metadata.TryGetValue (ModelKey, out model))
-				model = null;
-
-			return new AircraftDetails (make, model);
+			throw new Exception ("Aircraft photo page url not found.");
 		}
 
-		static AircraftDetails RequestAircraftDetails (string tailNumber, CancellationToken cancelToken)
+		static string ScrapeHtmlForPhotoUrl (Stream stream)
 		{
-			string url = "http://" + HostName + "/aircraftinquiry/NNum_Results.aspx?NNumbertxt=" + tailNumber;
+			HtmlDocument doc = new HtmlDocument ();
+
+			doc.Load (stream);
+
+			foreach (var img in doc.DocumentNode.SelectNodes ("//img").Where (tag => tag.HasAttributes)) {
+				var attr = img.Attributes.Where (x => x.Name == "id").FirstOrDefault ();
+
+				if (attr != null && attr.Value == "photo_main") {
+					var src = img.Attributes.Where (x => x.Name == "src").FirstOrDefault ();
+					if (src == null)
+						continue;
+
+					var url = src.Value;
+					if (url[0] == '/')
+						url = "http://" + HostName + url;
+
+					return url;
+				}
+			}
+
+			throw new Exception ("Aircraft photo url not found.");
+		}
+
+		static Stream RequestStream (string url, CancellationToken cancelToken, bool keepAlive)
+		{
 			HttpWebRequest request = (HttpWebRequest) WebRequest.Create (url);
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.AllowAutoRedirect = true;
+			request.KeepAlive = keepAlive;
 			request.UserAgent = UserAgent;
-			request.KeepAlive = false;
 
 			if (cancelToken.IsCancellationRequested)
 				throw new OperationCanceledException (cancelToken);
 
 			using (var response = (HttpWebResponse) request.GetResponse ()) {
 				var stream = response.GetResponseStream ();
-				using (var mem = new MemoryStream ()) {
-					byte[] buf = new byte[4096];
-					int nread;
+				var mem = new MemoryStream ();
+				byte[] buf = new byte[4096];
+				int nread;
 
-					do {
-						if (cancelToken.IsCancellationRequested)
-							throw new OperationCanceledException (cancelToken);
+				do {
+					if (cancelToken.IsCancellationRequested)
+						throw new OperationCanceledException (cancelToken);
 
-						if ((nread = stream.Read (buf, 0, buf.Length)) > 0)
-							mem.Write (buf, 0, nread);
-					} while (nread > 0);
+					if ((nread = stream.Read (buf, 0, buf.Length)) > 0)
+						mem.Write (buf, 0, nread);
+				} while (nread > 0);
 
-					mem.Seek (0, SeekOrigin.Begin);
+				mem.Seek (0, SeekOrigin.Begin);
 
-					return ParseAircraftDetails (mem);
-				}
+				return mem;
 			}
 		}
 
-		public static Task<AircraftDetails> GetAircraftDetails (string tailNumber, CancellationToken cancelToken)
+		static NSData RequestAircraftPhoto (string tailNumber, CancellationToken cancelToken)
+		{
+			string url = "http://" + HostName + "/live/flight/" + tailNumber;
+			Stream stream;
+
+			using (stream = RequestStream (url, cancelToken, true)) {
+				url = ScrapeHtmlForPhotoPageUrl (stream);
+			}
+
+			using (stream = RequestStream (url, cancelToken, true)) {
+				url = ScrapeHtmlForPhotoUrl (stream);
+			}
+
+			using (stream = RequestStream (url, cancelToken, false)) {
+				return NSData.FromStream (stream);
+			}
+		}
+
+		public static Task<NSData> GetAircraftPhoto (string tailNumber, CancellationToken cancelToken)
 		{
 			return Task.Factory.StartNew (() => {
-				return RequestAircraftDetails (tailNumber, cancelToken);
+				return RequestAircraftPhoto (tailNumber, cancelToken);
 			}, cancelToken);
 		}
 	}
