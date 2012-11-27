@@ -127,7 +127,7 @@ namespace FlightLog {
 			if (!File.Exists (path))
 				return null;
 			
-			UIImage image = UIImage.FromFileUncached (path);
+			UIImage image = UIImage.FromFile (path);
 			
 			if (image == null)
 				return null;

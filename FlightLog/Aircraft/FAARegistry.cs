@@ -78,7 +78,7 @@ namespace FlightLog
 				if (reachability == null) {
 					reachability = new NetworkReachability ("registry.faa.gov");
 					reachability.Schedule (CFRunLoop.Current, CFRunLoop.ModeDefault);
-					reachability.SetCallback (ReachabilityChanged);
+					reachability.SetNotification (ReachabilityChanged);
 
 					haveFlags = reachability.TryGetFlags (out flags);
 				}

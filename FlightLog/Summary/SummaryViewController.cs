@@ -169,16 +169,5 @@ namespace FlightLog {
 			
 			base.ViewWillAppear (animated);
 		}
-		
-		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
-		{
-			switch (toInterfaceOrientation) {
-			case UIInterfaceOrientation.LandscapeRight:
-			case UIInterfaceOrientation.LandscapeLeft:
-				return true;
-			default:
-				return false;
-			}
-		}
 	}
 }

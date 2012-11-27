@@ -33,6 +33,28 @@ using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
+	public class FlightLogTabBarController : UITabBarController
+	{
+		public FlightLogTabBarController ()
+		{
+		}
+
+		public override bool ShouldAutorotate ()
+		{
+			return true;
+		}
+
+		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
+		{
+			return UIInterfaceOrientationMask.Landscape;
+		}
+
+		public override UIInterfaceOrientation PreferredInterfaceOrientationForPresentation ()
+		{
+			return UIInterfaceOrientation.LandscapeRight;
+		}
+	}
+
 	/// <summary>
 	/// The UIApplicationDelegate for the application. This class is responsible for launching the 
 	/// User Interface of the application, as well as listening (and optionally responding) to 
@@ -42,7 +64,7 @@ namespace FlightLog {
 	public partial class AppDelegate : UIApplicationDelegate
 	{
 		// class-level declarations
-		UITabBarController tabBarController;
+		FlightLogTabBarController tabBarController;
 		UIWindow window;
 		
 		/// <summary>
@@ -62,7 +84,7 @@ namespace FlightLog {
 			var viewController1 = new FlightLogSplitViewController ();
 			var viewController2 = new AircraftSplitViewController ();
 			var viewController3 = new AirportViewController ();
-			tabBarController = new UITabBarController ();
+			tabBarController = new FlightLogTabBarController ();
 			tabBarController.ViewControllers = new UIViewController [] {
 				viewController0,
 				viewController1,

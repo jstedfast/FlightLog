@@ -341,17 +341,6 @@ namespace FlightLog {
 			details.Aircraft = GetItem (tableView, indexPath);
 		}
 		
-		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
-		{
-			switch (toInterfaceOrientation) {
-			case UIInterfaceOrientation.LandscapeRight:
-			case UIInterfaceOrientation.LandscapeLeft:
-				return true;
-			default:
-				return false;
-			}
-		}
-		
 		protected override void Dispose (bool disposing)
 		{
 			base.Dispose (disposing);
