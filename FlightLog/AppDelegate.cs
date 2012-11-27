@@ -51,7 +51,7 @@ namespace FlightLog {
 
 		public override UIInterfaceOrientation PreferredInterfaceOrientationForPresentation ()
 		{
-			return UIInterfaceOrientation.LandscapeRight;
+			return UIInterfaceOrientation.LandscapeLeft;
 		}
 	}
 
