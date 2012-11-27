@@ -34,6 +34,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+using MonoTouch.SystemConfiguration;
+using MonoTouch.CoreFoundation;
+
 using HtmlAgilityPack;
 
 namespace FlightLog
@@ -59,6 +62,39 @@ namespace FlightLog
 	{
 		const string ManufacturerKey = "Manufacturer Name";
 		const string ModelKey = "Model";
+
+		static NetworkReachability reachability = null;
+		static NetworkReachabilityFlags flags;
+		static bool haveFlags = false;
+
+		static void ReachabilityChanged (NetworkReachabilityFlags flags)
+		{
+			FAARegistry.flags = flags;
+			haveFlags = true;
+		}
+
+		public static bool IsReachableViaWiFi {
+			get {
+				if (reachability == null) {
+					reachability = new NetworkReachability ("registry.faa.gov");
+					reachability.Schedule (CFRunLoop.Current, CFRunLoop.ModeDefault);
+					reachability.SetCallback (ReachabilityChanged);
+
+					haveFlags = reachability.TryGetFlags (out flags);
+				}
+
+				if (!haveFlags)
+					return false;
+
+				if (!flags.HasFlag (NetworkReachabilityFlags.Reachable))
+					return false;
+
+				if (flags.HasFlag (NetworkReachabilityFlags.IsWWAN))
+					return false;
+
+				return true;
+			}
+		}
 
 		static string Normalize (string name)
 		{
