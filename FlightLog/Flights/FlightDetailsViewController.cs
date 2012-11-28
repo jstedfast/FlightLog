@@ -221,9 +221,6 @@ namespace FlightLog {
 
 			List<List<FlightProperty>> newSections = new List<List<FlightProperty>> ();
 			List<SectionTitle> newTitles = new List<SectionTitle> ();
-			List<NSIndexPath> reload = new List<NSIndexPath> ();
-			bool needEndUpdates = false;
-			bool reloadRemarks = false;
 
 			// Create a new list of sections & properties
 			for (int i = 0; i < PropertySections.Count; i++) {
@@ -243,7 +240,11 @@ namespace FlightLog {
 				}
 			}
 
+#if ATTEMPT_TO_DO_FANCY_ANIMATIONS
 			// Update sections & titles to match newSections and newTitles
+			List<NSIndexPath> reload = new List<NSIndexPath> ();
+			bool needEndUpdates = false;
+			bool reloadRemarks = false;
 
 			// Remove old rows and sections...
 			for (int section = PropertySections.Count - 1; section >= 0; section--) {
@@ -373,6 +374,12 @@ namespace FlightLog {
 				TableView.ReloadSections (remarks, UITableViewRowAnimation.None);
 				remarks.Dispose ();
 			}
+#else
+			sections = newSections;
+			titles = newTitles;
+
+			TableView.ReloadData ();
+#endif
 		}
 
 		protected override void Dispose (bool disposing)
