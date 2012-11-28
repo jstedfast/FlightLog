@@ -25,71 +25,77 @@
 // 
 
 using System;
+using System.Text;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 
 using MonoTouch.Foundation;
+using MonoTouch.SQLite;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
-	public class FlightDetailsViewController : DialogViewController
+	public class FlightDetailsViewController : AllInOneTableViewController
 	{
-		static string[] SectionNames = new string[] { "Flight", "Flight Experience", "Instrument Experience" };
-		
-		delegate string FlightDetailGetValue (Flight flight);
-		
-		class FlightDetails {
-			public string Detail;
-			public FlightDetailGetValue GetValue;
-			
-			public FlightDetails (string detail, FlightDetailGetValue getValue)
-			{
-				Detail = detail;
-				GetValue = getValue;
-			}
+		static readonly string[] SectionTitles = new string[] { "Flight", "Flight Experience", "Instrument Experience", "Remarks" };
+		static readonly NSString TextFieldCellKey = new NSString ("FlightDetails.Text");
+		static readonly List<List<FlightProperty>> PropertySections;
+
+		enum SectionTitle {
+			Flight,
+			FlightExperience,
+			InstrumentExperience,
+			Remarks
 		}
-		
+
+		List<List<FlightProperty>> sections = new List<List<FlightProperty>> ();
+		List<SectionTitle> titles = new List<SectionTitle> ();
 		EditFlightDetailsViewController editor;
-		List<List<FlightDetails>> sections;
 		UIBarButtonItem edit;
 		Flight flight;
-		
-		public FlightDetailsViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
+
+		static FlightDetailsViewController ()
 		{
-			Autorotate = true;
-			
-			List<FlightDetails> basic = new List<FlightDetails> ();
-			basic.Add (new FlightDetails ("Date", GetFlightDate));
-			basic.Add (new FlightDetails ("Aircraft", GetFlightAircraft));
-			basic.Add (new FlightDetails ("Departed", GetFlightAirportDeparted));
-			basic.Add (new FlightDetails ("Visited", GetFlightAirportVisited));
-			basic.Add (new FlightDetails ("Arrived", GetFlightAirportArrived));
-			
-			List<FlightDetails> xp = new List<FlightDetails> ();
-			xp.Add (new FlightDetails ("Flight Time", GetFlightFlightTime));
-			xp.Add (new FlightDetails ("Certified Flight Instructor", GetFlightCertifiedFlightInstructor));
-			xp.Add (new FlightDetails ("Dual Received", GetFlightDualReceived));
-			xp.Add (new FlightDetails ("Pilot in Command", GetFlightPilotInCommand));
-			xp.Add (new FlightDetails ("Second in Command", GetFlightSecondInCommand));
-			xp.Add (new FlightDetails ("Cross Country", GetFlightCrossCountry));
-			xp.Add (new FlightDetails ("Night Flying", GetFlightNight));
-			xp.Add (new FlightDetails ("Day Landings", GetFlightDayLandings));
-			xp.Add (new FlightDetails ("Night Landings", GetFlightNightLandings));
-			
-			List<FlightDetails> inst = new List<FlightDetails> ();
-			inst.Add (new FlightDetails ("Actual Time", GetFlightInstrumentActual));
-			inst.Add (new FlightDetails ("Hood Time", GetFlightInstrumentHood));
-			inst.Add (new FlightDetails ("Simulator Time", GetFlightInstrumentSimulator));
-			inst.Add (new FlightDetails ("Approaches", GetFlightInstrumentApproaches));
-			
-			sections = new List<List<FlightDetails>> ();
-			sections.Add (basic);
-			sections.Add (xp);
-			sections.Add (inst);
+			var sections = new List<List<FlightProperty>> ();
+
+			sections.Add (new List<FlightProperty> () {
+				FlightProperty.Date,
+				FlightProperty.Aircraft,
+				FlightProperty.AirportDeparted,
+				FlightProperty.AirportVisited,
+				FlightProperty.AirportArrived,
+			});
+			sections.Add (new List<FlightProperty> () {
+				FlightProperty.FlightTime,
+				FlightProperty.CertifiedFlightInstructor,
+				FlightProperty.DualReceived,
+				FlightProperty.PilotInCommand,
+				FlightProperty.SecondInCommand,
+				FlightProperty.Night,
+				FlightProperty.DayLandings,
+				FlightProperty.NightLandings,
+			});
+			sections.Add (new List<FlightProperty> () {
+				FlightProperty.InstrumentActual,
+				FlightProperty.InstrumentHood,
+				FlightProperty.InstrumentSimulator,
+				FlightProperty.InstrumentApproaches,
+				FlightProperty.InstrumentHoldingProcedures,
+				FlightProperty.ActingInstrumentSafetyPilot,
+				FlightProperty.InstrumentSafetyPilot,
+			});
+			sections.Add (new List<FlightProperty> () {
+				FlightProperty.Remarks
+			});
+
+			PropertySections = sections;
 		}
-		
+
+		public FlightDetailsViewController () : base (UITableViewStyle.Grouped, false)
+		{
+		}
+
 		public Flight Flight {
 			get { return flight; }
 			set {
@@ -102,277 +108,39 @@ namespace FlightLog {
 		public bool EditorEngaged {
 			get { return editor != null; }
 		}
-		
+
 		public override void LoadView ()
 		{
-			Section section;
-			
-			section = new Section ("Flight");
-			section.Add (new StringElement ("Date"));
-			section.Add (new StringElement ("Aircraft"));
-			section.Add (new StringElement ("Departed"));
-			section.Add (new StringElement ("Arrived"));
-			Root.Add (section);
-			
-			section = new Section ("Flight Experience");
-			section.Add (new StringElement ("Flight Time"));
-			Root.Add (section);
-			
 			edit = new UIBarButtonItem (UIBarButtonSystemItem.Edit, OnEditClicked);
 			NavigationItem.LeftBarButtonItem = edit;
+
+			var section = new List<FlightProperty> () {
+				FlightProperty.Date,
+				FlightProperty.Aircraft,
+				FlightProperty.AirportDeparted,
+				FlightProperty.AirportArrived,
+			};
+
+			titles.Add (SectionTitle.Flight);
+			sections.Add (section);
 			
+			section = new List<FlightProperty> () {
+				FlightProperty.FlightTime,
+			};
+
+			titles.Add (SectionTitle.FlightExperience);
+			sections.Add (section);
+
 			base.LoadView ();
 		}
-		
-		static string FormatFlightTime (int seconds, bool force)
+
+		public override void ViewDidLoad ()
 		{
-			if (seconds == 0 && !force)
-				return null;
+			base.ViewDidLoad ();
 			
-			double time = Math.Round (seconds / 3600.0, 1);
-			
-			if (time > 0.9 && time < 1.1)
-				return "1 hour";
-			
-			return time.ToString () + " hours";
+			TableView.AllowsSelection = false;
 		}
-		
-		static string GetFlightDate (Flight flight)
-		{
-			return flight != null ? flight.Date.ToLongDateString () : string.Empty;
-		}
-		
-		static string GetFlightAircraft (Flight flight)
-		{
-			return flight != null ? flight.Aircraft : string.Empty;
-		}
-		
-		static string GetFlightAirportDeparted (Flight flight)
-		{
-			return flight != null ? flight.AirportDeparted : string.Empty;
-		}
-		
-		static string GetFlightAirportVisited (Flight flight)
-		{
-			if (flight == null)
-				return null;
-			
-			List<string> visited = new List<string> ();
-			if (flight.AirportVisited1 != null && flight.AirportVisited1.Length > 0)
-				visited.Add (flight.AirportVisited1);
-			if (flight.AirportVisited2 != null && flight.AirportVisited2.Length > 0)
-				visited.Add (flight.AirportVisited2);
-			if (flight.AirportVisited3 != null && flight.AirportVisited3.Length > 0)
-				visited.Add (flight.AirportVisited3);
-			
-			if (visited.Count == 0)
-				return null;
-			
-			return string.Join (", ", visited.ToArray ());
-		}
-		
-		static string GetFlightAirportArrived (Flight flight)
-		{
-			return flight != null ? flight.AirportArrived : string.Empty;
-		}
-		
-		static string GetFlightFlightTime (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.FlightTime, true) : string.Empty;
-		}
-		
-		static string GetFlightCertifiedFlightInstructor (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.CertifiedFlightInstructor, false) : null;
-		}
-		
-		static string GetFlightDualReceived (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.DualReceived, false) : null;
-		}
-		
-		static string GetFlightPilotInCommand (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.PilotInCommand, false) : null;
-		}
-		
-		static string GetFlightSecondInCommand (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.SecondInCommand, false) : null;
-		}
-		
-		static string GetFlightCrossCountry (Flight flight)
-		{
-			return flight != null && flight.IsCrossCountry ? "true" : "false";
-		}
-		
-		static string GetFlightNight (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.Night, false) : null;
-		}
-		
-		static string GetFlightNightLandings (Flight flight)
-		{
-			return flight != null && flight.NightLandings > 0 ? flight.NightLandings.ToString () : null;
-		}
-		
-		static string GetFlightDayLandings (Flight flight)
-		{
-			return flight != null && flight.DayLandings > 0 ? flight.DayLandings.ToString () : null;
-		}
-		
-		static string GetFlightInstrumentActual (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.InstrumentActual, false) : null;
-		}
-		
-		static string GetFlightInstrumentHood (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.InstrumentHood, false) : null;
-		}
-		
-		static string GetFlightInstrumentSimulator (Flight flight)
-		{
-			return flight != null ? FormatFlightTime (flight.InstrumentSimulator, false) : null;
-		}
-		
-		static string GetFlightInstrumentApproaches (Flight flight)
-		{
-			return flight != null && flight.InstrumentApproaches > 0 ? flight.InstrumentApproaches.ToString () : null;
-		}
-		
-		void SetCaptionAndValue (Section section, int index, ref bool reload, string caption, string value)
-		{
-			if (index >= section.Count) {
-				section.Insert (index, UITableViewRowAnimation.None, new StringElement (caption, value));
-				reload = false;
-			} else {
-				StringElement element = section[index] as StringElement;
-				element.Caption = caption;
-				element.Value = value;
-				Root.Reload (element, UITableViewRowAnimation.None);
-			}
-		}
-		
-		bool HasInstrumentExperience (Flight flight)
-		{
-			return flight.InstrumentActual > 0 || flight.InstrumentHood > 0 || flight.InstrumentSimulator > 0 || flight.InstrumentApproaches > 0;
-		}
-		
-		void UpdateDetails ()
-		{
-			Title = string.Format ("{0} to {1} on {2}", Flight.AirportDeparted,
-				Flight.AirportArrived, Flight.Date.ToShortDateString ());
-			
-			List<NSIndexPath> updated = new List<NSIndexPath> ();
-			Section section;
-			int reload = -1;
-			int sect = 0;
-			
-			//TableView.BeginUpdates ();
-			
-			for (int s = 0; s < sections.Count; s++) {
-				List<FlightDetails> details = sections[s];
-				string[] values = new string[details.Count];
-				int first = -1, last = -1;
-				int n = 0;
-				
-				for (int i = 0; i < details.Count; i++) {
-					values[i] = details[i].GetValue (Flight);
-					if (values[i] != null) {
-						if (first == -1)
-							first = i;
-						last = i;
-						n++;
-					}
-				}
-				
-				if (n > 0) {
-					if (sect >= Root.Count) {
-						section = new Section (SectionNames[s]);
-						Root.Insert (sect, UITableViewRowAnimation.Top, section);
-						Console.WriteLine ("Adding section @ {0} {1}", sect, section.Caption);
-					} else {
-						section = Root[sect];
-						if (section.Caption != SectionNames[s]) {
-							section = new Section (SectionNames[s]);
-							Root.Insert (sect, UITableViewRowAnimation.Top, section);
-							Console.WriteLine ("Inserting section @ {0} {1}", sect, section.Caption);
-						} else {
-							Console.WriteLine ("Updating section @ {0} {1}", sect, section.Caption);
-						}
-					}
-					
-					for (int i = 0, row = 0; i < values.Length; i++) {
-						StringElement se;
-						
-						if (values[i] != null) {
-							if (row >= section.Count) {
-								se = new StringElement (details[i].Detail, values[i]);
-								section.Insert (row, UITableViewRowAnimation.Fade, se);
-								Console.WriteLine ("\tAdding row @ {0} {1}", row, se.Caption);
-							} else {
-								se = section[row] as StringElement;
-								if (se.Caption != details[i].Detail) {
-									se = new StringElement (details[i].Detail, values[i]);
-									section.Insert (row, UITableViewRowAnimation.Middle, se);
-									Console.WriteLine ("\tInserting row @ {0} {1}", row, se.Caption);
-								} else {
-									Console.WriteLine ("\tUpdating row @ {0} {1}", row, se.Caption);
-									updated.Add (NSIndexPath.FromRowSection (row, sect));
-									se.Value = values[i];
-								}
-							}
-							
-							row++;
-						} else if (row < section.Count) {
-							se = section[row] as StringElement;
-							if (se.Caption == details[i].Detail) {
-								//if (i > last) {
-								//	int count = section.Count - row;
-								//	section.RemoveRange (row, count, UITableViewRowAnimation.Automatic);
-								//	Console.WriteLine ("\tDeleting rows @ {0}-{1} {2}", row, section.Count - 1, se.Caption);
-								//	break;
-								//}
-								
-								section.RemoveRange (row, 1, UITableViewRowAnimation.Bottom);
-								Console.WriteLine ("\tDeleting row @ {0} {1}", row, se.Caption);
-							}
-						}
-					}
-					
-					sect++;
-				} else if (sect < Root.Count) {
-					section = Root[sect];
-					if (section.Caption == SectionNames[s]) {
-						Root.RemoveAt (sect, UITableViewRowAnimation.Middle);
-						Console.WriteLine ("Deleting section @ {0} {1}", sect, section.Caption);
-					}
-				}
-			}
-			
-			if (!string.IsNullOrEmpty (Flight.Remarks)) {
-				if (sect >= Root.Count) {
-					section = new Section ("Remarks", Flight.Remarks);
-					Root.Insert (sect, UITableViewRowAnimation.Top, section);
-				} else {
-					section = Root[sect];
-					section.Footer = Flight.Remarks;
-					reload = sect;
-				}
-			} else if (sect < Root.Count) {
-				Root.RemoveAt (sect, UITableViewRowAnimation.Middle);
-			}
-			
-			//TableView.EndUpdates ();
-			
-			if (updated.Count > 0)
-				TableView.ReloadRows (updated.ToArray (), UITableViewRowAnimation.None);
-			
-			if (reload != -1)
-				TableView.ReloadSections (NSIndexSet.FromIndex (reload), UITableViewRowAnimation.None);
-		}
-		
+
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
@@ -405,7 +173,208 @@ namespace FlightLog {
 			
 			NavigationController.PushViewController (editor, true);
 		}
+
+		protected override int NumberOfSections (UITableView tableView)
+		{
+			return sections.Count;
+		}
+
+		protected override int RowsInSection (UITableView tableView, int section)
+		{
+			if (titles[section] == SectionTitle.Remarks)
+				return 0;
+
+			return sections[section].Count;
+		}
+
+		protected override string TitleForHeader (UITableView tableView, int section)
+		{
+			return SectionTitles[(int) titles[section]];
+		}
+
+		protected override string TitleForFooter (UITableView tableView, int section)
+		{
+			if (titles[section] == SectionTitle.Remarks)
+				return Flight.GetValue (FlightProperty.Remarks);
+
+			return null;
+		}
+
+		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
+		{
+			var cell = tableView.DequeueReusableCell (TextFieldCellKey);
+
+			if (cell == null)
+				cell = new UITableViewCell (UITableViewCellStyle.Value1, TextFieldCellKey);
+
+			var property = sections[indexPath.Section][indexPath.Row];
+			cell.TextLabel.Text = property.ToHumanReadableName ();
+			cell.DetailTextLabel.Text = Flight.GetValue (property);
+
+			return cell;
+		}
 		
+		void UpdateDetails ()
+		{
+			Title = string.Format ("{0} to {1} on {2}", Flight.AirportDeparted,
+			                       Flight.AirportArrived, Flight.Date.ToShortDateString ());
+
+			List<List<FlightProperty>> newSections = new List<List<FlightProperty>> ();
+			List<SectionTitle> newTitles = new List<SectionTitle> ();
+			List<NSIndexPath> reload = new List<NSIndexPath> ();
+			bool needEndUpdates = false;
+			bool reloadRemarks = false;
+
+			// Create a new list of sections & properties
+			for (int i = 0; i < PropertySections.Count; i++) {
+				List<FlightProperty> section = null;
+
+				foreach (var property in PropertySections[i]) {
+					if (Flight.GetValue (property) != null) {
+						if (section == null)
+							section = new List<FlightProperty> ();
+						section.Add (property);
+					}
+				}
+
+				if (section != null) {
+					newTitles.Add ((SectionTitle) i);
+					newSections.Add (section);
+				}
+			}
+
+			// Update sections & titles to match newSections and newTitles
+
+			// Remove old rows and sections...
+			for (int section = PropertySections.Count - 1; section >= 0; section--) {
+				SectionTitle title = (SectionTitle) section;
+				int oldSection = titles.IndexOf (title);
+
+				if (oldSection == -1)
+					continue;
+
+				int newSection = newTitles.IndexOf (title);
+				if (newSection != -1 && title != SectionTitle.Remarks) {
+					// Remove old rows...
+					List<NSIndexPath> rows = new List<NSIndexPath> ();
+
+					for (int row = PropertySections[section].Count - 1; row >= 0; row--) {
+						var property = PropertySections[section][row];
+						int oldRow = sections[oldSection].IndexOf (property);
+
+						if (oldRow == -1)
+							continue;
+
+						int newRow = newSections[newSection].IndexOf (property);
+						if (newRow != -1)
+							continue;
+
+						//Console.WriteLine ("Removing {0} (row = {1}) from {2} (section = {3})", property, oldRow, title, oldSection);
+						rows.Add (NSIndexPath.FromRowSection (oldRow, oldSection));
+						sections[oldSection].RemoveAt (oldRow);
+					}
+
+					if (rows.Count > 0) {
+						if (!needEndUpdates) {
+							TableView.BeginUpdates ();
+							needEndUpdates = true;
+						}
+
+						TableView.DeleteRows (rows.ToArray (), UITableViewRowAnimation.Automatic);
+						foreach (var row in rows)
+							row.Dispose ();
+					}
+				} else if (newSection == -1) {
+					// Remove the entire section...
+					//Console.WriteLine ("Removing {0} @ {1}", title, oldSection);
+					if (!needEndUpdates) {
+						TableView.BeginUpdates ();
+						needEndUpdates = true;
+					}
+
+					var idx = NSIndexSet.FromIndex (oldSection);
+					TableView.DeleteSections (idx, UITableViewRowAnimation.Automatic);
+					sections.RemoveAt (oldSection);
+					titles.RemoveAt (oldSection);
+					idx.Dispose ();
+				}
+			}
+
+			// Add new rows and sections while maintaining a list of rows which need to be reloaded
+			for (int section = 0; section < PropertySections.Count; section++) {
+				SectionTitle title = (SectionTitle) section;
+				int newSection = newTitles.IndexOf (title);
+
+				if (newSection == -1)
+					continue;
+
+				int oldSection = titles.IndexOf (title);
+				if (oldSection != -1 && title != SectionTitle.Remarks) {
+					// Add new rows...
+					List<NSIndexPath> rows = new List<NSIndexPath> ();
+					
+					for (int row = 0; row < PropertySections[section].Count; row++) {
+						var property = PropertySections[section][row];
+						int newRow = newSections[newSection].IndexOf (property);
+
+						if (newRow == -1)
+							continue;
+						
+						int oldRow = sections[oldSection].IndexOf (property);
+						if (oldRow != -1) {
+							reload.Add (NSIndexPath.FromRowSection (newRow, newSection));
+							continue;
+						}
+
+						//Console.WriteLine ("Inserting {0} (row = {1}) into {2} (section = {3})", property, newRow, title, oldSection);
+						rows.Add (NSIndexPath.FromRowSection (newRow, oldSection));
+						sections[oldSection].Insert (newRow, property);
+					}
+					
+					if (rows.Count > 0) {
+						if (!needEndUpdates) {
+							TableView.BeginUpdates ();
+							needEndUpdates = true;
+						}
+
+						TableView.InsertRows (rows.ToArray (), UITableViewRowAnimation.Automatic);
+						foreach (var row in rows)
+							row.Dispose ();
+					}
+				} else if (oldSection == -1) {
+					// Add the entire section...
+					if (!needEndUpdates) {
+						TableView.BeginUpdates ();
+						needEndUpdates = true;
+					}
+
+					//Console.WriteLine ("Inserting {0} @ {1}", title, newSection);
+					var idx = NSIndexSet.FromIndex (newSection);
+					TableView.InsertSections (idx, UITableViewRowAnimation.Automatic);
+					sections.Insert (newSection, newSections[newSection]);
+					titles.Insert (newSection, title);
+					idx.Dispose ();
+				} else if (title == SectionTitle.Remarks) {
+					reloadRemarks = true;
+				}
+			}
+
+			if (needEndUpdates)
+				TableView.EndUpdates ();
+			
+			if (reload.Count > 0) {
+				TableView.ReloadRows (reload.ToArray (), UITableViewRowAnimation.None);
+				foreach (var row in reload)
+					row.Dispose ();
+			}
+
+			if (reloadRemarks) {
+				var remarks = NSIndexSet.FromIndex (sections.Count - 1);
+				TableView.ReloadSections (remarks, UITableViewRowAnimation.None);
+				remarks.Dispose ();
+			}
+		}
+
 		protected override void Dispose (bool disposing)
 		{
 			base.Dispose (disposing);
