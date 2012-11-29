@@ -169,5 +169,10 @@ namespace FlightLog {
 			
 			base.ViewWillAppear (animated);
 		}
+
+		protected override void Dispose (bool disposing)
+		{
+			base.Dispose (disposing);
+		}
 	}
 }

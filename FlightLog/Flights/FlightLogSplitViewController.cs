@@ -28,7 +28,6 @@ using System;
 using System.Drawing;
 
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -60,17 +59,19 @@ namespace FlightLog {
 		
 		protected override void Dispose (bool disposing)
 		{
+			if (disposing) {
+				if (flights != null) {
+					flights.Dispose ();
+					flights = null;
+				}
+
+				if (details != null) {
+					details.Dispose ();
+					details = null;
+				}
+			}
+
 			base.Dispose (disposing);
-			
-			if (flights != null) {
-				flights.Dispose ();
-				flights = null;
-			}
-			
-			if (details != null) {
-				details.Dispose ();
-				details = null;
-			}
 		}
 	}
 }

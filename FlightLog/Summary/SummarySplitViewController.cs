@@ -54,17 +54,19 @@ namespace FlightLog {
 		
 		protected override void Dispose (bool disposing)
 		{
+			if (disposing) {
+				if (overview != null) {
+					overview.Dispose ();
+					overview = null;
+				}
+
+				if (details != null) {
+					details.Dispose ();
+					details = null;
+				}
+			}
+
 			base.Dispose (disposing);
-			
-			if (overview != null) {
-				overview.Dispose ();
-				overview = null;
-			}
-			
-			if (details != null) {
-				details.Dispose ();
-				details = null;
-			}
 		}
 	}
 }

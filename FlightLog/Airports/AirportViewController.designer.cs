@@ -16,5 +16,18 @@ namespace FlightLog
 
 		[Outlet]
 		MonoTouch.MapKit.MKMapView mapView { get; set; }
+
+		void ReleaseDesignerOutlets ()
+		{
+			if (mapType != null) {
+				mapType.Dispose ();
+				mapType = null;
+			}
+
+			if (mapView != null) {
+				mapView.Dispose ();
+				mapView = null;
+			}
+		}
 	}
 }

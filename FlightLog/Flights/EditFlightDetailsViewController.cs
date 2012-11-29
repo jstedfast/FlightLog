@@ -331,5 +331,10 @@ namespace FlightLog {
 			if (handler != null)
 				handler (this, EventArgs.Empty);
 		}
+
+		protected override void Dispose (bool disposing)
+		{
+			base.Dispose (disposing);
+		}
 	}
 }

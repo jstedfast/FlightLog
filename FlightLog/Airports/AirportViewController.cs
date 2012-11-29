@@ -131,17 +131,18 @@ namespace FlightLog {
 		{
 			base.ViewDidUnload ();
 			
-			mapView.Dispose ();
-			mapView = null;
+			ReleaseDesignerOutlets ();
 			
 			annotations.Clear ();
 		}
 		
 		protected override void Dispose (bool disposing)
 		{
-			if (annotations != null) {
-				annotations.Clear ();
-				annotations = null;
+			if (disposing) {
+				if (annotations != null) {
+					annotations.Clear ();
+					annotations = null;
+				}
 			}
 			
 			base.Dispose (disposing);

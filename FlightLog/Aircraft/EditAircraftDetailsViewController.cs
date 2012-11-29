@@ -245,22 +245,6 @@ namespace FlightLog
 			base.ViewWillDisappear (animated);
 		}
 		
-		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
-		{
-			switch (toInterfaceOrientation) {
-			case UIInterfaceOrientation.LandscapeRight:
-			case UIInterfaceOrientation.LandscapeLeft:
-				return true;
-			default:
-				return false;
-			}
-		}
-		
-		protected override void Dispose (bool disposing)
-		{
-			base.Dispose (disposing);
-		}
-		
 		public event EventHandler<EventArgs> EditorClosed;
 		
 		void OnEditorClosed ()
@@ -269,6 +253,11 @@ namespace FlightLog
 			
 			if (handler != null)
 				handler (this, EventArgs.Empty);
+		}
+
+		protected override void Dispose (bool disposing)
+		{
+			base.Dispose (disposing);
 		}
 	}
 }

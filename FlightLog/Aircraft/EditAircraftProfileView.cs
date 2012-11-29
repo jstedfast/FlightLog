@@ -498,18 +498,22 @@ namespace FlightLog {
 		
 		protected override void Dispose (bool disposing)
 		{
-			CancelMakeModelTask ();
-			CancelPhotoTask ();
+			if (disposing) {
+				CancelMakeModelTask ();
+				CancelPhotoTask ();
 
-			if (photograph != null) {
-				photograph.Dispose ();
-				photograph = null;
+				if (photograph != null) {
+					photograph.Dispose ();
+					photograph = null;
+				}
+
+				if (dialog != null) {
+					dialog.Dispose ();
+					dialog = null;
+				}
 			}
-			
-			if (dialog != null) {
-				dialog.Dispose ();
-				dialog = null;
-			}
+
+			base.Dispose (disposing);
 		}
 	}
 }

@@ -42,6 +42,7 @@ namespace FlightLog {
 		UIBarButtonItem addAircraft;
 		NSIndexPath updating;
 		bool searching;
+		bool disposed;
 		
 		public AircraftViewController ()
 		{
@@ -360,17 +361,22 @@ namespace FlightLog {
 		
 		protected override void Dispose (bool disposing)
 		{
-			base.Dispose (disposing);
-			
-			if (updating != null) {
-				updating.Dispose ();
-				updating = null;
+			if (disposing) {
+				if (updating != null) {
+					updating.Dispose ();
+					updating = null;
+				}
+
+				if (!disposed) {
+					LogBook.AircraftAdded -= OnAircraftAdded;
+					LogBook.AircraftUpdated -= OnAircraftUpdated;
+					LogBook.AircraftWillUpdate -= OnAircraftWillUpdate;
+					LogBook.AircraftUpdateFailed -= OnAircraftUpdateFailed;
+					disposed = true;
+				}
 			}
-			
-			LogBook.AircraftAdded -= OnAircraftAdded;
-			LogBook.AircraftUpdated -= OnAircraftUpdated;
-			LogBook.AircraftWillUpdate -= OnAircraftWillUpdate;
-			LogBook.AircraftUpdateFailed -= OnAircraftUpdateFailed;
+
+			base.Dispose (disposing);
 		}
 	}
 }

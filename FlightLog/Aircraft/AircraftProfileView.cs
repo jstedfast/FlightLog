@@ -118,5 +118,10 @@ namespace FlightLog {
 			
 			ctx.RestoreState ();
 		}
+
+		protected override void Dispose (bool disposing)
+		{
+			base.Dispose (disposing);
+		}
 	}
 }
