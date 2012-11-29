@@ -251,7 +251,7 @@ namespace FlightLog {
 		/// </value>
 		[SQLiteSearchAlias ("holdings")]
 		[SQLiteSearchAlias ("procedures")]
-		public bool IntrumentHoldingProcedures {
+		public bool InstrumentHoldingProcedures {
 			get; set;
 		}
 		
