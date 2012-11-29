@@ -144,9 +144,9 @@ namespace FlightLog
 			case FlightProperty.InstrumentApproaches:
 				return flight != null && flight.InstrumentApproaches > 0 ? flight.InstrumentApproaches.ToString () : null;
 			case FlightProperty.InstrumentHoldingProcedures:
-				return flight != null && flight.InstrumentHoldingProcedures ? "yes" : null;
+				return flight != null && flight.InstrumentHoldingProcedures ? "Yes" : null;
 			case FlightProperty.ActingInstrumentSafetyPilot:
-				return flight != null && flight.ActingInstrumentSafetyPilot ? "yes" : null;
+				return flight != null && flight.ActingInstrumentSafetyPilot ? "Yes" : null;
 			case FlightProperty.InstrumentSafetyPilot:
 				return flight != null && !string.IsNullOrEmpty (flight.InstrumentSafetyPilot) ? flight.InstrumentSafetyPilot : null;
 			case FlightProperty.Remarks:
