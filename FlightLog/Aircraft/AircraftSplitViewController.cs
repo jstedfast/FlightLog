@@ -27,7 +27,6 @@
 using System;
 using System.Drawing;
 
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
