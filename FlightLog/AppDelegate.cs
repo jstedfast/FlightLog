@@ -46,12 +46,12 @@ namespace FlightLog {
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
 		{
-			return UIInterfaceOrientationMask.LandscapeLeft | UIInterfaceOrientationMask.LandscapeRight;
+			return UIInterfaceOrientationMask.All;
 		}
 
 		public override UIInterfaceOrientation PreferredInterfaceOrientationForPresentation ()
 		{
-			return UIInterfaceOrientation.LandscapeLeft;
+			return UIInterfaceOrientation.LandscapeRight;
 		}
 	}
 
@@ -80,13 +80,13 @@ namespace FlightLog {
 			// create a new window instance based on the screen size
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 			
-			var viewController0 = new SummarySplitViewController ();
+			//var viewController0 = new SummarySplitViewController ();
 			var viewController1 = new FlightLogSplitViewController ();
 			var viewController2 = new AircraftSplitViewController ();
 			var viewController3 = new AirportViewController ();
 			tabBarController = new FlightLogTabBarController ();
 			tabBarController.ViewControllers = new UIViewController [] {
-				viewController0,
+				//viewController0,
 				viewController1,
 				viewController2,
 				viewController3

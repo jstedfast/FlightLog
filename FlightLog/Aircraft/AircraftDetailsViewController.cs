@@ -36,6 +36,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class AircraftDetailsViewController : DialogViewController
 	{
+		UIPopoverController masterPopoverController;
 		EditAircraftDetailsViewController editor;
 		StringElement isComplex, isHighPerformance, isTailDragger, isSimulator;
 		StringElement category, classification;
@@ -47,13 +48,34 @@ namespace FlightLog {
 		{
 			Autorotate = true;
 		}
+
+		public AircraftViewController RootViewController {
+			get; set;
+		}
+
+		static bool AircraftEqual (Aircraft aircraft1, Aircraft aircraft2)
+		{
+			if (aircraft1 == aircraft2)
+				return true;
+
+			if (aircraft1 != null && aircraft2 != null)
+				return aircraft1.Id == aircraft2.Id;
+
+			return false;
+		}
 		
 		public Aircraft Aircraft {
 			get { return aircraft; }
 			set {
+				if (AircraftEqual (aircraft, value))
+					return;
+
 				aircraft = value;
 				if (value != null && IsViewLoaded)
 					UpdateDetails ();
+
+				if (masterPopoverController != null)
+					masterPopoverController.Dismiss (true);
 			}
 		}
 		
@@ -78,7 +100,7 @@ namespace FlightLog {
 			Root.Add (section);
 			
 			edit = new UIBarButtonItem (UIBarButtonSystemItem.Edit, OnEditClicked);
-			NavigationItem.LeftBarButtonItem = edit;
+			NavigationItem.RightBarButtonItem = edit;
 		}
 		
 		void UpdateDetails ()
@@ -104,19 +126,23 @@ namespace FlightLog {
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			
-			if (aircraft == null) {
-				List<Aircraft> list = LogBook.GetAircraft (1);
-				aircraft = list != null && list.Count > 0 ? list[0] : null;
+
+			if (InterfaceOrientation == UIInterfaceOrientation.Portrait || InterfaceOrientation == UIInterfaceOrientation.PortraitUpsideDown) {
+				if (aircraft == null)
+					Aircraft = RootViewController.FirstOrSelected;
+
+				if (aircraft == null)
+					RootViewController.OnAddClicked (null, null);
+			} else {
+				if (aircraft != null)
+					UpdateDetails ();
 			}
-			
-			if (aircraft != null)
-				UpdateDetails ();
 		}
 		
 		void OnEditorClosed (object sender, EventArgs args)
 		{
-			UpdateDetails ();
+			if (aircraft != null)
+				UpdateDetails ();
 			editor = null;
 		}
 		
@@ -137,6 +163,21 @@ namespace FlightLog {
 			editor.EditorClosed += OnEditorClosed;
 			
 			NavigationController.PushViewController (editor, true);
+		}
+
+		[Export ("splitViewController:willHideViewController:withBarButtonItem:forPopoverController:")]
+		public void WillHideMasterViewController (UISplitViewController splitViewController, UIViewController masterViewController, UIBarButtonItem barButtonItem, UIPopoverController popoverController)
+		{
+			barButtonItem.Title = masterViewController.Title;
+			NavigationItem.SetLeftBarButtonItem (barButtonItem, true);
+			masterPopoverController = popoverController;
+		}
+
+		[Export ("splitViewController:willShowViewController:invalidatingBarButtonItem:")]
+		public void WillShowMasterViewController (UISplitViewController splitViewController, UIViewController masterViewController, UIBarButtonItem barButtonItem)
+		{
+			NavigationItem.SetLeftBarButtonItem (null, true);
+			masterPopoverController = null;
 		}
 		
 		protected override void Dispose (bool disposing)

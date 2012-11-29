@@ -36,22 +36,20 @@ namespace FlightLog {
 	public class FlightViewController : SQLiteTableViewController<Flight>, IComparer<Flight>
 	{
 		static NSString key = new NSString ("Flight");
-		
+
+		NSIndexPath[] selectedRow = new NSIndexPath[2];
 		EditFlightDetailsViewController editor;
-		FlightDetailsViewController details;
 		UIBarButtonItem addFlight;
 		NSIndexPath updating;
 		bool searching;
 		bool loner;
 		
-		public FlightViewController (FlightDetailsViewController details)
+		public FlightViewController ()
 		{
 			RowHeight = FlightTableViewCell.CellHeight;
 			SearchPlaceholder = "Search Flights";
 			AutoHideSearch = true;
 			Title = "Flights";
-			
-			this.details = details;
 			
 			LogBook.FlightAdded += OnFlightAdded;
 			LogBook.FlightUpdated += OnFlightUpdated;
@@ -81,13 +79,31 @@ namespace FlightLog {
 				return searching ? SearchDisplayController.SearchResultsTableView : TableView;
 			}
 		}
+
+		public FlightDetailsViewController DetailsViewController {
+			get; set;
+		}
+
+		public Flight FirstOrSelected {
+			get {
+				if (DetailsViewController.Flight != null)
+					return DetailsViewController.Flight;
+
+				if (IsViewLoaded)
+					return ModelForTableView (CurrentTableView).GetItem (0);
+
+				// we haven't been loaded yet, so we'll have to create a new model...
+				using (var model = CreateModel (false))
+					return model.GetItem (0);
+			}
+		}
 		
 		void OnFlightAdded (object sender, FlightEventArgs e)
 		{
 			var tableView = CurrentTableView;
 			var model = ModelForTableView (tableView);
 			
-			details.Flight = e.Flight;
+			DetailsViewController.Flight = e.Flight;
 			model.ReloadData ();
 			
 			int index = model.IndexOf (e.Flight, this);
@@ -266,15 +282,15 @@ namespace FlightLog {
 			editor = null;
 		}
 		
-		void OnAddClicked (object sender, EventArgs args)
+		public void OnAddClicked (object sender, EventArgs args)
 		{
-			if (editor != null || details.EditorEngaged)
+			if (editor != null || DetailsViewController.EditorEngaged)
 				return;
 			
 			editor = new EditFlightDetailsViewController (new Flight (DateTime.Today), false);
 			editor.EditorClosed += OnEditorClosed;
 			
-			details.NavigationController.PushViewController (editor, true);
+			DetailsViewController.NavigationController.PushViewController (editor, true);
 		}
 		
 		protected override SQLiteTableModel<Flight> CreateModel (bool forSearching)
@@ -297,34 +313,33 @@ namespace FlightLog {
 			NavigationItem.LeftBarButtonItem = addFlight;
 		}
 		
-		void SelectFirstOrAdd ()
-		{
-			if (Model.SectionCount == 0) {
-				// Add new flight...
-				OnAddClicked (null, null);
-			} else {
-				// Select first flight...
-				var visible = TableView.IndexPathsForVisibleRows;
-				if (visible == null || visible.Length == 0)
-					return;
-				
-				TableView.SelectRow (visible[0], false, UITableViewScrollPosition.None);
-				RowSelected (TableView, visible[0]);
-			}
-		}
-		
 		public override void ViewDidAppear (bool animated)
 		{
 			base.ViewDidAppear (animated);
-			
-			if (searching)
-				return;
-			
-			var path = TableView.IndexPathForSelectedRow;
-			if (path != null)
-				return;
-			
-			SelectFirstOrAdd ();
+
+			var tableView = CurrentTableView;
+			var model = ModelForTableView (tableView);
+
+			if (model.SectionCount == 0) {
+				if (!searching) {
+					// Add new flight...
+					OnAddClicked (null, null);
+				}
+			} else {
+				var path = selectedRow[searching ? 1 : 0];
+
+				if (path == null) {
+					// Select first flight in view...
+					var visible = tableView.IndexPathsForVisibleRows;
+					if (visible == null || visible.Length == 0)
+						return;
+
+					path = visible[0];
+				}
+				
+				tableView.SelectRow (path, false, UITableViewScrollPosition.None);
+				RowSelected (tableView, path);
+			}
 		}
 		
 		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, Flight flight)
@@ -369,6 +384,7 @@ namespace FlightLog {
 		
 		protected override void DidEndSearch (UISearchDisplayController controller)
 		{
+			selectedRow[1] = null;
 			searching = false;
 		}
 		
@@ -388,7 +404,8 @@ namespace FlightLog {
 		
 		protected override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 		{
-			details.Flight = GetItem (tableView, indexPath);
+			DetailsViewController.Flight = GetItem (tableView, indexPath);
+			selectedRow[searching ? 1 : 0] = indexPath;
 		}
 		
 		protected override void Dispose (bool disposing)

@@ -43,7 +43,10 @@ namespace FlightLog {
 			Title = "Aircraft";
 			
 			details = new AircraftDetailsViewController ();
-			overview = new AircraftViewController (details);
+			overview = new AircraftViewController ();
+
+			overview.DetailsViewController = details;
+			details.RootViewController = overview;
 			
 			controllers = new UIViewController[] {
 				new UINavigationController (overview),
@@ -51,6 +54,7 @@ namespace FlightLog {
 			};
 			
 			ViewControllers = controllers;
+			WeakDelegate = details;
 		}
 		
 		protected override void Dispose (bool disposing)

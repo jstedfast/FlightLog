@@ -42,16 +42,20 @@ namespace FlightLog {
 		{
 			TabBarItem.Image = UIImage.FromBundle ("Images/first");
 			Title = "Flights";
-			
+
 			details = new FlightDetailsViewController ();
-			flights = new FlightViewController (details);
-			
+			flights = new FlightViewController ();
+
+			flights.DetailsViewController = details;
+			details.RootViewController = flights;
+
 			controllers = new UIViewController[] {
 				new UINavigationController (flights),
 				new UINavigationController (details),
 			};
 			
 			ViewControllers = controllers;
+			WeakDelegate = details;
 		}
 		
 		protected override void Dispose (bool disposing)

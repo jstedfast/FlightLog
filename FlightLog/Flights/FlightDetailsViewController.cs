@@ -32,7 +32,6 @@ using System.Collections.Generic;
 
 using MonoTouch.Foundation;
 using MonoTouch.SQLite;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -51,6 +50,7 @@ namespace FlightLog {
 
 		List<List<FlightProperty>> sections = new List<List<FlightProperty>> ();
 		List<SectionTitle> titles = new List<SectionTitle> ();
+		UIPopoverController masterPopoverController;
 		EditFlightDetailsViewController editor;
 		UIBarButtonItem edit;
 		Flight flight;
@@ -96,12 +96,33 @@ namespace FlightLog {
 		{
 		}
 
+		public FlightViewController RootViewController {
+			get; set;
+		}
+
+		static bool FlightsEqual (Flight flight1, Flight flight2)
+		{
+			if (flight1 == flight2)
+				return true;
+
+			if (flight1 != null && flight2 != null)
+				return flight1.Id == flight2.Id;
+
+			return false;
+		}
+
 		public Flight Flight {
 			get { return flight; }
 			set {
+				if (FlightsEqual (flight, value))
+					return;
+
 				flight = value;
 				if (value != null && IsViewLoaded)
 					UpdateDetails ();
+
+				if (masterPopoverController != null)
+					masterPopoverController.Dismiss (true);
 			}
 		}
 		
@@ -112,7 +133,7 @@ namespace FlightLog {
 		public override void LoadView ()
 		{
 			edit = new UIBarButtonItem (UIBarButtonSystemItem.Edit, OnEditClicked);
-			NavigationItem.LeftBarButtonItem = edit;
+			NavigationItem.RightBarButtonItem = edit;
 
 			var section = new List<FlightProperty> () {
 				FlightProperty.Date,
@@ -144,8 +165,17 @@ namespace FlightLog {
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			if (flight != null)
-				UpdateDetails ();
+
+			if (InterfaceOrientation == UIInterfaceOrientation.Portrait || InterfaceOrientation == UIInterfaceOrientation.PortraitUpsideDown) {
+				if (flight == null)
+					Flight = RootViewController.FirstOrSelected;
+
+				if (flight == null)
+					RootViewController.OnAddClicked (null, null);
+			} else {
+				if (flight != null)
+					UpdateDetails ();
+			}
 		}
 		
 		void OnEditorClosed (object sender, EventArgs args)
@@ -380,6 +410,21 @@ namespace FlightLog {
 
 			TableView.ReloadData ();
 #endif
+		}
+
+		[Export ("splitViewController:willHideViewController:withBarButtonItem:forPopoverController:")]
+		public void WillHideMasterViewController (UISplitViewController splitViewController, UIViewController masterViewController, UIBarButtonItem barButtonItem, UIPopoverController popoverController)
+		{
+			barButtonItem.Title = masterViewController.Title;
+			NavigationItem.SetLeftBarButtonItem (barButtonItem, true);
+			masterPopoverController = popoverController;
+		}
+
+		[Export ("splitViewController:willShowViewController:invalidatingBarButtonItem:")]
+		public void WillShowMasterViewController (UISplitViewController splitViewController, UIViewController masterViewController, UIBarButtonItem barButtonItem)
+		{
+			NavigationItem.SetLeftBarButtonItem (null, true);
+			masterPopoverController = null;
 		}
 
 		protected override void Dispose (bool disposing)
