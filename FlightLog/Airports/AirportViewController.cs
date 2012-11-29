@@ -48,11 +48,6 @@ namespace FlightLog {
 			annotations = new Dictionary<string, AirportAnnotation> ();
 		}
 		
-		public override void DidReceiveMemoryWarning ()
-		{
-			base.DidReceiveMemoryWarning ();
-		}
-		
 		MKAnnotationView GetAirportAnnotationView (MKMapView map, NSObject annotation)
 		{
 			MKAnnotationView annotationView = mapView.DequeueReusableAnnotation ("annotationViewID");
@@ -90,12 +85,15 @@ namespace FlightLog {
 			if (annotations.Count > 0) {
 				// Remove annotations that are no longer in view
 				mapView.RemoveAnnotations (annotations.Values.ToArray ());
+				foreach (var annotation in annotations.Values)
+					annotation.Dispose ();
 				annotations.Clear ();
 			}
 			
 			if (added.Count > 0) {
 				mapView.AddAnnotations (added.ToArray ());
-				added.Clear ();
+				foreach (var annotation in added)
+					annotation.Dispose ();
 			}
 			
 			annotations = current;
@@ -126,13 +124,13 @@ namespace FlightLog {
 			mapView.RegionChanged += MapRegionChanged;
 			mapType.ValueChanged += MapTypeChanged;
 		}
-		
-		public override void ViewDidUnload ()
+
+		public override void DidReceiveMemoryWarning ()
 		{
-			base.ViewDidUnload ();
-			
-			ReleaseDesignerOutlets ();
-			
+			base.DidReceiveMemoryWarning ();
+
+			foreach (var annotation in annotations.Values)
+				annotation.Dispose ();
 			annotations.Clear ();
 		}
 		
