@@ -42,12 +42,12 @@ namespace FlightLog {
 		HobbsMeterEntryElement total, dual, night, pic, sic, cfi, actual, hood, simulator;
 		NumericEntryElement landDay, landNight, approaches;
 		AirportEntryElement visited1, visited2, visited3;
+		BooleanElement actingSafety, holdingProcedures;
+		LimitedEntryElement remarks, safetyPilot;
 		AirportEntryElement departed, arrived;
 		AircraftEntryElement aircraft;
-		LimitedEntryElement remarks, safetyPilot;
 		UIBarButtonItem cancel, save;
 		FlightDateEntryElement date;
-		BooleanElement actingSafety;
 		UIAlertViewDelegate del;
 		UIAlertView alert;
 		bool exists;
@@ -101,8 +101,9 @@ namespace FlightLog {
 				(hood = new HobbsMeterEntryElement ("Hood Time", "Time spent flying under a hood.", Flight.InstrumentHood)),
 				(simulator = new HobbsMeterEntryElement ("Simulator Time", "Time spent practicing in a simulator.", Flight.InstrumentSimulator)),
 				(approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99)),
-				(actingSafety = new BooleanElement ("Acting Safety Pilot", false)),
-				(safetyPilot = new LimitedEntryElement ("Safety Pilot", "The name of your safety pilot.", 40)),
+				(holdingProcedures = new BooleanElement ("Performed Holding Procedures", Flight.InstrumentHoldingProcedures)),
+				(actingSafety = new BooleanElement ("Acting Safety Pilot", Flight.ActingInstrumentSafetyPilot)),
+				(safetyPilot = new LimitedEntryElement ("Safety Pilot", "The name of your safety pilot.", Flight.InstrumentSafetyPilot, 40)),
 			};
 		}
 		
@@ -165,7 +166,7 @@ namespace FlightLog {
 			return false;
 		}
 		
-		static string GetAirportCode (string value, List<Airport> airports, List<string> missing)
+		static string GetAirportCode (string value, List<Airport> airports, HashSet<string> missing)
 		{
 			Airport airport;
 			
@@ -207,25 +208,26 @@ namespace FlightLog {
 			}
 		}
 		
-		void ShowCrossCountryAlert (List<string> missing)
+		void ShowCrossCountryAlert (HashSet<string> missing)
 		{
 			string title = missing.Count > 1 ? "Missing Airports" : "Missing Airport";
 			StringBuilder message = new StringBuilder ();
+			int i = 0;
 			
 			if (missing.Count > 1)
 				message.Append ("The following airports are unknown: ");
 			else
 				message.Append ("The following airport is unknown: ");
 			
-			for (int i = 0; i < missing.Count; i++) {
+			foreach (var airport in missing) {
 				if (i > 0) {
 					if (i + 1 == missing.Count)
 						message.Append (" and ");
 					else
 						message.Append (", ");
 				}
-				
-				message.Append (missing[i]);
+
+				message.Append (airport);
 			}
 			
 			message.AppendLine (".");
@@ -259,8 +261,8 @@ namespace FlightLog {
 				return;
 			
 			// We need at least a departure airport
+			HashSet<string> missing = new HashSet<string> ();
 			List<Airport> airports = new List<Airport> ();
-			List<string> missing = new List<string> ();
 			string airport;
 			
 			if ((airport = GetAirportCode (departed.Value, airports, missing)) == null)
@@ -292,6 +294,7 @@ namespace FlightLog {
 			Flight.Day = Flight.FlightTime - Flight.Night;
 			
 			// Landings and Approaches
+			Flight.InstrumentHoldingProcedures = holdingProcedures.Value;
 			Flight.InstrumentApproaches = approaches.Value;
 			Flight.NightLandings = landNight.Value;
 			Flight.DayLandings = landDay.Value;
@@ -308,11 +311,12 @@ namespace FlightLog {
 			
 			// Cross-Country Flight
 			if (!actingSafety.Value) {
-				Flight.IsCrossCountry = IsCrossCountry (airports);
-				if (!Flight.IsCrossCountry && missing.Count > 0) {
+				if (missing.Count > 0) {
 					ShowCrossCountryAlert (missing);
 					return;
 				}
+
+				Flight.IsCrossCountry = IsCrossCountry (airports);
 			} else {
 				// Doesn't count as Cross-Country if you are the acting Safety-Pilot
 				// for another pilot who is under the hood.
