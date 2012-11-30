@@ -176,8 +176,23 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\mini-plane72.png" />
-    <EmbeddedResource Include="Images\calendar.png" />
-    <EmbeddedResource Include="Images\mini-plane128.png" />
+    <EmbeddedResource Include="Images\mini-plane72.png">
+      <LogicalName>mini-plane72.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\calendar.png">
+      <LogicalName>calendar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\mini-plane128.png">
+      <LogicalName>mini-plane128.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <DotNetNamingPolicy DirectoryNamespaceAssociation="None" ResourceNamePolicy="FileName" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>

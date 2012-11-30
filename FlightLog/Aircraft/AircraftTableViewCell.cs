@@ -68,7 +68,7 @@ namespace FlightLog {
 		
 		static AircraftTableViewCell ()
 		{
-			DefaultPhoto = UIImage.FromResource (typeof (AircraftTableViewCell).Assembly, "FlightLog.Images.mini-plane72.png");
+			DefaultPhoto = UIImage.FromResource (typeof (AircraftTableViewCell).Assembly, "mini-plane72.png");
 			
 			//NSString ns = new NSString ("MMMMMM");
 			//Console.WriteLine ("Width needed is: {0}", ns.DrawString (new RectangleF (0, 0, 200, 30), TailNumberFont).Width);

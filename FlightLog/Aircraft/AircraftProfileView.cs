@@ -61,7 +61,7 @@ namespace FlightLog {
 		
 		static AircraftProfileView ()
 		{
-			DefaultPhoto = UIImage.FromResource (typeof (AircraftProfileView).Assembly, "FlightLog.Images.mini-plane128.png");
+			DefaultPhoto = UIImage.FromResource (typeof (AircraftProfileView).Assembly, "mini-plane128.png");
 		}
 		
 		public AircraftProfileView (float width) : this (new RectangleF (0.0f, 0.0f, width, ProfileHeight)) { }

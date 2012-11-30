@@ -49,23 +49,23 @@ namespace FlightLog {
 		const float AircraftYOffset = AirportYOffset + AirportFontSize + TextPadding / 2;
 		const float RemarksYOffset = AircraftYOffset + AircraftFontSize + TextPadding;
 		
-		static UIFont AirportFont = UIFont.BoldSystemFontOfSize (AirportFontSize);
-		static UIFont AircraftFont = UIFont.BoldSystemFontOfSize (AircraftFontSize);
-		static UIFont RemarksFont = UIFont.ItalicSystemFontOfSize (RemarksFontSize);
-		static UIFont ViaBoldFont = UIFont.BoldSystemFontOfSize (ViaFontSize);
-		static UIFont ModelFont = UIFont.SystemFontOfSize (AircraftFontSize);
-		static UIFont ViaFont = UIFont.SystemFontOfSize (ViaFontSize);
-		static UIColor AirportColor = UIColor.FromRGB (56, 84, 135);
-		static UIColor AircraftColor = UIColor.FromRGB (56, 84, 135);
-		static UIColor RemarksColor = UIColor.DarkGray;
-		static CGGradient BottomGradient, TopGradient;
-		static UIImage Calendar;
+		static readonly UIFont AirportFont = UIFont.BoldSystemFontOfSize (AirportFontSize);
+		static readonly UIFont AircraftFont = UIFont.BoldSystemFontOfSize (AircraftFontSize);
+		static readonly UIFont RemarksFont = UIFont.ItalicSystemFontOfSize (RemarksFontSize);
+		static readonly UIFont ViaBoldFont = UIFont.BoldSystemFontOfSize (ViaFontSize);
+		static readonly UIFont ModelFont = UIFont.SystemFontOfSize (AircraftFontSize);
+		static readonly UIFont ViaFont = UIFont.SystemFontOfSize (ViaFontSize);
+		static readonly UIColor AirportColor = UIColor.FromRGB (56, 84, 135);
+		static readonly UIColor AircraftColor = UIColor.FromRGB (56, 84, 135);
+		static readonly UIColor RemarksColor = UIColor.DarkGray;
+		static readonly CGGradient BottomGradient, TopGradient;
+		static readonly UIImage Calendar;
 		
-		public static float CellHeight;
+		public static readonly float CellHeight;
 		
 		static FlightTableViewCell ()
 		{
-			Calendar = UIImage.FromResource (typeof (FlightTableViewCell).Assembly, "FlightLog.Images.calendar.png");
+			Calendar = UIImage.FromResource (typeof (FlightTableViewCell).Assembly, "calendar.png");
 			
 			CellHeight = Calendar.Size.Height + ImagePadding * 2;
 			
