@@ -34,6 +34,8 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class AirportEntryElement : LimitedEntryElement
 	{
+		static NSString AirportEntryElementCellKey = new NSString ("AirportEntryElement");
+
 		public AirportEntryElement (string caption, string value) : base (caption, "Enter the airport's FAA, ICAO, or IATA code.", value, 4)
 		{
 			KeyboardType = UIKeyboardType.Default;
@@ -50,12 +52,9 @@ namespace FlightLog {
 				return code.ToUpperInvariant ();
 			}
 		}
-		
-		static NSString airportKey = new NSString ("AirportEntryElement");
-		protected override NSString EntryKey {
-			get {
-				return airportKey;
-			}
+
+		protected override NSString CellKey {
+			get { return AirportEntryElementCellKey; }
 		}
 		
 		protected override UITextField CreateTextField (RectangleF frame)

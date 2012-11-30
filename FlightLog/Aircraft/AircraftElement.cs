@@ -56,15 +56,15 @@ namespace FlightLog {
 		const float TailNumberYOffset = TextPadding;
 		const float TailNumberWidth = 90.0f; // "MMMMMM".Width @ size 18
 		
-		static UIFont TailNumberFont = UIFont.BoldSystemFontOfSize (TailNumberFontSize);
-		static UIFont AircraftModelFont = UIFont.BoldSystemFontOfSize (AircraftModelFontSize);
-		static UIFont AircraftMakeFont = UIFont.SystemFontOfSize (AircraftMakeFontSize);
-		static UIFont FlightTimeFont = UIFont.ItalicSystemFontOfSize (FlightTimeFontSize);
-		static UIColor TailNumberColor = UIColor.FromRGB (56, 84, 135); //(147, 170, 204);
-		static CGGradient BottomGradient, TopGradient;
-		static UIImage DefaultPhoto;
+		static readonly UIFont TailNumberFont = UIFont.BoldSystemFontOfSize (TailNumberFontSize);
+		static readonly UIFont AircraftModelFont = UIFont.BoldSystemFontOfSize (AircraftModelFontSize);
+		static readonly UIFont AircraftMakeFont = UIFont.SystemFontOfSize (AircraftMakeFontSize);
+		static readonly UIFont FlightTimeFont = UIFont.ItalicSystemFontOfSize (FlightTimeFontSize);
+		static readonly UIColor TailNumberColor = UIColor.FromRGB (56, 84, 135); //(147, 170, 204);
+		static readonly CGGradient BottomGradient, TopGradient;
+		static readonly UIImage DefaultPhoto;
 		
-		public static float CellHeight = PhotoHeight + 2 * PhotoYPad;
+		public const float CellHeight = PhotoHeight + 2 * PhotoYPad;
 		
 		static AircraftTableViewCell ()
 		{
@@ -240,7 +240,7 @@ namespace FlightLog {
 	
 	public class AircraftElement : Element, IElementSizing
 	{
-		static NSString key = new NSString ("AircraftElement");
+		static readonly NSString AircraftElementCellKey = new NSString ("AircraftElement");
 		
 		public AircraftElement (Aircraft aircraft) : base (null)
 		{
@@ -259,6 +259,10 @@ namespace FlightLog {
 		/// </value>
 		public Aircraft Aircraft {
 			get; private set;
+		}
+
+		protected override NSString CellKey {
+			get { return AircraftElementCellKey; }
 		}
 		
 		public event EventHandler<EventArgs> Changed;
@@ -314,10 +318,10 @@ namespace FlightLog {
 		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
-			AircraftTableViewCell cell = tv.DequeueReusableCell (key) as AircraftTableViewCell;
+			AircraftTableViewCell cell = tv.DequeueReusableCell (AircraftElementCellKey) as AircraftTableViewCell;
 			
 			if (cell == null)
-				cell = new AircraftTableViewCell (key);
+				cell = new AircraftTableViewCell (AircraftElementCellKey);
 			
 			cell.Aircraft = Aircraft;
 			

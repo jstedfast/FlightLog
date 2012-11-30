@@ -37,6 +37,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class AircraftEntryElement : LimitedEntryElement
 	{
+		static readonly NSString AircraftEntryElementCellKey = new NSString ("AircraftEntryElement");
 		static char[] NotAllowedInTheUS = new char[] { 'I', 'O', 'i', 'o' };
 #if ENABLE_GLOBAL_SUPPORT
 		static string[] PrefixesStartingWithDigits = new string[] {
@@ -102,12 +103,9 @@ namespace FlightLog {
 				return value;
 			}
 		}
-		
-		static NSString aircraftKey = new NSString ("AircraftEntryElement");
-		protected override NSString EntryKey {
-			get {
-				return aircraftKey;
-			}
+
+		protected override NSString CellKey {
+			get { return AircraftEntryElementCellKey; }
 		}
 		
 		protected override UITextField CreateTextField (RectangleF frame)

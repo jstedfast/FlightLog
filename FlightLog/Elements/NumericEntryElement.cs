@@ -35,6 +35,8 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class NumericEntryElement : LimitedEntryElement
 	{
+		static readonly NSString NumericEntryElementCellKey = new NSString ("NumericEntryElement");
+
 		public NumericEntryElement (string caption, string placeholder) : base (caption, placeholder, 10)
 		{
 			KeyboardType = UIKeyboardType.NumberPad;
@@ -58,6 +60,10 @@ namespace FlightLog {
 			MaxValue = maxValue;
 			MinValue = minValue;
 			Value = value;
+		}
+
+		protected override NSString CellKey {
+			get { return NumericEntryElementCellKey; }
 		}
 		
 		public new int Value {
@@ -95,13 +101,6 @@ namespace FlightLog {
 		
 		public int MinValue {
 			get; set;
-		}
-		
-		static NSString numericKey = new NSString ("NumericEntryElement");
-		protected override NSString EntryKey {
-			get {
-				return numericKey;
-			}
 		}
 		
 		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)

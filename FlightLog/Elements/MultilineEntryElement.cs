@@ -34,6 +34,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class MultilineEntryElement : LimitedEntryElement, IElementSizing
 	{
+		static readonly NSString MultilineEntryElementCellKey = new NSString ("MultilineEntryElement");
 		int nVisibleLines = 1;
 		bool recalc = true;
 		float height;
@@ -51,6 +52,10 @@ namespace FlightLog {
 		{
 			VisibleLines = visibleLines;
 		}
+
+		protected override NSString CellKey {
+			get { return MultilineEntryElementCellKey; }
+		}
 		
 		public int VisibleLines {
 			get { return nVisibleLines; }
@@ -60,13 +65,6 @@ namespace FlightLog {
 				
 				nVisibleLines = value;
 				recalc = true;
-			}
-		}
-		
-		static NSString multiKey = new NSString ("MultilineEntryElement");
-		protected override NSString EntryKey {
-			get {
-				return multiKey;
 			}
 		}
 		

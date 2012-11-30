@@ -377,7 +377,7 @@ namespace FlightLog {
 	
 	public class FlightElement : Element, IElementSizing
 	{
-		static NSString key = new NSString ("FlightElement");
+		static readonly NSString FlightElementCellKey = new NSString ("FlightElement");
 		bool selected = false;
 		DateTime date;
 		
@@ -386,6 +386,10 @@ namespace FlightLog {
 			flight.Updated += OnFlightUpdated;
 			date = flight.Date;
 			Flight = flight;
+		}
+
+		protected override NSString CellKey {
+			get { return FlightElementCellKey; }
 		}
 		
 		public Flight Flight {
@@ -404,10 +408,10 @@ namespace FlightLog {
 		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
-			FlightTableViewCell cell = tv.DequeueReusableCell (key) as FlightTableViewCell;
+			FlightTableViewCell cell = tv.DequeueReusableCell (FlightElementCellKey) as FlightTableViewCell;
 			
 			if (cell == null)
-				cell = new FlightTableViewCell (key);
+				cell = new FlightTableViewCell (FlightElementCellKey);
 			
 			cell.Flight = Flight;
 			cell.Highlighted = selected;

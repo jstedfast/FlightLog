@@ -35,6 +35,8 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class HobbsMeterEntryElement : LimitedEntryElement
 	{
+		static readonly NSString HobbsMeterEntryElementCellKey = new NSString ("HobbsMeterEntryElement");
+
 		public HobbsMeterEntryElement (string caption, string placeholder) : base (caption, placeholder, 4)
 		{
 			KeyboardType = UIKeyboardType.DecimalPad;
@@ -57,6 +59,10 @@ namespace FlightLog {
 				base.Value = string.Empty;
 			else
 				Value = value;
+		}
+
+		protected override NSString CellKey {
+			get { return HobbsMeterEntryElementCellKey; }
 		}
 		
 		public new float Value {
@@ -117,13 +123,6 @@ namespace FlightLog {
 				}
 				
 				return (hours * 3600) + (tenths * 360);
-			}
-		}
-		
-		static NSString hobbsKey = new NSString ("HobbsMeterEntryElement");
-		protected override NSString EntryKey {
-			get {
-				return hobbsKey;
 			}
 		}
 		

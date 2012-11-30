@@ -34,7 +34,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class FlightDateEntryElement : Element
 	{
-		static NSString key = new NSString ("FlightDateEntryElement");
+		static readonly NSString FlightDateEntryElementCellKey = new NSString ("FlightDateEntryElement");
 		static SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
 		DatePickerController picker;
 		UIPopoverController popover;
@@ -50,7 +50,7 @@ namespace FlightLog {
 		}
 		
 		protected override NSString CellKey {
-			get { return key; }
+			get { return FlightDateEntryElementCellKey; }
 		}
 		
 		string FormatDateTime (DateTime date)
@@ -61,10 +61,10 @@ namespace FlightLog {
 		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
-			var cell = tv.DequeueReusableCell (key);
+			var cell = tv.DequeueReusableCell (FlightDateEntryElementCellKey);
 			
 			if (cell == null) {
-				cell = new UITableViewCell (UITableViewCellStyle.Value1, key);
+				cell = new UITableViewCell (UITableViewCellStyle.Value1, FlightDateEntryElementCellKey);
 				cell.Accessory = UITableViewCellAccessory.DisclosureIndicator;
 				cell.SelectionStyle = UITableViewCellSelectionStyle.Blue;
 				cell.DetailTextLabel.TextAlignment = UITextAlignment.Left;

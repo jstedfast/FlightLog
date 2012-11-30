@@ -34,6 +34,8 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class LimitedEntryElement : EntryElement
 	{
+		static readonly NSString LimitedEntryElementCellKey = new NSString ("LimitedEntryElement");
+
 		public LimitedEntryElement (string caption, string placeholder)
 			: base (caption, placeholder, null)
 		{
@@ -69,6 +71,10 @@ namespace FlightLog {
 		{
 			MaxLength = maxLength;
 		}
+
+		protected override NSString CellKey {
+			get { return LimitedEntryElementCellKey; }
+		}
 		
 		/// <summary>
 		/// Gets or sets the maximum allowable input length.
@@ -78,13 +84,6 @@ namespace FlightLog {
 		/// </value>
 		public int MaxLength {
 			get; set;
-		}
-		
-		static NSString limitedKey = new NSString ("LimitedEntryElement");
-		protected override NSString EntryKey {
-			get {
-				return limitedKey;
-			}
 		}
 		
 		protected override UITextField CreateTextField (RectangleF frame)

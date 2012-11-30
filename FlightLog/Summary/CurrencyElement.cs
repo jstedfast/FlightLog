@@ -64,7 +64,7 @@ namespace FlightLog {
 	
 	public class CurrencyElement : Element
 	{
-		static NSString key = new NSString ("CurrencyElement");
+		static readonly NSString CurrencyElementCellKey = new NSString ("CurrencyElement");
 		
 		public CurrencyElement (string caption, DateTime expires) : base (caption)
 		{
@@ -76,15 +76,15 @@ namespace FlightLog {
 		}
 		
 		protected override NSString CellKey {
-			get { return key; }
+			get { return CurrencyElementCellKey; }
 		}
 		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
-			CurrencyTableViewCell cell = tv.DequeueReusableCell (key) as CurrencyTableViewCell;
+			CurrencyTableViewCell cell = tv.DequeueReusableCell (CurrencyElementCellKey) as CurrencyTableViewCell;
 			
 			if (cell == null)
-				cell = new CurrencyTableViewCell (UITableViewCellStyle.Value1, key);
+				cell = new CurrencyTableViewCell (UITableViewCellStyle.Value1, CurrencyElementCellKey);
 			
 			cell.ExpirationDate = ExpirationDate;
 			cell.Caption = Caption;
