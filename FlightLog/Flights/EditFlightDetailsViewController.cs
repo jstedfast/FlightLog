@@ -30,10 +30,8 @@ using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 
-using MonoTouch.CoreLocation;
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
-using MonoTouch.MapKit;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
