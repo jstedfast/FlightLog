@@ -38,7 +38,6 @@ namespace FlightLog {
 		static NSString key = new NSString ("Aircraft");
 
 		NSIndexPath[] selectedRow = new NSIndexPath[2];
-		EditAircraftDetailsViewController editor;
 		UIBarButtonItem addAircraft;
 		NSIndexPath updating;
 		bool searching;
@@ -230,20 +229,12 @@ namespace FlightLog {
 			}
 		}
 		
-		void OnEditorClosed (object sender, EventArgs args)
-		{
-			editor = null;
-		}
-		
 		public void OnAddClicked (object sender, EventArgs args)
 		{
-			if (editor != null || DetailsViewController.EditorEngaged)
+			if (DetailsViewController.EditorEngaged)
 				return;
 			
-			editor = new EditAircraftDetailsViewController (new Aircraft (), false);
-			editor.EditorClosed += OnEditorClosed;
-			
-			DetailsViewController.NavigationController.PushViewController (editor, true);
+			DetailsViewController.Edit (new Aircraft (), false);
 		}
 		
 		protected override SQLiteTableModel<Aircraft> CreateModel (bool forSearching)

@@ -148,18 +148,19 @@ namespace FlightLog {
 		
 		void OnEditClicked (object sender, EventArgs args)
 		{
-			Aircraft edit;
-			bool exists;
-			
 			if (Aircraft == null) {
-				edit = new Aircraft ();
-				exists = false;
+				Edit (new Aircraft (), false);
 			} else {
-				edit = Aircraft;
-				exists = true;
+				Edit (Aircraft, true);
 			}
+		}
+
+		public void Edit (Aircraft aircraft, bool exists)
+		{
+			if (masterPopoverController != null)
+				masterPopoverController.Dismiss (true);
 			
-			editor = new EditAircraftDetailsViewController (edit, exists);
+			editor = new EditAircraftDetailsViewController (aircraft, exists);
 			editor.EditorClosed += OnEditorClosed;
 			
 			NavigationController.PushViewController (editor, true);
