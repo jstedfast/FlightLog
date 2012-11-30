@@ -132,7 +132,7 @@ namespace FlightLog {
 					Aircraft = RootViewController.FirstOrSelected;
 
 				if (aircraft == null)
-					RootViewController.OnAddClicked (null, null);
+					Edit (new Aircraft (), false);
 			} else {
 				if (aircraft != null)
 					UpdateDetails ();

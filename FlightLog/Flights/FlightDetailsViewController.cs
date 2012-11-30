@@ -170,7 +170,7 @@ namespace FlightLog {
 					Flight = RootViewController.FirstOrSelected;
 
 				if (flight == null)
-					RootViewController.OnAddClicked (null, null);
+					Edit (new Flight (DateTime.Today), false);
 			} else {
 				if (flight != null)
 					UpdateDetails ();

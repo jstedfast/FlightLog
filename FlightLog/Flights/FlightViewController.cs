@@ -277,7 +277,7 @@ namespace FlightLog {
 			}
 		}
 		
-		public void OnAddClicked (object sender, EventArgs args)
+		void OnAddClicked (object sender, EventArgs args)
 		{
 			if (DetailsViewController.EditorEngaged)
 				return;
