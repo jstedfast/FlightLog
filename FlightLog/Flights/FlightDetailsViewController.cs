@@ -82,7 +82,6 @@ namespace FlightLog {
 				FlightProperty.InstrumentSimulator,
 				FlightProperty.InstrumentApproaches,
 				FlightProperty.InstrumentHoldingProcedures,
-				FlightProperty.ActingInstrumentSafetyPilot,
 				FlightProperty.InstrumentSafetyPilot,
 			});
 			sections.Add (new List<FlightProperty> () {

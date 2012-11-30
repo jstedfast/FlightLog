@@ -42,9 +42,9 @@ namespace FlightLog {
 		HobbsMeterEntryElement total, dual, night, pic, sic, cfi, actual, hood, simulator;
 		NumericEntryElement landDay, landNight, approaches;
 		AirportEntryElement visited1, visited2, visited3;
-		BooleanElement actingSafety, holdingProcedures;
 		LimitedEntryElement remarks, safetyPilot;
 		AirportEntryElement departed, arrived;
+		BooleanElement holdingProcedures;
 		AircraftEntryElement aircraft;
 		UIBarButtonItem cancel, save;
 		FlightDateEntryElement date;
@@ -102,7 +102,6 @@ namespace FlightLog {
 				(simulator = new HobbsMeterEntryElement ("Simulator Time", "Time spent practicing in a simulator.", Flight.InstrumentSimulator)),
 				(approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99)),
 				(holdingProcedures = new BooleanElement ("Performed Holding Procedures", Flight.InstrumentHoldingProcedures)),
-				(actingSafety = new BooleanElement ("Acting Safety Pilot", Flight.ActingInstrumentSafetyPilot)),
 				(safetyPilot = new LimitedEntryElement ("Safety Pilot", "The name of your safety pilot.", Flight.InstrumentSafetyPilot, 40)),
 			};
 		}
@@ -300,28 +299,21 @@ namespace FlightLog {
 			Flight.DayLandings = landDay.Value;
 			
 			// Safety Pilot info
-			Flight.ActingInstrumentSafetyPilot = actingSafety.Value;
 			Flight.InstrumentSafetyPilot = safetyPilot.Value;
 			
 			// Remarks
 			Flight.Remarks = remarks.Value;
 			
-			// Note: This needs to be done last in case we are forced to pop up
+			// Note: Cross-Country needs to be done last in case we are forced to pop up
 			// an alert dialog.
-			
-			// Cross-Country Flight
-			if (!actingSafety.Value) {
-				if (missing.Count > 0) {
-					ShowCrossCountryAlert (missing);
-					return;
-				}
-
-				Flight.IsCrossCountry = IsCrossCountry (airports);
-			} else {
-				// Doesn't count as Cross-Country if you are the acting Safety-Pilot
-				// for another pilot who is under the hood.
-				Flight.IsCrossCountry = false;
+			if (missing.Count > 0) {
+				ShowCrossCountryAlert (missing);
+				return;
 			}
+
+			// FIXME: Doesn't count as Cross-Country if you are the acting Safety-Pilot
+			// for another pilot who is under the hood.
+			Flight.IsCrossCountry = IsCrossCountry (airports);
 			
 			SaveAndClose ();
 		}

@@ -249,8 +249,7 @@ namespace FlightLog {
 		/// <value>
 		/// <c>true</c> if holding procedures were performed; otherwise, <c>false</c>.
 		/// </value>
-		[SQLiteSearchAlias ("holdings")]
-		[SQLiteSearchAlias ("procedures")]
+		[SQLiteSearchAlias ("holds")]
 		public bool InstrumentHoldingProcedures {
 			get; set;
 		}
@@ -289,22 +288,12 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets whether the pilot was the acting instrument safety pilot.
-		/// </summary>
-		/// <value>
-		/// <c>true</c> if the pilot was the acting instrument safety pilot; otherwise, <c>false</c>.
-		/// </value>
-		public bool ActingInstrumentSafetyPilot {
-			get; set;
-		}
-		
-		/// <summary>
 		/// Gets or sets the name of the safety pilot.
 		/// </summary>
 		/// <value>
 		/// The instrument safety pilot.
 		/// </value>
-		[Indexed][MaxLength (40)]
+		[Indexed][MaxLength (40)][SQLiteSearchAlias ("safety")]
 		public string InstrumentSafetyPilot {
 			get; set;
 		}
