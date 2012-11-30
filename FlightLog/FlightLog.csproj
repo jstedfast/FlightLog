@@ -100,7 +100,6 @@
     </Compile>
     <Compile Include="LogBook\LogBook.cs" />
     <Compile Include="Extensions\EnumExtension.cs" />
-    <Compile Include="Aircraft\AircraftElement.cs" />
     <Compile Include="Utilities\LRUCache.cs" />
     <Compile Include="Aircraft\AircraftDetailsViewController.cs" />
     <Compile Include="Elements\LimitedEntryElement.cs" />
@@ -117,7 +116,6 @@
     <Compile Include="Flights\EditFlightDetailsViewController.cs" />
     <Compile Include="Flights\FlightDetailsViewController.cs" />
     <Compile Include="Flights\Flight.cs" />
-    <Compile Include="Flights\FlightElement.cs" />
     <Compile Include="Flights\FlightEventArgs.cs" />
     <Compile Include="Aircraft\AircraftSplitViewController.cs" />
     <Compile Include="Aircraft\AircraftViewController.cs" />
@@ -135,6 +133,8 @@
     <Compile Include="Aircraft\FlightAware.cs" />
     <Compile Include="Extensions\FlightExtension.cs" />
     <Compile Include="Flights\SafetyPilotEntryElement.cs" />
+    <Compile Include="Flights\FlightTableViewCell.cs" />
+    <Compile Include="Aircraft\AircraftTableViewCell.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />

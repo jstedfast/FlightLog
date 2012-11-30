@@ -1,5 +1,5 @@
 // 
-// FlightElement.cs
+// FlightTableViewCell.cs
 //  
 // Author: Jeffrey Stedfast <jeff@xamarin.com>
 // 
@@ -35,23 +35,6 @@ using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
-	public class FlightElementChangedEventArgs : EventArgs
-	{
-		public FlightElementChangedEventArgs (FlightElement element, bool dateChanged)
-		{
-			FlightElement = element;
-			DateChanged = dateChanged;
-		}
-		
-		public FlightElement FlightElement {
-			get; private set;
-		}
-		
-		public bool DateChanged {
-			get; private set;
-		}
-	}
-	
 	public class FlightTableViewCell : UITableViewCell
 	{
 		const float AirportFontSize = 17.0f;
@@ -372,87 +355,6 @@ namespace FlightLog {
 			base.LayoutSubviews ();
 			view.Frame = ContentView.Bounds;
 			view.SetNeedsDisplay ();
-		}
-	}
-	
-	public class FlightElement : Element, IElementSizing
-	{
-		static readonly NSString FlightElementCellKey = new NSString ("FlightElement");
-		bool selected = false;
-		DateTime date;
-		
-		public FlightElement (Flight flight) : base (null)
-		{
-			flight.Updated += OnFlightUpdated;
-			date = flight.Date;
-			Flight = flight;
-		}
-
-		protected override NSString CellKey {
-			get { return FlightElementCellKey; }
-		}
-		
-		public Flight Flight {
-			get; private set;
-		}
-		
-		public event EventHandler<FlightElementChangedEventArgs> Changed;
-		
-		void OnFlightUpdated (object sender, EventArgs args)
-		{
-			var handler = Changed;
-			
-			if (handler != null)
-				handler (this, new FlightElementChangedEventArgs (this, Flight.Date != date));
-		}
-		
-		public override UITableViewCell GetCell (UITableView tv)
-		{
-			FlightTableViewCell cell = tv.DequeueReusableCell (FlightElementCellKey) as FlightTableViewCell;
-			
-			if (cell == null)
-				cell = new FlightTableViewCell (FlightElementCellKey);
-			
-			cell.Flight = Flight;
-			cell.Highlighted = selected;
-			cell.Selected = selected;
-			
-			return cell;
-		}
-		
-		public override void Deselected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
-		{
-			base.Deselected (dvc, tableView, path);
-			selected = false;
-		}
-		
-		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
-		{
-			base.Selected (dvc, tableView, path);
-			selected = true;
-		}
-		
-		public override bool Matches (string text)
-		{
-			// FIXME: implement this...
-			return false;
-		}
-		
-		#region IElementSizing implementation
-		public float GetHeight (UITableView tableView, NSIndexPath indexPath)
-		{
-			return FlightTableViewCell.CellHeight;
-		}
-		#endregion
-		
-		protected override void Dispose (bool disposing)
-		{
-			if (Flight != null) {
-				Flight.Updated -= OnFlightUpdated;
-				Flight = null;
-			}
-			
-			base.Dispose (disposing);
 		}
 	}
 }
