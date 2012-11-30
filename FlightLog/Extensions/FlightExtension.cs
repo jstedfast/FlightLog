@@ -35,12 +35,20 @@ namespace FlightLog
 		[HumanReadableName ("Departed")]
 		AirportDeparted,
 		[HumanReadableName ("Visited")]
+		AirportVisited1,
+		[HumanReadableName ("Visited")]
+		AirportVisited2,
+		[HumanReadableName ("Visited")]
+		AirportVisited3,
+		[HumanReadableName ("Visited")]
 		AirportVisited,
 		[HumanReadableName ("Arrived")]
 		AirportArrived,
 
 		[HumanReadableName ("Flight Time")]
 		FlightTime,
+		[HumanReadableName ("Cross-Country")]
+		IsCrossCountry,
 		[HumanReadableName ("Certified Flight Instructor")]
 		CertifiedFlightInstructor,
 		[HumanReadableName ("Dual Received")]
@@ -49,6 +57,8 @@ namespace FlightLog
 		PilotInCommand,
 		[HumanReadableName ("Second In Command")]
 		SecondInCommand,
+		[HumanReadableName ("Day Flying")]
+		Day,
 		[HumanReadableName ("Night Flying")]
 		Night,
 		[HumanReadableName ("Day Landings")]
@@ -113,12 +123,20 @@ namespace FlightLog
 				return flight != null ? flight.Aircraft : string.Empty;
 			case FlightProperty.AirportDeparted:
 				return flight != null ? flight.AirportDeparted : string.Empty;
+			case FlightProperty.AirportVisited1:
+				return flight != null ? flight.AirportVisited1 : null;
+			case FlightProperty.AirportVisited2:
+				return flight != null ? flight.AirportVisited2 : null;
+			case FlightProperty.AirportVisited3:
+				return flight != null ? flight.AirportVisited3 : null;
 			case FlightProperty.AirportVisited:
 				return flight != null ? GetFlightAirportsVisited (flight) : null;
 			case FlightProperty.AirportArrived:
 				return flight != null ? flight.AirportArrived : string.Empty;
 			case FlightProperty.FlightTime:
 				return flight != null ? FormatFlightTime (flight.FlightTime, true) : string.Empty;
+			case FlightProperty.IsCrossCountry:
+				return flight != null && flight.IsCrossCountry ? "Yes" : null;
 			case FlightProperty.CertifiedFlightInstructor:
 				return flight != null ? FormatFlightTime (flight.CertifiedFlightInstructor, false) : null;
 			case FlightProperty.DualReceived:
@@ -127,6 +145,8 @@ namespace FlightLog
 				return flight != null ? FormatFlightTime (flight.PilotInCommand, false) : null;
 			case FlightProperty.SecondInCommand:
 				return flight != null ? FormatFlightTime (flight.SecondInCommand, false) : null;
+			case FlightProperty.Day:
+				return flight != null ? FormatFlightTime (flight.Day, false) : null;
 			case FlightProperty.Night:
 				return flight != null ? FormatFlightTime (flight.Night, false) : null;
 			case FlightProperty.DayLandings:
