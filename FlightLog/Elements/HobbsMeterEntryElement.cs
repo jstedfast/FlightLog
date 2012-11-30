@@ -36,35 +36,23 @@ namespace FlightLog {
 	public class HobbsMeterEntryElement : LimitedEntryElement
 	{
 		static readonly NSString HobbsMeterEntryElementCellKey = new NSString ("HobbsMeterEntryElement");
+		const int OneDayInSeconds = 24 * 3600;
 
-		public HobbsMeterEntryElement (string caption, string placeholder) : base (caption, placeholder, 4)
+		public HobbsMeterEntryElement (string caption, string placeholder) : this (caption, placeholder, 0)
 		{
-			KeyboardType = UIKeyboardType.DecimalPad;
-			base.Value = string.Empty;
 		}
 		
 		public HobbsMeterEntryElement (string caption, string placeholder, int seconds) : base (caption, placeholder, 4)
 		{
 			KeyboardType = UIKeyboardType.DecimalPad;
-			if (seconds <= 0)
-				base.Value = string.Empty;
-			else
-				ValueAsSeconds = seconds;
-		}
-		
-		public HobbsMeterEntryElement (string caption, string placeholder, float value) : base (caption, placeholder, 4)
-		{
-			KeyboardType = UIKeyboardType.DecimalPad;
-			if (value < 0.1f)
-				base.Value = string.Empty;
-			else
-				Value = value;
+			ValueAsSeconds = Math.Max (0, seconds);
+			MaxValueAsSeconds = OneDayInSeconds;
 		}
 
 		protected override NSString CellKey {
 			get { return HobbsMeterEntryElementCellKey; }
 		}
-		
+
 		public new float Value {
 			set {
 				if (value < 0.1f) {
@@ -95,9 +83,13 @@ namespace FlightLog {
 				return 0.0f;
 			}
 		}
+
+		public int MaxValueAsSeconds {
+			get; set;
+		}
 		
 		public int ValueAsSeconds {
-			set { base.Value = Math.Round (value / 3600.0, 1).ToString (); }
+			set { base.Value = value > 0 ? Math.Round (value / 3600.0, 1).ToString () : string.Empty; }
 			get {
 				string str = base.Value;
 				int hours, tenths = 0;
@@ -128,36 +120,41 @@ namespace FlightLog {
 		
 		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
-			int dot, hours = 0;
-			int i;
-			
+			int maxHours = MaxValueAsSeconds / 3600;
+			int hours = 0;
+			int dot = -1;
+
+			if (replacementText.Length == 0)
+				return true;
+
 			if (result.Length > MaxLength)
 				return false;
 			
-			if (result.Length == 0)
-				return true;
-			
 			// Validate that the replacement characters are all numeric
-			for (i = 0; i < replacementText.Length; i++) {
+			for (int i = 0; i < replacementText.Length; i++) {
 				if ((replacementText[i] < '0' || replacementText[i] > '9') && replacementText[i] != '.')
 					return false;
 			}
 			
 			// Validate the value
-			for (i = 0, dot = -1; i < result.Length; i++) {
+			for (int i = 0; i < result.Length; i++) {
 				if (result[i] == '.') {
+					if (dot != -1)
+						return false;
 					dot = i;
-					break;
 				} else {
 					hours = (hours * 10) + (result[i] - '0');
 				}
 			}
-			
-			// Make sure total entered time is <= 24 hours
-			if (hours > 24)
+
+			// Make sure total entered time is <= the max number of hours
+			if (hours > maxHours)
 				return false;
 			
 			if (dot != -1) {
+				if (dot + 1 == result.Length)
+					return true;
+
 				// Make sure we don't have more than 1 significant decimal point
 				if ((dot + 2) < result.Length)
 					return false;
@@ -165,9 +162,15 @@ namespace FlightLog {
 				// Make sure the decimal value is in range
 				if ((dot + 1) < result.Length && (result[dot + 1] < '0' || result[dot + 1] > '9'))
 					return false;
-				
-				// Make sure the number of hours does not exceed 24
-				if (hours > 23)
+
+				// Parse the tenths digit
+				int tenths;
+				if (!Int32.TryParse (result.Substring (dot + 1), out tenths))
+					return false;
+
+				// Make sure the value does not exceed the maximum number of seconds
+				int seconds = (hours * 3600) + (tenths * 360);
+				if (seconds > MaxValueAsSeconds)
 					return false;
 			}
 			
