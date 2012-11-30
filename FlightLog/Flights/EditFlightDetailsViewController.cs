@@ -83,36 +83,52 @@ namespace FlightLog {
 			};
 		}
 
-		Section CreateFlightTimeBreakdownSection ()
+		RootElement CreateFlightTimeDetailsElement ()
 		{
+			total = new HobbsMeterEntryElement ("Flight Time", "Total flight time, as measured on the Hobbs Meter.", Flight.FlightTime);
 			cfi = new HobbsMeterEntryElement ("C.F.I.", "Time spent sweating only on the right side of your face.", Flight.CertifiedFlightInstructor);
 			dual = new HobbsMeterEntryElement ("Dual Received", "Time spent in training with an instructor.", Flight.DualReceived);
-			pic = new HobbsMeterEntryElement ("P.I.C.", "Time spent as Pilot in Command.", Flight.PilotInCommand);
-			sic = new HobbsMeterEntryElement ("S.I.C.", "Time spent as Second in Command.", Flight.SecondInCommand);
+			pic = new HobbsMeterEntryElement ("P.I.C.", "Time spent flying as Pilot in Command.", Flight.PilotInCommand);
+			sic = new HobbsMeterEntryElement ("S.I.C.", "Time spent flying as Second in Command.", Flight.SecondInCommand);
 			night = new HobbsMeterEntryElement ("Night Flying", "Time spent flying after dark.", Flight.Night);
 
+			// When the user enters the total flight time, default PIC, CFI, and/or DualReceived times as appropriate.
+			total.EditingCompleted += OnFlightTimeEntered;
+
+			// Disable auto-setting of the breakdown times if any of them are manually set.
 			dual.EditingCompleted += DisableAutoFlightTimes;
 			cfi.EditingCompleted += DisableAutoFlightTimes;
 			pic.EditingCompleted += DisableAutoFlightTimes;
 			sic.EditingCompleted += DisableAutoFlightTimes;
 
-			return new Section ("Flight Time Breakdown") {
-				cfi, pic, sic, dual, night
+			return new RootElement ("Flight Time", 0, 0) {
+				new Section ("Flight Time") {
+					total, cfi, dual, pic, sic, night
+				}
 			};
 		}
-		
+
+		RootElement CreateInstrumentDetailsElement ()
+		{
+			simulator = new HobbsMeterEntryElement ("Simulator Time", "Time spent practicing in a simulator.", Flight.InstrumentSimulator);
+			actual = new HobbsMeterEntryElement ("Actual Time", "Time spent flying by instrumentation only.", Flight.InstrumentActual);
+			hood = new HobbsMeterEntryElement ("Hood Time", "Time spent flying under a hood.", Flight.InstrumentHood);
+
+			approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99);
+			holdingProcedures = new BooleanElement ("Performed Holding Procedures", Flight.InstrumentHoldingProcedures);
+			safetyPilot = new SafetyPilotEntryElement (Flight.InstrumentSafetyPilot) { AutoComplete = true };
+
+			return new RootElement ("Instrument Experience") {
+				new Section ("Instrument Experience") {
+					actual, hood, simulator, approaches, holdingProcedures, safetyPilot
+				}
+			};
+		}
+
 		Section CreateExperienceSection ()
 		{
-			total = new HobbsMeterEntryElement ("Flight Time", "Total flight time, as measured on the Hobbs Meter.", Flight.FlightTime);
-			var breakdown = new RootElement ("Flight Time Breakdown") {
-				CreateFlightTimeBreakdownSection (),
-			};
-
-			// When the user enters the total flight time, default PIC, CFI, and/or DualReceived times as appropriate.
-			total.EditingCompleted += OnFlightTimeEntered;
-
 			return new Section ("Flight Experience") {
-				total, breakdown
+				CreateFlightTimeDetailsElement (), CreateInstrumentDetailsElement ()
 			};
 		}
 
@@ -125,26 +141,12 @@ namespace FlightLog {
 				landDay, landNight
 			};
 		}
-		
-		Section CreateInstrumentSection ()
+
+		Section CreateRemarksSection ()
 		{
-			simulator = new HobbsMeterEntryElement ("Simulator Time", "Time spent practicing in a simulator.", Flight.InstrumentSimulator);
-			actual = new HobbsMeterEntryElement ("Actual Time", "Time spent flying by instrumentation only.", Flight.InstrumentActual);
-			hood = new HobbsMeterEntryElement ("Hood Time", "Time spent flying under a hood.", Flight.InstrumentHood);
+			remarks = new LimitedEntryElement (null, "Enter any remarks here.", Flight.Remarks, 140);
 
-			approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99);
-			holdingProcedures = new BooleanElement ("Performed Holding Procedures", Flight.InstrumentHoldingProcedures);
-			safetyPilot = new SafetyPilotEntryElement (Flight.InstrumentSafetyPilot) { AutoComplete = true };
-
-			var instrument = new RootElement ("Instrument Experience") {
-				new Section ("Instrument Experience") {
-					actual, hood, simulator, approaches, holdingProcedures, safetyPilot
-				}
-			};
-
-			return new Section () {
-				instrument
-			};
+			return new Section ("Remarks") { remarks };
 		}
 
 		void DisableAutoFlightTimes (object sender, EventArgs e)
@@ -183,11 +185,7 @@ namespace FlightLog {
 			Root.Add (CreateFlightSection ());
 			Root.Add (CreateLandingsSection ());
 			Root.Add (CreateExperienceSection ());
-			Root.Add (CreateInstrumentSection ());
-			
-			Root.Add (new Section ("Remarks") {
-				(remarks = new LimitedEntryElement (null, "Enter any remarks here.", Flight.Remarks, 140)),
-			});
+			Root.Add (CreateRemarksSection ());
 			
 			cancel = new UIBarButtonItem (UIBarButtonSystemItem.Cancel, OnCancelClicked);
 			NavigationItem.LeftBarButtonItem = cancel;
