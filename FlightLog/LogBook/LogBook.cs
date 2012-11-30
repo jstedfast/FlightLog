@@ -728,6 +728,20 @@ namespace FlightLog {
 			
 			return sqlitedb.Query<Flight> (query.ToString (), args);
 		}
+
+		/// <summary>
+		/// Gets a list of safety pilots matching the provided string.
+		/// </summary>
+		/// <returns>
+		/// The list of matching safety pilots.
+		/// </returns>
+		/// <param name='text'>
+		/// The text to match against.
+		/// </param>
+		public static List<string> GetMatchingSafetyPilots (string text)
+		{
+			return sqlitedb.Query<Flight> ("select distinct InstrumentSafetyPilot from Flight where InstrumentSafetyPilot like ?", text + "%").Select (flight => flight.InstrumentSafetyPilot).ToList ();
+		}
 		#endregion
 	}
 }

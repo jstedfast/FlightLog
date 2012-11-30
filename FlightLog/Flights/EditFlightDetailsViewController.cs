@@ -102,7 +102,7 @@ namespace FlightLog {
 				(simulator = new HobbsMeterEntryElement ("Simulator Time", "Time spent practicing in a simulator.", Flight.InstrumentSimulator)),
 				(approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99)),
 				(holdingProcedures = new BooleanElement ("Performed Holding Procedures", Flight.InstrumentHoldingProcedures)),
-				(safetyPilot = new LimitedEntryElement ("Safety Pilot", "The name of your safety pilot.", Flight.InstrumentSafetyPilot, 40)),
+				(safetyPilot = new SafetyPilotEntryElement (Flight.InstrumentSafetyPilot) { AutoComplete = true }),
 			};
 		}
 		

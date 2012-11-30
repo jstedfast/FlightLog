@@ -134,6 +134,7 @@
     <Compile Include="Aircraft\FAARegistry.cs" />
     <Compile Include="Aircraft\FlightAware.cs" />
     <Compile Include="Extensions\FlightExtension.cs" />
+    <Compile Include="Flights\SafetyPilotEntryElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
