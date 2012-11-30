@@ -38,7 +38,7 @@ namespace FlightLog {
 	public class FlightDetailsViewController : AllInOneTableViewController
 	{
 		static readonly string[] SectionTitles = new string[] { "Flight", "Flight Experience", "Instrument Experience", "Remarks" };
-		static readonly NSString TextFieldCellKey = new NSString ("FlightDetails.Text");
+		static readonly NSString FlightDetailsTableViewCellKey = new NSString ("FlightDetails");
 		static readonly List<List<FlightProperty>> PropertySections;
 
 		enum SectionTitle {
@@ -232,10 +232,10 @@ namespace FlightLog {
 
 		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 		{
-			var cell = tableView.DequeueReusableCell (TextFieldCellKey);
+			var cell = tableView.DequeueReusableCell (FlightDetailsTableViewCellKey);
 
 			if (cell == null)
-				cell = new UITableViewCell (UITableViewCellStyle.Value1, TextFieldCellKey);
+				cell = new UITableViewCell (UITableViewCellStyle.Value1, FlightDetailsTableViewCellKey);
 
 			var property = sections[indexPath.Section][indexPath.Row];
 			cell.TextLabel.Text = property.ToHumanReadableName ();

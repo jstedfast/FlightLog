@@ -35,7 +35,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class AircraftViewController : SQLiteTableViewController<Aircraft>, IComparer<Aircraft>
 	{
-		static NSString key = new NSString ("Aircraft");
+		static readonly NSString AircraftTableViewCellKey = new NSString ("Aircraft");
 
 		NSIndexPath[] selectedRow = new NSIndexPath[2];
 		UIBarButtonItem addAircraft;
@@ -283,10 +283,10 @@ namespace FlightLog {
 		
 		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, Aircraft aircraft)
 		{
-			AircraftTableViewCell cell = tableView.DequeueReusableCell (key) as AircraftTableViewCell;
+			AircraftTableViewCell cell = tableView.DequeueReusableCell (AircraftTableViewCellKey) as AircraftTableViewCell;
 			
 			if (cell == null)
-				cell = new AircraftTableViewCell (key);
+				cell = new AircraftTableViewCell (AircraftTableViewCellKey);
 			
 			cell.Aircraft = aircraft;
 			
