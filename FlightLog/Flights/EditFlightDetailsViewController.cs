@@ -49,7 +49,6 @@ namespace FlightLog {
 		bool autoFlightTimes = true;
 		UIAlertViewDelegate del;
 		UIAlertView alert;
-		int numVisited;
 		bool exists;
 		
 		public EditFlightDetailsViewController (Flight flight, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
