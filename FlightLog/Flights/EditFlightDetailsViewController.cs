@@ -49,6 +49,7 @@ namespace FlightLog {
 		bool autoFlightTimes = true;
 		UIAlertViewDelegate del;
 		UIAlertView alert;
+		int numVisited;
 		bool exists;
 		
 		public EditFlightDetailsViewController (Flight flight, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
@@ -65,6 +66,93 @@ namespace FlightLog {
 		{
 			return base.MakeTableView (bounds, style);
 		}
+
+		class EditFlightDetailsTableViewSource : DialogViewController.Source {
+			public EditFlightDetailsTableViewSource (EditFlightDetailsViewController container) : base (container)
+			{
+			}
+
+			public override UITableViewCellEditingStyle EditingStyleForRow (UITableView tableView, NSIndexPath indexPath)
+			{
+				var controller = (EditFlightDetailsViewController) Container;
+				var element = Root[indexPath.Section][indexPath.Row];
+
+				if (element == controller.visited1)
+					return UITableViewCellEditingStyle.Insert;
+
+				if (element == controller.visited2)
+					return UITableViewCellEditingStyle.Delete;
+
+				if (element == controller.visited3)
+					return UITableViewCellEditingStyle.Delete;
+
+				return UITableViewCellEditingStyle.None;
+			}
+
+			public override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
+			{
+				var controller = (EditFlightDetailsViewController) Container;
+				var element = Root[indexPath.Section][indexPath.Row];
+
+				if (element == controller.visited1)
+					return true;
+
+				if (element == controller.visited2)
+					return true;
+
+				if (element == controller.visited3)
+					return true;
+
+				return false;
+			}
+
+			public override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
+			{
+				var controller = (EditFlightDetailsViewController) Container;
+				var section = Root[indexPath.Section];
+				int row = indexPath.Row;
+				Element element;
+
+				switch (editingStyle) {
+				case UITableViewCellEditingStyle.Insert:
+					switch (controller.numVisited) {
+					case 1: element = controller.visited2; break;
+					case 2: element = controller.visited3; break;
+					default: return;
+					}
+
+					row += controller.numVisited;
+					controller.numVisited++;
+
+					section.Insert (row, UITableViewRowAnimation.Automatic, element);
+					break;
+				case UITableViewCellEditingStyle.Delete:
+					element = section[row];
+
+					if (element == controller.visited2 && controller.numVisited == 3) {
+						controller.visited2.Value = controller.visited3.Value;
+						controller.visited3.Value = null;
+						row++;
+					}
+
+					section.RemoveRange (row, 1, UITableViewRowAnimation.Automatic);
+					controller.numVisited--;
+					break;
+				default:
+					break;
+				}
+			}
+
+			public override bool ShouldIndentWhileEditing (UITableView tableView, NSIndexPath indexPath)
+			{
+				return false;
+			}
+		}
+
+		public override Source CreateSizingSource (bool unevenRows)
+		{
+			return new EditFlightDetailsTableViewSource (this);
+		}
 		
 		Section CreateFlightSection ()
 		{
@@ -76,9 +164,26 @@ namespace FlightLog {
 			visited3 = new AirportEntryElement ("Visited", Flight.AirportVisited3);
 			arrived = new AirportEntryElement ("Arrived", Flight.AirportArrived);
 
-			return new Section ("Flight") {
-				date, aircraft, departed, visited1, visited2, visited3, arrived
-			};
+			var section = new Section ("Flight");
+			section.Add (date);
+			section.Add (aircraft);
+			section.Add (departed);
+			section.Add (visited1);
+			numVisited++;
+
+			if (!string.IsNullOrEmpty (Flight.AirportVisited2)) {
+				section.Add (visited2);
+				numVisited++;
+			}
+
+			if (!string.IsNullOrEmpty (Flight.AirportVisited3)) {
+				section.Add (visited3);
+				numVisited++;
+			}
+
+			section.Add (arrived);
+
+			return section;
 		}
 
 		RootElement CreateFlightTimeDetailsElement ()
@@ -192,6 +297,12 @@ namespace FlightLog {
 			NavigationItem.RightBarButtonItem = save;
 			
 			base.LoadView ();
+		}
+
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+			SetEditing (true, animated);
 		}
 		
 		void OnCancelClicked (object sender, EventArgs args)
