@@ -39,9 +39,9 @@ namespace FlightLog {
 	{
 		HobbsMeterEntryElement total, dual, night, pic, sic, cfi, actual, hood, simulator;
 		NumericEntryElement landDay, landNight, approaches;
-		AirportEntryElement visited1, visited2, visited3;
 		LimitedEntryElement remarks, safetyPilot;
 		AirportEntryElement departed, arrived;
+		List<AirportEntryElement> visited;
 		BooleanElement holdingProcedures;
 		AircraftEntryElement aircraft;
 		UIBarButtonItem cancel, save;
@@ -68,75 +68,74 @@ namespace FlightLog {
 		}
 
 		class EditFlightDetailsTableViewSource : DialogViewController.Source {
-			public EditFlightDetailsTableViewSource (EditFlightDetailsViewController container) : base (container)
+			public EditFlightDetailsTableViewSource (EditFlightDetailsViewController editor) : base (editor)
 			{
+			}
+
+			EditFlightDetailsViewController Editor {
+				get { return (EditFlightDetailsViewController) Container; }
+			}
+
+			List<AirportEntryElement> Visited {
+				get { return Editor.visited; }
 			}
 
 			public override UITableViewCellEditingStyle EditingStyleForRow (UITableView tableView, NSIndexPath indexPath)
 			{
-				var controller = (EditFlightDetailsViewController) Container;
 				var element = Root[indexPath.Section][indexPath.Row];
 
-				if (element == controller.visited1)
+				if (element == Visited[0])
 					return UITableViewCellEditingStyle.Insert;
 
-				if (element == controller.visited2)
-					return UITableViewCellEditingStyle.Delete;
-
-				if (element == controller.visited3)
-					return UITableViewCellEditingStyle.Delete;
+				for (int i = 1; i < Visited.Count; i++) {
+					if (element == Visited[i])
+						return UITableViewCellEditingStyle.Delete;
+				}
 
 				return UITableViewCellEditingStyle.None;
 			}
 
 			public override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
 			{
-				var controller = (EditFlightDetailsViewController) Container;
 				var element = Root[indexPath.Section][indexPath.Row];
 
-				if (element == controller.visited1)
-					return true;
-
-				if (element == controller.visited2)
-					return true;
-
-				if (element == controller.visited3)
-					return true;
+				foreach (var airport in Visited) {
+					if (element == airport)
+						return true;
+				}
 
 				return false;
 			}
 
 			public override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
 			{
-				var controller = (EditFlightDetailsViewController) Container;
 				var section = Root[indexPath.Section];
+				var element = section[indexPath.Row];
+				AirportEntryElement airport;
 				int row = indexPath.Row;
-				Element element;
 
 				switch (editingStyle) {
 				case UITableViewCellEditingStyle.Insert:
-					switch (controller.numVisited) {
-					case 1: element = controller.visited2; break;
-					case 2: element = controller.visited3; break;
-					default: return;
+					if (element == Visited[0]) {
+						if (Visited.Count >= 3)
+							return;
+
+						row += Visited.Count;
+
+						airport = new AirportEntryElement ("Visited", "");
+						Visited.Add (airport);
+
+						section.Insert (row, UITableViewRowAnimation.Automatic, airport);
 					}
-
-					row += controller.numVisited;
-					controller.numVisited++;
-
-					section.Insert (row, UITableViewRowAnimation.Automatic, element);
 					break;
 				case UITableViewCellEditingStyle.Delete:
-					element = section[row];
-
-					if (element == controller.visited2 && controller.numVisited == 3) {
-						controller.visited2.Value = controller.visited3.Value;
-						controller.visited3.Value = null;
-						row++;
+					if (element is AirportEntryElement) {
+						airport = (AirportEntryElement) element;
+						if (Visited.Contains (airport)) {
+							section.RemoveRange (row, 1, UITableViewRowAnimation.Automatic);
+							Visited.Remove (airport);
+						}
 					}
-
-					section.RemoveRange (row, 1, UITableViewRowAnimation.Automatic);
-					controller.numVisited--;
 					break;
 				default:
 					break;
@@ -156,29 +155,34 @@ namespace FlightLog {
 		
 		Section CreateFlightSection ()
 		{
+			AirportEntryElement airport;
+
 			date = new FlightDateEntryElement ("Date", Flight.Date);
 			aircraft = new AircraftEntryElement (Flight.Aircraft) { AutoComplete = true };
 			departed = new AirportEntryElement ("Departed", Flight.AirportDeparted);
-			visited1 = new AirportEntryElement ("Visited", Flight.AirportVisited1);
-			visited2 = new AirportEntryElement ("Visited", Flight.AirportVisited2);
-			visited3 = new AirportEntryElement ("Visited", Flight.AirportVisited3);
+			airport = new AirportEntryElement ("Visited", Flight.AirportVisited1);
 			arrived = new AirportEntryElement ("Arrived", Flight.AirportArrived);
+
+			visited = new List<AirportEntryElement> ();
 
 			var section = new Section ("Flight");
 			section.Add (date);
 			section.Add (aircraft);
 			section.Add (departed);
-			section.Add (visited1);
-			numVisited++;
+
+			section.Add (airport);
+			visited.Add (airport);
 
 			if (!string.IsNullOrEmpty (Flight.AirportVisited2)) {
-				section.Add (visited2);
-				numVisited++;
+				airport = new AirportEntryElement ("Visited", Flight.AirportVisited2);
+				section.Add (airport);
+				visited.Add (airport);
 			}
 
 			if (!string.IsNullOrEmpty (Flight.AirportVisited3)) {
-				section.Add (visited3);
-				numVisited++;
+				airport = new AirportEntryElement ("Visited", Flight.AirportVisited3);
+				section.Add (airport);
+				visited.Add (airport);
 			}
 
 			section.Add (arrived);
@@ -449,9 +453,9 @@ namespace FlightLog {
 			Flight.Date = date.DateValue;
 			Flight.Aircraft = aircraft.Value;
 			Flight.AirportDeparted = airport;
-			Flight.AirportVisited1 = GetAirportCode (visited1.Value, airports, missing);
-			Flight.AirportVisited2 = GetAirportCode (visited2.Value, airports, missing);
-			Flight.AirportVisited3 = GetAirportCode (visited3.Value, airports, missing);
+			Flight.AirportVisited1 = visited.Count > 0 ? GetAirportCode (visited[0].Value, airports, missing) : null;
+			Flight.AirportVisited2 = visited.Count > 1 ? GetAirportCode (visited[1].Value, airports, missing) : null;
+			Flight.AirportVisited3 = visited.Count > 2 ? GetAirportCode (visited[2].Value, airports, missing) : null;
 			Flight.AirportArrived = GetAirportCode (arrived.Value, airports, missing);
 			
 			if (Flight.AirportArrived == null)
