@@ -163,7 +163,7 @@ namespace FlightLog {
 			departed = new AirportEntryElement ("Departed", Flight.AirportDeparted);
 			arrived = new AirportEntryElement ("Arrived", Flight.AirportArrived);
 
-			visited = new List<AirportEntryElement> ();
+			visited = new List<AirportEntryElement> (3);
 
 			var section = new Section ("Flight");
 			section.Add (date);
