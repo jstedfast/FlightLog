@@ -74,7 +74,7 @@ namespace FlightLog
 		InstrumentSimulator,
 		[HumanReadableName ("Approaches")]
 		InstrumentApproaches,
-		[HumanReadableName ("Performed Holding Procedures")]
+		[HumanReadableName ("Holding Procedures")]
 		InstrumentHoldingProcedures,
 		[HumanReadableName ("Safety Pilot")]
 		InstrumentSafetyPilot,

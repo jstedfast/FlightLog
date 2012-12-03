@@ -66,6 +66,7 @@ namespace FlightLog {
 			return base.MakeTableView (bounds, style);
 		}
 
+#if false
 		class EditFlightDetailsTableViewSource : DialogViewController.Source {
 			public EditFlightDetailsTableViewSource (EditFlightDetailsViewController editor) : base (editor)
 			{
@@ -151,6 +152,7 @@ namespace FlightLog {
 		{
 			return new EditFlightDetailsTableViewSource (this);
 		}
+#endif
 		
 		Section CreateFlightSection ()
 		{
@@ -159,7 +161,6 @@ namespace FlightLog {
 			date = new FlightDateEntryElement ("Date", Flight.Date);
 			aircraft = new AircraftEntryElement (Flight.Aircraft) { AutoComplete = true };
 			departed = new AirportEntryElement ("Departed", Flight.AirportDeparted);
-			airport = new AirportEntryElement ("Visited", Flight.AirportVisited1);
 			arrived = new AirportEntryElement ("Arrived", Flight.AirportArrived);
 
 			visited = new List<AirportEntryElement> ();
@@ -169,17 +170,18 @@ namespace FlightLog {
 			section.Add (aircraft);
 			section.Add (departed);
 
+			airport = new AirportEntryElement ("Visited", Flight.AirportVisited1 ?? "");
 			section.Add (airport);
 			visited.Add (airport);
 
-			if (!string.IsNullOrEmpty (Flight.AirportVisited2)) {
-				airport = new AirportEntryElement ("Visited", Flight.AirportVisited2);
+			if (true || !string.IsNullOrEmpty (Flight.AirportVisited2)) {
+				airport = new AirportEntryElement ("Visited", Flight.AirportVisited2 ?? "");
 				section.Add (airport);
 				visited.Add (airport);
 			}
 
-			if (!string.IsNullOrEmpty (Flight.AirportVisited3)) {
-				airport = new AirportEntryElement ("Visited", Flight.AirportVisited3);
+			if (true || !string.IsNullOrEmpty (Flight.AirportVisited3)) {
+				airport = new AirportEntryElement ("Visited", Flight.AirportVisited3 ?? "");
 				section.Add (airport);
 				visited.Add (airport);
 			}
@@ -214,19 +216,15 @@ namespace FlightLog {
 			};
 		}
 
-		RootElement CreateInstrumentDetailsElement ()
+		RootElement CreateInstrumentTimeDetailsElement ()
 		{
 			simulator = new HobbsMeterEntryElement ("Simulator Time", "Time spent practicing in a simulator.", Flight.InstrumentSimulator);
 			actual = new HobbsMeterEntryElement ("Actual Time", "Time spent flying by instrumentation only.", Flight.InstrumentActual);
 			hood = new HobbsMeterEntryElement ("Hood Time", "Time spent flying under a hood.", Flight.InstrumentHood);
 
-			approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99);
-			holdingProcedures = new BooleanElement ("Performed Holding Procedures", Flight.InstrumentHoldingProcedures);
-			safetyPilot = new SafetyPilotEntryElement (Flight.InstrumentSafetyPilot) { AutoComplete = true };
-
-			return new RootElement ("Instrument Experience") {
-				new Section ("Instrument Experience") {
-					actual, hood, simulator, approaches, holdingProcedures, safetyPilot
+			return new RootElement ("Instrument Time") {
+				new Section ("Instrument Time") {
+					actual, hood, simulator
 				}
 			};
 		}
@@ -234,7 +232,18 @@ namespace FlightLog {
 		Section CreateExperienceSection ()
 		{
 			return new Section ("Flight Experience") {
-				CreateFlightTimeDetailsElement (), CreateInstrumentDetailsElement ()
+				CreateFlightTimeDetailsElement (), CreateInstrumentTimeDetailsElement ()
+			};
+		}
+
+		Section CreateInstrumentSection ()
+		{
+			approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99);
+			holdingProcedures = new BooleanElement ("Holding Procedures", Flight.InstrumentHoldingProcedures);
+			safetyPilot = new SafetyPilotEntryElement (Flight.InstrumentSafetyPilot) { AutoComplete = true };
+
+			return new Section ("Instrument Experience") {
+				approaches, holdingProcedures, safetyPilot
 			};
 		}
 
@@ -291,6 +300,7 @@ namespace FlightLog {
 			Root.Add (CreateFlightSection ());
 			Root.Add (CreateLandingsSection ());
 			Root.Add (CreateExperienceSection ());
+			Root.Add (CreateInstrumentSection ());
 			Root.Add (CreateRemarksSection ());
 			
 			cancel = new UIBarButtonItem (UIBarButtonSystemItem.Cancel, OnCancelClicked);
@@ -305,7 +315,7 @@ namespace FlightLog {
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			SetEditing (true, animated);
+			//SetEditing (true, animated);
 		}
 		
 		void OnCancelClicked (object sender, EventArgs args)
