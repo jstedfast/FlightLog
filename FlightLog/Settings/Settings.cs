@@ -30,12 +30,25 @@ using MonoTouch.Foundation;
 
 namespace FlightLog {
 	public enum PilotCertification {
+		[HumanReadableName ("Student Pilot")]
 		Student,
+		[HumanReadableName ("Sport Pilot")]
 		Sport,
+		[HumanReadableName ("Recreational Pilot")]
 		Recreational,
+		[HumanReadableName ("Private Pilot")]
 		Private,
+		[HumanReadableName ("Commercial Pilot")]
 		Commercial,
+		[HumanReadableName ("Airline Transport Pilot")]
 		AirlineTransport
+	}
+
+	public enum FlightTimeFormat {
+		[HumanReadableName ("Decimal Format")]
+		Decimal,
+		[HumanReadableName ("Standard Format (hh:mm)")]
+		Standard
 	}
 
 	public static class Settings
@@ -53,10 +66,19 @@ namespace FlightLog {
 				}
 
 				// Assume most users will be Private Pilots
-				return FlightLog.PilotCertification.Private;
+				return PilotCertification.Private;
 			}
 			set {
 				settings.SetString (value.ToString (), "PilotCertification");
+			}
+		}
+
+		public static string PilotName {
+			get {
+				return settings.StringForKey ("PilotName");
+			}
+			set {
+				settings.SetString (value, "PilotName");
 			}
 		}
 
@@ -69,12 +91,20 @@ namespace FlightLog {
 			}
 		}
 
-		public static bool ShowDecimalTime {
+		public static FlightTimeFormat FlightTimeFormat {
 			get {
-				return settings.BoolForKey ("ShowDecimalTime");
+				string str = settings.StringForKey ("FlightTimeFormat");
+				FlightTimeFormat value;
+
+				if (!string.IsNullOrEmpty (str)) {
+					if (Enum.TryParse<FlightTimeFormat> (str, out value))
+						return value;
+				}
+
+				return FlightTimeFormat.Standard;
 			}
 			set {
-				settings.SetBool (value, "ShowDecimalTime");
+				settings.SetString (value.ToString (), "FlightTimeFormat");
 			}
 		}
 

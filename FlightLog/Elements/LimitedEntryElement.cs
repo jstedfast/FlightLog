@@ -118,6 +118,9 @@ namespace FlightLog {
 		/// </param>
 		protected virtual bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
+			if (MaxLength < 0)
+				return true;
+
 			return result.Length <= MaxLength;
 		}
 		

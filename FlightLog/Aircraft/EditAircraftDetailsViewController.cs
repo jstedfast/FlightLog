@@ -61,18 +61,18 @@ namespace FlightLog
 		{
 			return base.MakeTableView (bounds, style);
 		}
-		
-		AircraftCategory CategoryFromIndex (int index)
+
+		static AircraftCategory CategoryFromIndex (int index)
 		{
 			return (AircraftCategory) (index * Aircraft.CategoryStep);
 		}
 		
-		int CategoryToIndex (AircraftCategory category)
+		static int CategoryToIndex (AircraftCategory category)
 		{
 			return ((int) category) / Aircraft.CategoryStep;
 		}
 		
-		RootElement CreateCategoryElement (AircraftCategory category)
+		static RootElement CreateCategoryElement (AircraftCategory category)
 		{
 			RootElement root = new RootElement ("Category", new RadioGroup ("AircraftCategory", 0));
 			Section section = new Section ();
@@ -81,23 +81,23 @@ namespace FlightLog
 				section.Add (new RadioElement (value.ToHumanReadableName (), "AircraftCategory"));
 			
 			root.Add (section);
-			
+
 			root.RadioSelected = CategoryToIndex (category);
 			
 			return root;
 		}
 		
-		AircraftClassification ClassificationFromIndexes (int category, int classification)
+		static AircraftClassification ClassificationFromIndexes (int category, int classification)
 		{
 			return (AircraftClassification) ((category * Aircraft.CategoryStep) + classification);
 		}
 		
-		int ClassificationToIndex (AircraftClassification classification)
+		static int ClassificationToIndex (AircraftClassification classification)
 		{
 			return ((int) classification) % Aircraft.CategoryStep;
 		}
 		
-		RootElement CreateClassificationElement (AircraftCategory category)
+		static RootElement CreateClassificationElement (AircraftCategory category, RadioGroup classes)
 		{
 			RootElement root = new RootElement ("Class", classes);
 			int next = (int) category + Aircraft.CategoryStep;
@@ -122,7 +122,7 @@ namespace FlightLog
 		{
 			Section section = new Section ("Type of Aircraft") {
 				(category = CreateCategoryElement (Aircraft.Category)),
-				(classification = CreateClassificationElement (Aircraft.Category)),
+				(classification = CreateClassificationElement (Aircraft.Category, classes)),
 				(isComplex = new BooleanElement ("Complex", Aircraft.IsComplex)),
 				(isHighPerformance = new BooleanElement ("High Performance", Aircraft.IsHighPerformance)),
 				(isTailDragger = new BooleanElement ("Tail Dragger", Aircraft.IsTailDragger)),
@@ -224,7 +224,7 @@ namespace FlightLog
 			if (category.RadioSelected != previousCategory) {
 				var index = classification.IndexPath;
 				
-				classification = CreateClassificationElement (CategoryFromIndex (category.RadioSelected));
+				classification = CreateClassificationElement (CategoryFromIndex (category.RadioSelected), classes);
 				classification.RadioSelected = 0;
 				
 				Root[index.Section].Remove (index.Row);

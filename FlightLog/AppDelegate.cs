@@ -84,12 +84,14 @@ namespace FlightLog {
 			var viewController1 = new FlightLogSplitViewController ();
 			var viewController2 = new AircraftSplitViewController ();
 			var viewController3 = new AirportViewController ();
+			var viewController4 = new UINavigationController (new SettingsViewController ());
 			tabBarController = new FlightLogTabBarController ();
 			tabBarController.ViewControllers = new UIViewController [] {
 				//viewController0,
 				viewController1,
 				viewController2,
-				viewController3
+				viewController3,
+				viewController4
 			};
 			
 			window.RootViewController = tabBarController;

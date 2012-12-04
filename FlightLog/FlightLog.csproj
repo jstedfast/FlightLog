@@ -137,6 +137,7 @@
     <Compile Include="Flights\FlightTableViewCell.cs" />
     <Compile Include="Aircraft\AircraftTableViewCell.cs" />
     <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Settings\SettingsViewController.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
@@ -161,6 +162,7 @@
     <Folder Include="Summary\" />
     <Folder Include="Settings\" />
     <Folder Include="Resources\" />
+    <Folder Include="Resources\Settings.bundle\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
@@ -198,5 +200,6 @@
   </ProjectExtensions>
   <ItemGroup>
     <BundleResource Include="Resources\Airports.sqlite" />
+    <BundleResource Include="Resources\Settings.bundle\Root.plist" />
   </ItemGroup>
 </Project>
