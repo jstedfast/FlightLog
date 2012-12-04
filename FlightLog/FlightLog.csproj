@@ -9,6 +9,7 @@
     <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Exe</OutputType>
     <RootNamespace>FlightLog</RootNamespace>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AssemblyName>FlightLog</AssemblyName>
     <Description>Flight LogBook for private pilots.</Description>
   </PropertyGroup>
@@ -135,6 +136,7 @@
     <Compile Include="Flights\SafetyPilotEntryElement.cs" />
     <Compile Include="Flights\FlightTableViewCell.cs" />
     <Compile Include="Aircraft\AircraftTableViewCell.cs" />
+    <Compile Include="Settings\Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
@@ -144,9 +146,6 @@
     <Content Include="Images\first%402x.png" />
     <Content Include="Images\second.png" />
     <Content Include="Images\second%402x.png" />
-    <Content Include="Airports.sqlite">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Images\aircraft.png" />
     <Content Include="Images\aircraft%402x.png" />
   </ItemGroup>
@@ -160,6 +159,8 @@
     <Folder Include="Elements\" />
     <Folder Include="Flights\" />
     <Folder Include="Summary\" />
+    <Folder Include="Settings\" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
@@ -195,4 +196,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <BundleResource Include="Resources\Airports.sqlite" />
+  </ItemGroup>
 </Project>

@@ -43,6 +43,7 @@ namespace FlightLog {
 		AirportEntryElement departed, arrived;
 		List<AirportEntryElement> visited;
 		BooleanElement holdingProcedures;
+		PilotCertification certification;
 		AircraftEntryElement aircraft;
 		UIBarButtonItem cancel, save;
 		FlightDateEntryElement date;
@@ -53,12 +54,21 @@ namespace FlightLog {
 		
 		public EditFlightDetailsViewController (Flight flight, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
+			certification = Settings.PilotCertification;
 			this.exists = exists;
 			Flight = flight;
 		}
 		
 		public Flight Flight {
 			get; private set;
+		}
+
+		bool IsStudentPilot {
+			get { return certification == PilotCertification.Student; }
+		}
+
+		bool IsFlightInstructor {
+			get { return Settings.IsCertifiedFlightInstructor; }
 		}
 		
 		public override UITableView MakeTableView (RectangleF bounds, UITableViewStyle style)
@@ -196,7 +206,10 @@ namespace FlightLog {
 			total = new HobbsMeterEntryElement ("Flight Time", "Total flight time, as measured on the Hobbs Meter.", Flight.FlightTime);
 			cfi = new HobbsMeterEntryElement ("C.F.I.", "Time spent sweating only on the right side of your face.", Flight.CertifiedFlightInstructor);
 			dual = new HobbsMeterEntryElement ("Dual Received", "Time spent in training with an instructor.", Flight.DualReceived);
-			pic = new HobbsMeterEntryElement ("P.I.C.", "Time spent flying as Pilot in Command.", Flight.PilotInCommand);
+			if (IsStudentPilot)
+				pic = new HobbsMeterEntryElement ("Solo", "Time spent flying solo.", Flight.PilotInCommand);
+			else
+				pic = new HobbsMeterEntryElement ("P.I.C.", "Time spent flying as Pilot in Command.", Flight.PilotInCommand);
 			sic = new HobbsMeterEntryElement ("S.I.C.", "Time spent flying as Second in Command.", Flight.SecondInCommand);
 			night = new HobbsMeterEntryElement ("Night Flying", "Time spent flying after dark.", Flight.Night);
 
@@ -209,11 +222,16 @@ namespace FlightLog {
 			pic.EditingCompleted += DisableAutoFlightTimes;
 			sic.EditingCompleted += DisableAutoFlightTimes;
 
-			return new RootElement ("Flight Time", 0, 0) {
-				new Section ("Flight Time") {
-					total, cfi, dual, pic, sic, night
-				}
-			};
+			var section = new Section ("Flight Time");
+			section.Add (total);
+			if (IsFlightInstructor || Flight.CertifiedFlightInstructor > 0)
+				section.Add (cfi);
+			section.Add (dual);
+			section.Add (pic);
+			section.Add (sic);
+			section.Add (night);
+
+			return new RootElement ("Flight Time", 0, 0) { section };
 		}
 
 		RootElement CreateInstrumentTimeDetailsElement ()
@@ -229,11 +247,23 @@ namespace FlightLog {
 			};
 		}
 
+		bool ShowInstrumentExperience {
+			get {
+				return Flight.InstrumentActual > 0 || Flight.InstrumentHood > 0 || Flight.InstrumentSimulator > 0 ||
+					Flight.InstrumentApproaches > 0 || Flight.InstrumentHoldingProcedures ||
+						Settings.ShowInstrumentExperience;
+			}
+		}
+
 		Section CreateExperienceSection ()
 		{
-			return new Section ("Flight Experience") {
-				CreateFlightTimeDetailsElement (), CreateInstrumentTimeDetailsElement ()
-			};
+			var section = new Section ("Flight Experience");
+
+			section.Add (CreateFlightTimeDetailsElement ());
+			if (ShowInstrumentExperience)
+				section.Add (CreateInstrumentTimeDetailsElement ());
+
+			return section;
 		}
 
 		Section CreateInstrumentSection ()
@@ -272,7 +302,7 @@ namespace FlightLog {
 		void OnFlightTimeEntered (object sender, EventArgs e)
 		{
 			if (autoFlightTimes) {
-				if (false /* IsStudentPilot */) {
+				if (certification == PilotCertification.Student) {
 					dual.ValueAsSeconds = total.ValueAsSeconds;
 				} else if (false /* IsFlightInstructor */) {
 					cfi.ValueAsSeconds = total.ValueAsSeconds;
@@ -300,7 +330,8 @@ namespace FlightLog {
 			Root.Add (CreateFlightSection ());
 			Root.Add (CreateLandingsSection ());
 			Root.Add (CreateExperienceSection ());
-			Root.Add (CreateInstrumentSection ());
+			if (ShowInstrumentExperience)
+				Root.Add (CreateInstrumentSection ());
 			Root.Add (CreateRemarksSection ());
 			
 			cancel = new UIBarButtonItem (UIBarButtonSystemItem.Cancel, OnCancelClicked);
