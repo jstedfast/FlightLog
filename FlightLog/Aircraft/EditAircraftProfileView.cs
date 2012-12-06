@@ -160,13 +160,11 @@ namespace FlightLog {
 
 		void OnTailNumberEntered (object sender, EventArgs e)
 		{
-			if (!string.IsNullOrEmpty (Make) && !string.IsNullOrEmpty (Model))
-				return;
-
 			if (string.IsNullOrEmpty (TailNumber))
 				return;
 
-			FetchMakeAndModel ();
+			if (string.IsNullOrEmpty (Make) || string.IsNullOrEmpty (Model))
+				FetchMakeAndModel ();
 
 			if (Photograph == null)
 				FetchPhotograph ();
