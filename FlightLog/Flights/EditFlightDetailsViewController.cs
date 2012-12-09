@@ -247,7 +247,7 @@ namespace FlightLog {
 			};
 		}
 
-		bool ShowInstrumentExperience {
+		bool EditInstrumentExperience {
 			get {
 				return Flight.InstrumentActual > 0 || Flight.InstrumentHood > 0 || Flight.InstrumentSimulator > 0 ||
 					Flight.InstrumentApproaches > 0 || Flight.InstrumentHoldingProcedures ||
@@ -260,7 +260,7 @@ namespace FlightLog {
 			var section = new Section ("Flight Experience");
 
 			section.Add (CreateFlightTimeDetailsElement ());
-			if (ShowInstrumentExperience)
+			if (EditInstrumentExperience)
 				section.Add (CreateInstrumentTimeDetailsElement ());
 
 			return section;
@@ -330,7 +330,7 @@ namespace FlightLog {
 			Root.Add (CreateFlightSection ());
 			Root.Add (CreateLandingsSection ());
 			Root.Add (CreateExperienceSection ());
-			if (ShowInstrumentExperience)
+			if (EditInstrumentExperience)
 				Root.Add (CreateInstrumentSection ());
 			Root.Add (CreateRemarksSection ());
 			
@@ -504,9 +504,6 @@ namespace FlightLog {
 			// Flight Time values
 			Flight.FlightTime = total.ValueAsSeconds;
 			Flight.CertifiedFlightInstructor = cfi.ValueAsSeconds;
-			Flight.InstrumentSimulator = simulator.ValueAsSeconds;
-			Flight.InstrumentActual = actual.ValueAsSeconds;
-			Flight.InstrumentHood = hood.ValueAsSeconds;
 			Flight.SecondInCommand = sic.ValueAsSeconds;
 			Flight.PilotInCommand = pic.ValueAsSeconds;
 			Flight.DualReceived = dual.ValueAsSeconds;
@@ -514,15 +511,24 @@ namespace FlightLog {
 			
 			Flight.Day = Flight.FlightTime - Flight.Night;
 			
-			// Landings and Approaches
-			Flight.InstrumentHoldingProcedures = holdingProcedures.Value;
-			Flight.InstrumentApproaches = approaches.Value;
+			// Landings
 			Flight.NightLandings = landNight.Value;
 			Flight.DayLandings = landDay.Value;
-			
-			// Safety Pilot info
-			Flight.InstrumentSafetyPilot = safetyPilot.Value;
-			
+
+			if (EditInstrumentExperience) {
+				// Flight Time values
+				Flight.InstrumentSimulator = simulator.ValueAsSeconds;
+				Flight.InstrumentActual = actual.ValueAsSeconds;
+				Flight.InstrumentHood = hood.ValueAsSeconds;
+
+				// Holding Procedures and Approaches
+				Flight.InstrumentHoldingProcedures = holdingProcedures.Value;
+				Flight.InstrumentApproaches = approaches.Value;
+
+				// Safety Pilot info
+				Flight.InstrumentSafetyPilot = safetyPilot.Value;
+			}
+
 			// Remarks
 			Flight.Remarks = remarks.Value;
 			
