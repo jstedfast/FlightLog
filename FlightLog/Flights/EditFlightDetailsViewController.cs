@@ -228,7 +228,8 @@ namespace FlightLog {
 				section.Add (cfi);
 			section.Add (dual);
 			section.Add (pic);
-			section.Add (sic);
+			if (certification >= PilotCertification.Private || Flight.SecondInCommand > 0)
+				section.Add (sic);
 			section.Add (night);
 
 			return new RootElement ("Flight Time", 0, 0) { section };
