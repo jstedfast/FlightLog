@@ -39,7 +39,7 @@ namespace FlightLog {
 		
 		public FlightLogSplitViewController ()
 		{
-			TabBarItem.Image = UIImage.FromBundle ("Images/first");
+			TabBarItem.Image = UIImage.FromBundle ("Images/radar");
 			Title = "Flights";
 
 			details = new FlightDetailsViewController ();

@@ -40,7 +40,7 @@ namespace FlightLog
 
 		public SettingsViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
-			TabBarItem.Image = UIImage.FromBundle ("Images/first");
+			TabBarItem.Image = UIImage.FromBundle ("Images/sliders");
 			Title = "Settings";
 			Autorotate = true;
 		}

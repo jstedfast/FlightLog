@@ -143,12 +143,13 @@
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\first.png" />
-    <Content Include="Images\first%402x.png" />
-    <Content Include="Images\second.png" />
-    <Content Include="Images\second%402x.png" />
     <Content Include="Images\aircraft.png" />
     <Content Include="Images\aircraft%402x.png" />
+    <Content Include="Images\radar.png" />
+    <Content Include="Images\camera.png" />
+    <Content Include="Images\sliders.png" />
+    <Content Include="Images\map.png" />
+    <Content Include="Images\user.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

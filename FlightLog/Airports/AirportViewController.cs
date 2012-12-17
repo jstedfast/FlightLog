@@ -42,7 +42,7 @@ namespace FlightLog {
 		//loads the MapViewController.xib file and connects it to this object
 		public AirportViewController () : base ("AirportViewController", null)
 		{
-			TabBarItem.Image = UIImage.FromBundle ("Images/first");
+			TabBarItem.Image = UIImage.FromBundle ("Images/map");
 			Title = "Airports";
 			
 			annotations = new Dictionary<string, AirportAnnotation> ();
