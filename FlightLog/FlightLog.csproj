@@ -150,6 +150,8 @@
     <Content Include="Images\sliders.png" />
     <Content Include="Images\map.png" />
     <Content Include="Images\user.png" />
+    <Content Include="Images\airplane.png" />
+    <Content Include="Images\ekg.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
