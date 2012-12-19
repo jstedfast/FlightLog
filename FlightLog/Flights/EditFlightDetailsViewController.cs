@@ -252,7 +252,7 @@ namespace FlightLog {
 			get {
 				return Flight.InstrumentActual > 0 || Flight.InstrumentHood > 0 || Flight.InstrumentSimulator > 0 ||
 					Flight.InstrumentApproaches > 0 || Flight.InstrumentHoldingProcedures ||
-						Settings.ShowInstrumentExperience;
+						Settings.IsInstrumentRated;
 			}
 		}
 

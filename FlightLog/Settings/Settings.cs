@@ -108,12 +108,12 @@ namespace FlightLog {
 			}
 		}
 
-		public static bool ShowInstrumentExperience {
+		public static bool IsInstrumentRated {
 			get {
-				return settings.BoolForKey ("ShowInstrumentExperience");
+				return settings.BoolForKey ("IsInstrumentRated");
 			}
 			set {
-				settings.SetBool (value, "ShowInstrumentExperience");
+				settings.SetBool (value, "IsInstrumentRated");
 			}
 		}
 	}

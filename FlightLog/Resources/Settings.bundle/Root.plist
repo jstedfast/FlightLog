@@ -60,6 +60,16 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
+			<string>Instrument Rated / In-Training</string>
+			<key>Key</key>
+			<string>IsInstrumentRated</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
 			<string>Certified Flight Instructor</string>
 			<key>Key</key>
 			<string>IsCertifiedFlightInstructor</string>
@@ -91,16 +101,6 @@
 				<string>Decimal</string>
 				<string>Standard</string>
 			</array>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Show IFR Inputs</string>
-			<key>Key</key>
-			<string>ShowIFRInputs</string>
-			<key>DefaultValue</key>
-			<true/>
 		</dict>
 	</array>
 	<key>StringsTable</key>

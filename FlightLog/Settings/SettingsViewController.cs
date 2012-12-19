@@ -36,7 +36,7 @@ namespace FlightLog
 	{
 		RootElement certification, format;
 		LimitedEntryElement name;
-		BooleanElement cfi;
+		BooleanElement cfi, ifr;
 
 		public SettingsViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
@@ -79,12 +79,13 @@ namespace FlightLog
 		{
 			name = new LimitedEntryElement ("Pilot's Name", "Enter the name of the pilot.", Settings.PilotName);
 			cfi = new BooleanElement ("Certified Flight Instructor", Settings.IsCertifiedFlightInstructor);
+			ifr = new BooleanElement ("Instrument Rated / In-Training", Settings.IsInstrumentRated);
 			certification = CreatePilotCertificationElement (Settings.PilotCertification);
 			format = CreateFlightTimeFormatElement (Settings.FlightTimeFormat);
 
 			base.LoadView ();
 
-			Root.Add (new Section ("Pilot Information") { name, certification, cfi });
+			Root.Add (new Section ("Pilot Information") { name, certification, ifr, cfi });
 			Root.Add (new Section ("LogBook Entry") { format });
 		}
 
@@ -92,6 +93,7 @@ namespace FlightLog
 		{
 			Settings.PilotCertification = (PilotCertification) certification.RadioSelected;
 			Settings.IsCertifiedFlightInstructor = cfi.Value;
+			Settings.IsInstrumentRated = ifr.Value;
 			Settings.PilotName = name.Value;
 
 			Settings.FlightTimeFormat = (FlightTimeFormat) format.RadioSelected;
