@@ -106,12 +106,20 @@ namespace FlightLog
 			if (seconds == 0 && !force)
 				return null;
 
-			double time = Math.Round (seconds / 3600.0, 1);
+			if (Settings.FlightTimeFormat == FlightTimeFormat.Decimal) {
+				double time = Math.Round (seconds / 3600.0, 1);
 
-			if (time > 0.9 && time < 1.1)
-				return "1 hour";
+				if (time > 0.9 && time < 1.1)
+					return "1 hour";
 
-			return time.ToString () + " hours";
+				return time.ToString () + " hours";
+			} else {
+				int hh = seconds / 3600;
+				int mm = (seconds % 3600) / 60;
+				//int ss = seconds % 60;
+
+				return string.Format ("{0}:{1}", hh.ToString ("00"), mm.ToString ("00"));
+			}
 		}
 
 		public static string GetValue (this Flight flight, FlightProperty property)
