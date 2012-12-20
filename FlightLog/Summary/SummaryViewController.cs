@@ -164,9 +164,9 @@ namespace FlightLog {
 					return;
 				}
 			}
-			
+
 			// currency is out of date
-			section.Add (new CurrencyElement (caption, DateTime.Now));
+			section.Add (new CurrencyElement (caption, DateTime.Today));
 		}
 		
 		void LoadInstrumentCurrency ()
