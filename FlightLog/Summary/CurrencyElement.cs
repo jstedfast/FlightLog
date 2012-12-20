@@ -46,12 +46,14 @@ namespace FlightLog {
 				DateTime now = DateTime.Now;
 				
 				if (value > now) {
-					DetailTextLabel.TextColor = UIColor.Green;
-					TimeSpan left = value.Subtract (now);
-					DetailTextLabel.Text = string.Format ("{0} Days Left", left.Days);
+					if (value.AddMonths (-1) > now)
+						DetailTextLabel.TextColor = UIColor.Green;
+					else
+						DetailTextLabel.TextColor = UIColor.Orange;
+					DetailTextLabel.Text = string.Format ("Current until {0}", value.ToShortDateString ());
 				} else {
 					DetailTextLabel.TextColor = UIColor.Red;
-					DetailTextLabel.Text = "0 Days Left";
+					DetailTextLabel.Text = string.Format ("Expired on {0}", value.ToShortDateString ());
 				}
 			}
 		}

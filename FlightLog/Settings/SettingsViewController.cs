@@ -34,30 +34,13 @@ namespace FlightLog
 {
 	public class SettingsViewController : DialogViewController
 	{
-		RootElement certification, format;
-		LimitedEntryElement name;
-		BooleanElement cfi, ifr;
+		RootElement format;
 
 		public SettingsViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
 			TabBarItem.Image = UIImage.FromBundle ("Images/sliders");
 			Title = "Settings";
 			Autorotate = true;
-		}
-
-		static RootElement CreatePilotCertificationElement (PilotCertification certification)
-		{
-			RootElement root = new RootElement ("Pilot Certification", new RadioGroup ("PilotCertification", 0));
-			Section section = new Section ();
-
-			foreach (PilotCertification value in Enum.GetValues (typeof (PilotCertification)))
-				section.Add (new RadioElement (value.ToHumanReadableName (), "PilotCertification"));
-
-			root.Add (section);
-
-			root.RadioSelected = (int) certification;
-
-			return root;
 		}
 
 		static RootElement CreateFlightTimeFormatElement (FlightTimeFormat format)
@@ -77,25 +60,15 @@ namespace FlightLog
 
 		public override void LoadView ()
 		{
-			name = new LimitedEntryElement ("Pilot's Name", "Enter the name of the pilot.", Settings.PilotName);
-			cfi = new BooleanElement ("Certified Flight Instructor", Settings.IsCertifiedFlightInstructor);
-			ifr = new BooleanElement ("Instrument Rated / In-Training", Settings.IsInstrumentRated);
-			certification = CreatePilotCertificationElement (Settings.PilotCertification);
 			format = CreateFlightTimeFormatElement (Settings.FlightTimeFormat);
 
 			base.LoadView ();
 
-			Root.Add (new Section ("Pilot Information") { name, certification, ifr, cfi });
 			Root.Add (new Section ("LogBook Entry") { format });
 		}
 
 		public override void ViewWillDisappear (bool animated)
 		{
-			Settings.PilotCertification = (PilotCertification) certification.RadioSelected;
-			Settings.IsCertifiedFlightInstructor = cfi.Value;
-			Settings.IsInstrumentRated = ifr.Value;
-			Settings.PilotName = name.Value;
-
 			Settings.FlightTimeFormat = (FlightTimeFormat) format.RadioSelected;
 
 			base.ViewWillDisappear (animated);

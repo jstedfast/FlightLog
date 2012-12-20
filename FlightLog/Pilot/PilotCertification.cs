@@ -1,5 +1,5 @@
 //
-// Settings.cs
+// PilotCertification.cs
 //
 // Author: Jeffrey Stedfast <jeff@xamarin.com>
 //
@@ -26,35 +26,19 @@
 
 using System;
 
-using MonoTouch.Foundation;
-
 namespace FlightLog {
-	public enum FlightTimeFormat {
-		[HumanReadableName ("Decimal Format")]
-		Decimal,
-		[HumanReadableName ("Standard Format (hh:mm)")]
-		Standard
-	}
-
-	public static class Settings
-	{
-		static NSUserDefaults settings = NSUserDefaults.StandardUserDefaults;
-
-		public static FlightTimeFormat FlightTimeFormat {
-			get {
-				string str = settings.StringForKey ("FlightTimeFormat");
-				FlightTimeFormat value;
-
-				if (!string.IsNullOrEmpty (str)) {
-					if (Enum.TryParse<FlightTimeFormat> (str, out value))
-						return value;
-				}
-
-				return FlightTimeFormat.Decimal;
-			}
-			set {
-				settings.SetString (value.ToString (), "FlightTimeFormat");
-			}
-		}
+	public enum PilotCertification {
+		[HumanReadableName ("Student Pilot")]
+		Student,
+		[HumanReadableName ("Sport Pilot")]
+		Sport,
+		[HumanReadableName ("Recreational Pilot")]
+		Recreational,
+		[HumanReadableName ("Private Pilot")]
+		Private,
+		[HumanReadableName ("Commercial Pilot")]
+		Commercial,
+		[HumanReadableName ("Airline Transport Pilot")]
+		AirlineTransport
 	}
 }

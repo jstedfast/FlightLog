@@ -8,78 +8,6 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Pilot Information</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSTextFieldSpecifier</string>
-			<key>Title</key>
-			<string>Pilot Name</string>
-			<key>AutocapitalizationType</key>
-			<string>Words</string>
-			<key>AutocorrectionType</key>
-			<string>No</string>
-			<key>KeyboardType</key>
-			<string>Alphabet</string>
-			<key>IsSecure</key>
-			<false/>
-			<key>Key</key>
-			<string>PilotName</string>
-			<key>DefaultValue</key>
-			<string></string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSMultiValueSpecifier</string>
-			<key>Title</key>
-			<string>Pilot Certification</string>
-			<key>Key</key>
-			<string>PilotCertification</string>
-			<key>DefaultValue</key>
-			<string>Private</string>
-			<key>Titles</key>
-			<array>
-				<string>Student Pilot</string>
-				<string>Sport Pilot</string>
-				<string>Recreational Pilot</string>
-				<string>Private Pilot</string>
-				<string>Commercial Pilot</string>
-				<string>Airline Transport Pilot</string>
-			</array>
-			<key>Values</key>
-			<array>
-				<string>Student</string>
-				<string>Sport</string>
-				<string>Recreational</string>
-				<string>Private</string>
-				<string>Commercial</string>
-				<string>AirlineTransport</string>
-			</array>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Instrument Rated / In-Training</string>
-			<key>Key</key>
-			<string>IsInstrumentRated</string>
-			<key>DefaultValue</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Certified Flight Instructor</string>
-			<key>Key</key>
-			<string>IsCertifiedFlightInstructor</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-			<key>Title</key>
 			<string>LogBook Entry</string>
 		</dict>
 		<dict>
@@ -90,7 +18,7 @@
 			<key>Key</key>
 			<string>FlightTimeEntryFormat</string>
 			<key>DefaultValue</key>
-			<string>Standard</string>
+			<string>Decimal</string>
 			<key>Titles</key>
 			<array>
 				<string>Decimal Format</string>

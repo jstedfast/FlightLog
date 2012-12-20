@@ -79,19 +79,21 @@ namespace FlightLog {
 		{
 			// create a new window instance based on the screen size
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
-			
-			//var viewController0 = new SummarySplitViewController ();
-			var viewController1 = new FlightLogSplitViewController ();
-			var viewController2 = new AircraftSplitViewController ();
-			var viewController3 = new AirportViewController ();
-			var viewController4 = new UINavigationController (new SettingsViewController ());
+
+			var pilot = new PilotViewController (LogBook.Pilot);
+			var summary = new SummaryViewController ();
+			var logbook = new FlightLogSplitViewController ();
+			var aircraft = new AircraftSplitViewController ();
+			var airports = new AirportViewController ();
+			var settings = new UINavigationController (new SettingsViewController ());
 			tabBarController = new FlightLogTabBarController ();
 			tabBarController.ViewControllers = new UIViewController [] {
-				//viewController0,
-				viewController1,
-				viewController2,
-				viewController3,
-				viewController4
+				pilot,
+				summary,
+				logbook,
+				aircraft,
+				airports,
+				settings
 			};
 			
 			window.RootViewController = tabBarController;

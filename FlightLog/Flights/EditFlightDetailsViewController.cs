@@ -54,7 +54,7 @@ namespace FlightLog {
 		
 		public EditFlightDetailsViewController (Flight flight, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
-			certification = Settings.PilotCertification;
+			certification = LogBook.Pilot.Certification;
 			this.exists = exists;
 			Flight = flight;
 		}
@@ -68,7 +68,7 @@ namespace FlightLog {
 		}
 
 		bool IsFlightInstructor {
-			get { return Settings.IsCertifiedFlightInstructor; }
+			get { return LogBook.Pilot.IsCertifiedFlightInstructor; }
 		}
 		
 		public override UITableView MakeTableView (RectangleF bounds, UITableViewStyle style)
@@ -252,7 +252,7 @@ namespace FlightLog {
 			get {
 				return Flight.InstrumentActual > 0 || Flight.InstrumentHood > 0 || Flight.InstrumentSimulator > 0 ||
 					Flight.InstrumentApproaches > 0 || Flight.InstrumentHoldingProcedures ||
-						Settings.IsInstrumentRated;
+						LogBook.Pilot.IsInstrumentRated;
 			}
 		}
 

@@ -101,7 +101,7 @@ namespace FlightLog
 			return string.Join (", ", visited.ToArray ());
 		}
 
-		static string FormatFlightTime (int seconds, bool force)
+		internal static string FormatFlightTime (int seconds, bool force)
 		{
 			if (seconds == 0 && !force)
 				return null;

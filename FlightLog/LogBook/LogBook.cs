@@ -37,13 +37,15 @@ namespace FlightLog {
 	public static class LogBook
 	{
 		static SQLiteConnection sqlitedb;
-		
+		static Pilot pilot;
+
 		public static void Init ()
 		{
 			string docsDir = Environment.GetFolderPath (Environment.SpecialFolder.Personal);
 			string logbook = Path.Combine (docsDir, "LogBook.sqlite");
 			
 			sqlitedb = new SQLiteConnection (logbook);
+			sqlitedb.CreateTable<Pilot> ();
 			sqlitedb.CreateTable<Flight> ();
 			sqlitedb.CreateTable<Aircraft> ();
 		}
@@ -51,6 +53,54 @@ namespace FlightLog {
 		public static SQLiteConnection SQLiteDB {
 			get { return sqlitedb; }
 		}
+
+		#region Pilot
+		public static Pilot Pilot {
+			get {
+				if (pilot == null) {
+					var result = sqlitedb.Query<Pilot> ("select * from Pilot limit 1");
+					pilot = result.Count > 0 ? result[0] : null;
+
+					if (pilot == null) {
+						pilot = new Pilot ();
+						sqlitedb.Insert (pilot);
+					}
+				}
+
+				return pilot;
+			}
+		}
+
+		/// <summary>
+		/// Update the pilot information.
+		/// </summary>
+		/// <param name='pilot'>
+		/// The pilot to update.
+		/// </param>
+		public static bool Update (Pilot pilot)
+		{
+			if (sqlitedb.Update (pilot) > 0) {
+				OnPilotUpdated ();
+				pilot.OnUpdated ();
+				return true;
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Event that occurs when the Pilot is updated in the LogBook.
+		/// </summary>
+		public static event EventHandler<EventArgs> PilotUpdated;
+
+		static void OnPilotUpdated ()
+		{
+			var handler = PilotUpdated;
+
+			if (handler != null)
+				handler (null, EventArgs.Empty);
+		}
+		#endregion
 		
 		#region Aircraft
 		/// <summary>

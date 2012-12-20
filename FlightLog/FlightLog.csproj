@@ -125,7 +125,6 @@
     <Compile Include="Utilities\PhotoManager.cs" />
     <Compile Include="Elements\DialogView.cs" />
     <Compile Include="Aircraft\EditAircraftProfileView.cs" />
-    <Compile Include="Summary\SummarySplitViewController.cs" />
     <Compile Include="Summary\SummaryViewController.cs" />
     <Compile Include="Summary\CurrencyElement.cs" />
     <Compile Include="Elements\YearSection.cs" />
@@ -138,6 +137,9 @@
     <Compile Include="Aircraft\AircraftTableViewCell.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Settings\SettingsViewController.cs" />
+    <Compile Include="Pilot\Pilot.cs" />
+    <Compile Include="Pilot\PilotViewController.cs" />
+    <Compile Include="Pilot\PilotCertification.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
@@ -166,6 +168,7 @@
     <Folder Include="Settings\" />
     <Folder Include="Resources\" />
     <Folder Include="Resources\Settings.bundle\" />
+    <Folder Include="Pilot\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

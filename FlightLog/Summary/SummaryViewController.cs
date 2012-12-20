@@ -35,15 +35,45 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class SummaryViewController : DialogViewController
 	{
-		FlightDetailsViewController details;
-		
-		public SummaryViewController (FlightDetailsViewController details) :
-			base (UITableViewStyle.Plain, new RootElement (null))
+		public SummaryViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
-			Title = "FAA Currency";
+			TabBarItem.Image = UIImage.FromBundle ("Images/ekg");
 			EnableSearch = false;
-			
-			this.details = details;
+			Title = "Summary";
+		}
+
+		static DateTime GetMonthsAgo (int months)
+		{
+			var date = DateTime.Now.AddMonths (-months);
+
+			return date.Subtract (new TimeSpan (0, date.Hour, date.Minute, date.Second, date.Millisecond));
+		}
+
+		void LoadFlightTimeTotals ()
+		{
+			DateTime twelveMonthsAgo = GetMonthsAgo (12);
+			DateTime sixMonthsAgo = GetMonthsAgo (6);
+			int last12months = 0;
+			int last6months = 0;
+			int total = 0;
+
+			foreach (var flight in LogBook.GetAllFlights ()) {
+				if (flight.Date >= sixMonthsAgo) {
+					last12months += flight.FlightTime;
+					last6months += flight.FlightTime;
+				} if (flight.Date >= twelveMonthsAgo) {
+					last12months += flight.FlightTime;
+				}
+				total += flight.FlightTime;
+			}
+
+			Section totals = new Section ("Totals") {
+				new StringElement ("Total", FlightExtension.FormatFlightTime (total, true)),
+				new StringElement ("12 Months", FlightExtension.FormatFlightTime (last12months, true)),
+				new StringElement ("6 Months", FlightExtension.FormatFlightTime (last6months, true)),
+			};
+
+			Root.Add (totals);
 		}
 		
 		void AddLandingCurrency (Section section, List<Aircraft> list, AircraftClassification @class, bool night, bool tailDragger)
@@ -158,6 +188,7 @@ namespace FlightLog {
 		
 		void LoadSummary ()
 		{
+			LoadFlightTimeTotals ();
 			LoadDayAndNightCurrency ();
 			LoadInstrumentCurrency ();
 		}
