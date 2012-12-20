@@ -153,12 +153,16 @@ namespace FlightLog {
 			string caption = "Instrument Current";
 			DateTime oldestApproach = DateTime.Now;
 			int approaches = 0;
+			int holds = 0;
 			
 			foreach (var flight in LogBook.GetFlightsForInstrumentCurrencyRequirements (list)) {
 				approaches += flight.InstrumentApproaches;
+				if (flight.InstrumentHoldingProcedures)
+					holds++;
+
 				oldestApproach = flight.Date;
 				
-				if (approaches >= 6) {
+				if (approaches >= 6 && holds > 0) {
 					DateTime expires = GetInstrumentCurrencyExipirationDate (oldestApproach);
 					section.Add (new CurrencyElement (caption, expires));
 					return;
