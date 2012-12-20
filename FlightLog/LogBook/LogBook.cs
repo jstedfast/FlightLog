@@ -526,6 +526,28 @@ namespace FlightLog {
 			
 			return false;
 		}
+
+		static IEnumerable<Flight> EnumerateFlights (string countQuery, string query)
+		{
+			var cmd = sqlitedb.CreateCommand (countQuery);
+			int count = cmd.ExecuteScalar<int> ();
+			List<Flight> flights;
+			int startIndex = 0;
+			int limit;
+
+			while (startIndex < count) {
+				limit = Math.Min (count - startIndex, 64);
+				cmd = sqlitedb.CreateCommand (query + " limit ? offset ?", limit, startIndex);
+				flights = cmd.ExecuteQuery<Flight> ();
+
+				foreach (var flight in flights)
+					yield return flight;
+
+				startIndex += limit;
+			}
+
+			yield break;
+		}
 		
 		/// <summary>
 		/// Gets a list of all of the logged flights.
@@ -533,9 +555,9 @@ namespace FlightLog {
 		/// <returns>
 		/// A list of all of the logged flights.
 		/// </returns>
-		public static List<Flight> GetAllFlights ()
+		public static IEnumerable<Flight> GetAllFlights ()
 		{
-			return sqlitedb.Query<Flight> ("select * from Flight order by Date desc");
+			return EnumerateFlights ("select count (*) from Flight", "select * from Flight order by Date desc");
 		}
 		
 		/// <summary>

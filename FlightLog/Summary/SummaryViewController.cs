@@ -44,9 +44,7 @@ namespace FlightLog {
 
 		static DateTime GetMonthsAgo (int months)
 		{
-			var date = DateTime.Now.AddMonths (-months);
-
-			return date.Subtract (new TimeSpan (0, date.Hour, date.Minute, date.Second, date.Millisecond));
+			return DateTime.Today.AddMonths (-months);
 		}
 
 		void LoadFlightTimeTotals ()

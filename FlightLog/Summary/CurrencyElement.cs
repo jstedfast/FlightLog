@@ -53,7 +53,7 @@ namespace FlightLog {
 					DetailTextLabel.Text = string.Format ("Current until {0}", value.ToShortDateString ());
 				} else {
 					DetailTextLabel.TextColor = UIColor.Red;
-					DetailTextLabel.Text = string.Format ("Expired on {0}", value.ToShortDateString ());
+					DetailTextLabel.Text = "Expired";
 				}
 			}
 		}
