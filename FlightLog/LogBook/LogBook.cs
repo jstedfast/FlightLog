@@ -62,7 +62,7 @@ namespace FlightLog {
 					pilot = result.Count > 0 ? result[0] : null;
 
 					if (pilot == null) {
-						pilot = new Pilot ();
+						pilot = new Pilot () { BirthDate = DateTime.Today };
 						sqlitedb.Insert (pilot);
 					}
 				}

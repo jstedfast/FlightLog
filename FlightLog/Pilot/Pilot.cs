@@ -31,8 +31,13 @@ using MonoTouch.SQLite;
 namespace FlightLog {
 	public class Pilot
 	{
+		public static readonly DateTime WrightBrosFirstFlight = new DateTime (1903, 12, 17, 0, 0, 0, DateTimeKind.Local);
+
 		public Pilot ()
 		{
+			BirthDate = WrightBrosFirstFlight;
+			LastMedicalExam = WrightBrosFirstFlight;
+			LastFlightReview = WrightBrosFirstFlight;
 		}
 
 		[PrimaryKey][AutoIncrement]
@@ -61,7 +66,11 @@ namespace FlightLog {
 			get; set;
 		}
 
-		public DateTime LastMedical {
+		public DateTime LastMedicalExam {
+			get; set;
+		}
+
+		public DateTime LastFlightReview {
 			get; set;
 		}
 

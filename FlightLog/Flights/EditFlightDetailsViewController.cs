@@ -46,7 +46,7 @@ namespace FlightLog {
 		PilotCertification certification;
 		AircraftEntryElement aircraft;
 		UIBarButtonItem cancel, save;
-		FlightDateEntryElement date;
+		DateEntryElement date;
 		bool autoFlightTimes = true;
 		UIAlertViewDelegate del;
 		UIAlertView alert;
@@ -168,7 +168,7 @@ namespace FlightLog {
 		{
 			AirportEntryElement airport;
 
-			date = new FlightDateEntryElement ("Date", Flight.Date);
+			date = new DateEntryElement ("Date", Flight.Date);
 			aircraft = new AircraftEntryElement (Flight.Aircraft) { AutoComplete = true };
 			departed = new AirportEntryElement ("Departed", Flight.AirportDeparted);
 			arrived = new AirportEntryElement ("Arrived", Flight.AirportArrived);

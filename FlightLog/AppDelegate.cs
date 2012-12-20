@@ -80,7 +80,7 @@ namespace FlightLog {
 			// create a new window instance based on the screen size
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 
-			var pilot = new PilotViewController (LogBook.Pilot);
+			var pilot = new UINavigationController (new PilotViewController (LogBook.Pilot));
 			var summary = new SummaryViewController ();
 			var logbook = new FlightLogSplitViewController ();
 			var aircraft = new AircraftSplitViewController ();

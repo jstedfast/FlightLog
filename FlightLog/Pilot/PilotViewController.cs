@@ -33,7 +33,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class PilotViewController : DialogViewController
 	{
-		FlightDateEntryElement birthday, medical;
+		DateEntryElement birthday, medical, review;
 		RootElement certification;
 		LimitedEntryElement name;
 		BooleanElement cfi, ifr;
@@ -70,12 +70,15 @@ namespace FlightLog {
 			name = new LimitedEntryElement ("Name", "Enter the name of the pilot.", Pilot.Name);
 			cfi = new BooleanElement ("Certified Flight Instructor", Pilot.IsCertifiedFlightInstructor);
 			ifr = new BooleanElement ("Instrument Rated / In-Training", Pilot.IsInstrumentRated);
-			birthday = new FlightDateEntryElement ("Date of Birth", Pilot.BirthDate);
 			certification = CreatePilotCertificationElement (Pilot.Certification);
+			birthday = new DateEntryElement ("Date of Birth", Pilot.BirthDate);
+			medical = new DateEntryElement ("Last Medical Exam", Pilot.LastMedicalExam);
+			review = new DateEntryElement ("Last Flight Review", Pilot.LastFlightReview);
 
 			base.LoadView ();
 
 			Root.Add (new Section ("Pilot Information") { name, birthday, certification, ifr, cfi });
+			Root.Add (new Section ("Pilot Status") { medical, review });
 		}
 
 		public override void ViewWillDisappear (bool animated)
@@ -85,6 +88,9 @@ namespace FlightLog {
 			Pilot.IsInstrumentRated = ifr.Value;
 			Pilot.BirthDate = birthday.DateValue;
 			Pilot.Name = name.Value;
+
+			Pilot.LastMedicalExam = medical.DateValue;
+			Pilot.LastFlightReview = review.DateValue;
 
 			LogBook.Update (Pilot);
 

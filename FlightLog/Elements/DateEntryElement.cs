@@ -1,5 +1,5 @@
 // 
-// FlightDateEntryElement.cs
+// DateEntryElement.cs
 //  
 // Author: Jeffrey Stedfast <jeff@xamarin.com>
 // 
@@ -32,7 +32,7 @@ using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
-	public class FlightDateEntryElement : Element
+	public class DateEntryElement : Element
 	{
 		static readonly NSString FlightDateEntryElementCellKey = new NSString ("FlightDateEntryElement");
 		static SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
@@ -40,7 +40,7 @@ namespace FlightLog {
 		UIPopoverController popover;
 		UINavigationController nav;
 		
-		public FlightDateEntryElement (string caption, DateTime date) : base (caption)
+		public DateEntryElement (string caption, DateTime date) : base (caption)
 		{
 			DateValue = date;
 		}
@@ -131,9 +131,14 @@ namespace FlightLog {
 			public DatePickerController (DateTime date)
 			{
 				Title = "Pick a Date";
+
+				if (date < Pilot.WrightBrosFirstFlight)
+					date = Pilot.WrightBrosFirstFlight;
 				
 				View = picker = new UIDatePicker (new RectangleF (PointF.Empty, DatePickerSize)) {
 					AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
+					MinimumDate = (NSDate) Pilot.WrightBrosFirstFlight,
+					MaximumDate = NSDate.Now,
 					Mode = UIDatePickerMode.Date,
 					Date = date,
 				};

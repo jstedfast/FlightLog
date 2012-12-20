@@ -113,7 +113,6 @@
     <Compile Include="Elements\NumericEntryElement.cs" />
     <Compile Include="Elements\HobbsMeterEntryElement.cs" />
     <Compile Include="Elements\MultilineEntryElement.cs" />
-    <Compile Include="Elements\FlightDateEntryElement.cs" />
     <Compile Include="Flights\EditFlightDetailsViewController.cs" />
     <Compile Include="Flights\FlightDetailsViewController.cs" />
     <Compile Include="Flights\Flight.cs" />
@@ -140,6 +139,7 @@
     <Compile Include="Pilot\Pilot.cs" />
     <Compile Include="Pilot\PilotViewController.cs" />
     <Compile Include="Pilot\PilotCertification.cs" />
+    <Compile Include="Elements\DateEntryElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />
