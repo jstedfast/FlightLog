@@ -88,6 +88,13 @@ namespace FlightLog {
 			List<Totals> totals = new List<Totals> ();
 			DateTime twelveMonthsAgo = GetMonthsAgo (12);
 			DateTime sixMonthsAgo = GetMonthsAgo (6);
+			Dictionary<string, Aircraft> dict;
+			Aircraft aircraft;
+			int time;
+
+			dict = new Dictionary<string, Aircraft> ();
+			foreach (var craft in LogBook.GetAllAircraft ())
+				dict.Add (craft.TailNumber, craft);
 
 			totals.Add (new Totals ("Flight Time Totals", FlightProperty.FlightTime));
 			totals.Add (new Totals ("Pilot-in-Command Totals", FlightProperty.PilotInCommand));
@@ -97,41 +104,69 @@ namespace FlightLog {
 			totals.Add (new Totals ("Instrument (Actual) Totals", FlightProperty.InstrumentActual));
 			totals.Add (new Totals ("Instrument (Hood) Totals", FlightProperty.InstrumentHood));
 
+			totals.Add (new Totals ("Complex Totals", AircraftProperty.IsComplex));
+			totals.Add (new Totals ("High-Performance Totals", AircraftProperty.IsHighPerformance));
+			totals.Add (new Totals ("Taildragger Totals", AircraftProperty.IsTailDragger));
+			foreach (AircraftClassification @class in Enum.GetValues (typeof (AircraftClassification)))
+				totals.Add (new Totals (@class.ToHumanReadableName () + " Totals", @class));
+
 			foreach (var flight in LogBook.GetAllFlights ()) {
-				if (flight.Date >= sixMonthsAgo) {
-					foreach (var total in totals) {
-						total.Last12Months += flight.GetFlightTime ((FlightProperty) total.Property);
-						total.Last6Months += flight.GetFlightTime ((FlightProperty) total.Property);
-						total.Total += flight.GetFlightTime ((FlightProperty) total.Property);
+				foreach (var total in totals) {
+					if (total.Property is FlightProperty) {
+						time = flight.GetFlightTime ((FlightProperty) total.Property);
+					} else if (dict.TryGetValue (flight.Aircraft, out aircraft)) {
+						if (total.Property is AircraftProperty) {
+							if (!((bool) aircraft.GetValue ((AircraftProperty) total.Property)))
+								continue;
+
+							time = flight.FlightTime;
+						} else {
+							if (aircraft.Classification != (AircraftClassification) total.Property)
+								continue;
+
+							time = flight.FlightTime;
+						}
+					} else {
+						continue;
 					}
-				} if (flight.Date >= twelveMonthsAgo) {
-					foreach (var total in totals) {
-						total.Last12Months += flight.GetFlightTime ((FlightProperty) total.Property);
-						total.Total += flight.GetFlightTime ((FlightProperty) total.Property);
+
+					if (flight.Date >= sixMonthsAgo) {
+						total.Last12Months += time;
+						total.Last6Months += time;
+					} else if (flight.Date >= twelveMonthsAgo) {
+						total.Last12Months += time;
 					}
-				} else {
-					foreach (var total in totals) {
-						total.Total += flight.GetFlightTime ((FlightProperty) total.Property);
-					}
+
+					total.Total += time;
 				}
 			}
 
+			var aircraftTotals = new RootElement ("By Aircraft Category...");
 			var otherTotals = new RootElement ("Other Totals");
 			for (int i = 1; i < totals.Count; i++) {
 				if (totals[i].Total == 0)
 					continue;
-				
-				otherTotals.Add (new Section (totals[i].Title) {
-					new StringElement ("Total", FlightExtension.FormatFlightTime (totals[i].Total, true)),
-					new StringElement ("12 Months", FlightExtension.FormatFlightTime (totals[i].Last12Months, true)),
-					new StringElement ("6 Months", FlightExtension.FormatFlightTime (totals[i].Last6Months, true)),
-				});
+
+				if (totals[i].Property is FlightProperty) {
+					otherTotals.Add (new Section (totals[i].Title) {
+						new StringElement ("Total", FlightExtension.FormatFlightTime (totals[i].Total, true)),
+						new StringElement ("12 Months", FlightExtension.FormatFlightTime (totals[i].Last12Months, true)),
+						new StringElement ("6 Months", FlightExtension.FormatFlightTime (totals[i].Last6Months, true)),
+					});
+				} else {
+					aircraftTotals.Add (new Section (totals[i].Title) {
+						new StringElement ("Total", FlightExtension.FormatFlightTime (totals[i].Total, true)),
+						new StringElement ("12 Months", FlightExtension.FormatFlightTime (totals[i].Last12Months, true)),
+						new StringElement ("6 Months", FlightExtension.FormatFlightTime (totals[i].Last6Months, true)),
+					});
+				}
 			}
 
 			Root.Add (new Section (totals[0].Title) {
 				new StringElement ("Total", FlightExtension.FormatFlightTime (totals[0].Total, true)),
 				new StringElement ("12 Months", FlightExtension.FormatFlightTime (totals[0].Last12Months, true)),
 				new StringElement ("6 Months", FlightExtension.FormatFlightTime (totals[0].Last6Months, true)),
+				aircraftTotals,
 				otherTotals
 			});
 		}
@@ -256,7 +291,7 @@ namespace FlightLog {
 			LoadDayAndNightCurrency ();
 			LoadInstrumentCurrency ();
 		}
-		
+
 		public override void ViewWillAppear (bool animated)
 		{
 			Root.Clear ();
