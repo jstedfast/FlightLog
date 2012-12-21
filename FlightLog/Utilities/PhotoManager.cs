@@ -35,6 +35,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public static class PhotoManager
 	{
+		static readonly Size ThumbnailSize = new Size (192, 144); // @2x (Retina)
 		static LRUCache<string, UIImage> ThumbnailCache;
 		static string PhotosDir;
 		
@@ -133,7 +134,7 @@ namespace FlightLog {
 				return null;
 			
 			if (resize) {
-				UIImage scaled = ScaleToSize (image, 96, 72);
+				UIImage scaled = ScaleToSize (image, ThumbnailSize.Width, ThumbnailSize.Height);
 				NSError error;
 				
 				scaled.AsJPEG ().Save (Path.Combine (PhotosDir, tailNumber + "-thumb.jpg"), true, out error);

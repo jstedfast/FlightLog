@@ -1,5 +1,5 @@
 // 
-// SummaryViewController.cs
+// StatusViewController.cs
 //  
 // Author: Jeffrey Stedfast <jeff@xamarin.com>
 // 
