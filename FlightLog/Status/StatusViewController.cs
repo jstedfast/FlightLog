@@ -33,27 +33,6 @@ using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
-	public enum TotalsCategory {
-		[HumanReadableName ("Totals")]
-		Total,
-		[HumanReadableName ("Pilot-in-Command Totals")]
-		PIC,
-		[HumanReadableName ("Certified Flight Instructor Totals")]
-		CFI,
-		[HumanReadableName ("Complex Totals")]
-		Complex,
-		[HumanReadableName ("High Performance Totals")]
-		HighPerformance,
-		[HumanReadableName ("Taildragger Totals")]
-		Taildragger,
-		[HumanReadableName ("Night Totals")]
-		Night,
-		[HumanReadableName ("Instrument (Actual) Totals")]
-		InstrumentActual,
-		[HumanReadableName ("Simulated Instrument Totals")]
-		InstrumentSimulated,
-	}
-
 	public class Totals
 	{
 		public object Property { get; private set; }
