@@ -29,6 +29,59 @@ using System;
 using MonoTouch.SQLite;
 
 namespace FlightLog {
+	public enum FlightProperty {
+		Date,
+		Aircraft,
+		[HumanReadableName ("Departed")]
+		AirportDeparted,
+		[HumanReadableName ("Visited")]
+		AirportVisited1,
+		[HumanReadableName ("Visited")]
+		AirportVisited2,
+		[HumanReadableName ("Visited")]
+		AirportVisited3,
+		[HumanReadableName ("Visited")]
+		AirportVisited,
+		[HumanReadableName ("Arrived")]
+		AirportArrived,
+
+		[HumanReadableName ("Flight Time")]
+		FlightTime,
+		[HumanReadableName ("Cross-Country")]
+		IsCrossCountry,
+		[HumanReadableName ("Certified Flight Instructor")]
+		CertifiedFlightInstructor,
+		[HumanReadableName ("Dual Received")]
+		DualReceived,
+		[HumanReadableName ("Pilot In Command")]
+		PilotInCommand,
+		[HumanReadableName ("Second In Command")]
+		SecondInCommand,
+		[HumanReadableName ("Day Flying")]
+		Day,
+		[HumanReadableName ("Night Flying")]
+		Night,
+		[HumanReadableName ("Day Landings")]
+		DayLandings,
+		[HumanReadableName ("Night Landings")]
+		NightLandings,
+
+		[HumanReadableName ("Actual Time")]
+		InstrumentActual,
+		[HumanReadableName ("Hood Time")]
+		InstrumentHood,
+		[HumanReadableName ("Simulator Time")]
+		InstrumentSimulator,
+		[HumanReadableName ("Approaches")]
+		InstrumentApproaches,
+		[HumanReadableName ("Holding Procedures")]
+		InstrumentHoldingProcedures,
+		[HumanReadableName ("Safety Pilot")]
+		InstrumentSafetyPilot,
+
+		Remarks,
+	}
+
 	public class Flight {
 		public Flight (DateTime date)
 		{
@@ -308,6 +361,36 @@ namespace FlightLog {
 		[MaxLength (140)]
 		public string Remarks {
 			get; set;
+		}
+
+		public int GetFlightTime (FlightProperty property)
+		{
+			switch (property) {
+			case FlightProperty.FlightTime:
+				return FlightTime;
+			case FlightProperty.IsCrossCountry:
+				return IsCrossCountry ? FlightTime : 0;
+			case FlightProperty.CertifiedFlightInstructor:
+				return CertifiedFlightInstructor;
+			case FlightProperty.DualReceived:
+				return DualReceived;
+			case FlightProperty.PilotInCommand:
+				return PilotInCommand;
+			case FlightProperty.SecondInCommand:
+				return SecondInCommand;
+			case FlightProperty.Day:
+				return Day;
+			case FlightProperty.Night:
+				return Night;
+			case FlightProperty.InstrumentActual:
+				return InstrumentActual;
+			case FlightProperty.InstrumentHood:
+				return InstrumentHood;
+			case FlightProperty.InstrumentSimulator:
+				return InstrumentSimulator;
+			default:
+				throw new ArgumentOutOfRangeException ();
+			}
 		}
 		
 		/// <summary>

@@ -212,6 +212,19 @@ namespace FlightLog {
 		WeightShiftControlSea,
 		#endregion
 	}
+
+	public enum AircraftProperty {
+		TailNumber,
+		Make,
+		Model,
+		Category,
+		Classification,
+		IsComplex,
+		IsHighPerformance,
+		IsTailDragger,
+		IsSimulator,
+		Notes
+	}
 	
 	public class Aircraft
 	{
@@ -375,6 +388,34 @@ namespace FlightLog {
 			
 			set {
 				total = value;
+			}
+		}
+
+		public object GetValue (AircraftProperty property)
+		{
+			switch (property) {
+			case AircraftProperty.TailNumber:
+				return TailNumber;
+			case AircraftProperty.Make:
+				return Make;
+			case AircraftProperty.Model:
+				return Model;
+			case AircraftProperty.Category:
+				return Category;
+			case AircraftProperty.Classification:
+				return Classification;
+			case AircraftProperty.IsComplex:
+				return IsComplex;
+			case AircraftProperty.IsHighPerformance:
+				return IsHighPerformance;
+			case AircraftProperty.IsTailDragger:
+				return IsTailDragger;
+			case AircraftProperty.IsSimulator:
+				return IsSimulator;
+			case AircraftProperty.Notes:
+				return Notes;
+			default:
+				throw new ArgumentOutOfRangeException ();
 			}
 		}
 		

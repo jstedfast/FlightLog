@@ -29,59 +29,6 @@ using System.Collections.Generic;
 
 namespace FlightLog
 {
-	public enum FlightProperty {
-		Date,
-		Aircraft,
-		[HumanReadableName ("Departed")]
-		AirportDeparted,
-		[HumanReadableName ("Visited")]
-		AirportVisited1,
-		[HumanReadableName ("Visited")]
-		AirportVisited2,
-		[HumanReadableName ("Visited")]
-		AirportVisited3,
-		[HumanReadableName ("Visited")]
-		AirportVisited,
-		[HumanReadableName ("Arrived")]
-		AirportArrived,
-
-		[HumanReadableName ("Flight Time")]
-		FlightTime,
-		[HumanReadableName ("Cross-Country")]
-		IsCrossCountry,
-		[HumanReadableName ("Certified Flight Instructor")]
-		CertifiedFlightInstructor,
-		[HumanReadableName ("Dual Received")]
-		DualReceived,
-		[HumanReadableName ("Pilot In Command")]
-		PilotInCommand,
-		[HumanReadableName ("Second In Command")]
-		SecondInCommand,
-		[HumanReadableName ("Day Flying")]
-		Day,
-		[HumanReadableName ("Night Flying")]
-		Night,
-		[HumanReadableName ("Day Landings")]
-		DayLandings,
-		[HumanReadableName ("Night Landings")]
-		NightLandings,
-
-		[HumanReadableName ("Actual Time")]
-		InstrumentActual,
-		[HumanReadableName ("Hood Time")]
-		InstrumentHood,
-		[HumanReadableName ("Simulator Time")]
-		InstrumentSimulator,
-		[HumanReadableName ("Approaches")]
-		InstrumentApproaches,
-		[HumanReadableName ("Holding Procedures")]
-		InstrumentHoldingProcedures,
-		[HumanReadableName ("Safety Pilot")]
-		InstrumentSafetyPilot,
-
-		Remarks,
-	}
-
 	public static class FlightExtension
 	{
 		static string GetFlightAirportsVisited (Flight flight)
@@ -122,7 +69,7 @@ namespace FlightLog
 			}
 		}
 
-		public static string GetValue (this Flight flight, FlightProperty property)
+		public static string ToString (this Flight flight, FlightProperty property)
 		{
 			switch (property) {
 			case FlightProperty.Date:

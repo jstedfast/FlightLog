@@ -225,7 +225,7 @@ namespace FlightLog {
 		protected override string TitleForFooter (UITableView tableView, int section)
 		{
 			if (titles[section] == SectionTitle.Remarks)
-				return Flight.GetValue (FlightProperty.Remarks);
+				return Flight.ToString (FlightProperty.Remarks);
 
 			return null;
 		}
@@ -239,7 +239,7 @@ namespace FlightLog {
 
 			var property = sections[indexPath.Section][indexPath.Row];
 			cell.TextLabel.Text = property.ToHumanReadableName ();
-			cell.DetailTextLabel.Text = Flight.GetValue (property);
+			cell.DetailTextLabel.Text = Flight.ToString (property);
 
 			return cell;
 		}
@@ -257,7 +257,7 @@ namespace FlightLog {
 				List<FlightProperty> section = null;
 
 				foreach (var property in PropertySections[i]) {
-					if (Flight.GetValue (property) != null) {
+					if (Flight.ToString (property) != null) {
 						if (section == null)
 							section = new List<FlightProperty> ();
 						section.Add (property);

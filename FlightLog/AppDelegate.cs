@@ -81,7 +81,7 @@ namespace FlightLog {
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
 
 			var pilot = new UINavigationController (new PilotViewController (LogBook.Pilot));
-			var summary = new SummaryViewController ();
+			var summary = new UINavigationController (new StatusViewController ());
 			var logbook = new FlightLogSplitViewController ();
 			var aircraft = new AircraftSplitViewController ();
 			var airports = new AirportViewController ();

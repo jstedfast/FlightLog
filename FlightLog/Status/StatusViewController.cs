@@ -33,13 +33,49 @@ using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
-	public class SummaryViewController : DialogViewController
+	public enum TotalsCategory {
+		[HumanReadableName ("Totals")]
+		Total,
+		[HumanReadableName ("Pilot-in-Command Totals")]
+		PIC,
+		[HumanReadableName ("Certified Flight Instructor Totals")]
+		CFI,
+		[HumanReadableName ("Complex Totals")]
+		Complex,
+		[HumanReadableName ("High Performance Totals")]
+		HighPerformance,
+		[HumanReadableName ("Taildragger Totals")]
+		Taildragger,
+		[HumanReadableName ("Night Totals")]
+		Night,
+		[HumanReadableName ("Instrument (Actual) Totals")]
+		InstrumentActual,
+		[HumanReadableName ("Simulated Instrument Totals")]
+		InstrumentSimulated,
+	}
+
+	public class Totals
 	{
-		public SummaryViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
+		public object Property { get; private set; }
+		public string Title { get; private set; }
+		public int Last12Months;
+		public int Last6Months;
+		public int Total;
+
+		public Totals (string title, object property)
+		{
+			Property = property;
+			Title = title;
+		}
+	}
+
+	public class StatusViewController : DialogViewController
+	{
+		public StatusViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
 			TabBarItem.Image = UIImage.FromBundle ("Images/ekg");
 			EnableSearch = false;
-			Title = "Summary";
+			Title = "Status";
 		}
 
 		static DateTime GetMonthsAgo (int months)
@@ -49,29 +85,55 @@ namespace FlightLog {
 
 		void LoadFlightTimeTotals ()
 		{
+			List<Totals> totals = new List<Totals> ();
 			DateTime twelveMonthsAgo = GetMonthsAgo (12);
 			DateTime sixMonthsAgo = GetMonthsAgo (6);
-			int last12months = 0;
-			int last6months = 0;
-			int total = 0;
+
+			totals.Add (new Totals ("Flight Time Totals", FlightProperty.FlightTime));
+			totals.Add (new Totals ("Pilot-in-Command Totals", FlightProperty.PilotInCommand));
+			totals.Add (new Totals ("Certified Flight Instructor Totals", FlightProperty.CertifiedFlightInstructor));
+			totals.Add (new Totals ("Cross-Country Totals", FlightProperty.IsCrossCountry));
+			totals.Add (new Totals ("Night Totals", FlightProperty.Night));
+			totals.Add (new Totals ("Instrument (Actual) Totals", FlightProperty.InstrumentActual));
+			totals.Add (new Totals ("Instrument (Hood) Totals", FlightProperty.InstrumentHood));
 
 			foreach (var flight in LogBook.GetAllFlights ()) {
 				if (flight.Date >= sixMonthsAgo) {
-					last12months += flight.FlightTime;
-					last6months += flight.FlightTime;
+					foreach (var total in totals) {
+						total.Last12Months += flight.GetFlightTime ((FlightProperty) total.Property);
+						total.Last6Months += flight.GetFlightTime ((FlightProperty) total.Property);
+						total.Total += flight.GetFlightTime ((FlightProperty) total.Property);
+					}
 				} if (flight.Date >= twelveMonthsAgo) {
-					last12months += flight.FlightTime;
+					foreach (var total in totals) {
+						total.Last12Months += flight.GetFlightTime ((FlightProperty) total.Property);
+						total.Total += flight.GetFlightTime ((FlightProperty) total.Property);
+					}
+				} else {
+					foreach (var total in totals) {
+						total.Total += flight.GetFlightTime ((FlightProperty) total.Property);
+					}
 				}
-				total += flight.FlightTime;
 			}
 
-			Section totals = new Section ("Totals") {
-				new StringElement ("Total", FlightExtension.FormatFlightTime (total, true)),
-				new StringElement ("12 Months", FlightExtension.FormatFlightTime (last12months, true)),
-				new StringElement ("6 Months", FlightExtension.FormatFlightTime (last6months, true)),
-			};
+			var otherTotals = new RootElement ("Other Totals");
+			for (int i = 1; i < totals.Count; i++) {
+				if (totals[i].Total == 0)
+					continue;
+				
+				otherTotals.Add (new Section (totals[i].Title) {
+					new StringElement ("Total", FlightExtension.FormatFlightTime (totals[i].Total, true)),
+					new StringElement ("12 Months", FlightExtension.FormatFlightTime (totals[i].Last12Months, true)),
+					new StringElement ("6 Months", FlightExtension.FormatFlightTime (totals[i].Last6Months, true)),
+				});
+			}
 
-			Root.Add (totals);
+			Root.Add (new Section (totals[0].Title) {
+				new StringElement ("Total", FlightExtension.FormatFlightTime (totals[0].Total, true)),
+				new StringElement ("12 Months", FlightExtension.FormatFlightTime (totals[0].Last12Months, true)),
+				new StringElement ("6 Months", FlightExtension.FormatFlightTime (totals[0].Last6Months, true)),
+				otherTotals
+			});
 		}
 		
 		void AddLandingCurrency (Section section, List<Aircraft> list, AircraftClassification @class, bool night, bool tailDragger)
