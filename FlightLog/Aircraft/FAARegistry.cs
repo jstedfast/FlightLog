@@ -65,9 +65,19 @@ namespace FlightLog
 		const string ModelKey = "Model";
 		const string HostName = "registry.faa.gov";
 
+		static Dictionary<string, string> manufacturers;
 		static NetworkReachability reachability = null;
 		static NetworkReachabilityFlags flags;
 		static bool haveFlags = false;
+
+		static FAARegistry ()
+		{
+			manufacturers = new Dictionary<string, string> ();
+			manufacturers.Add ("BEECH", "Beechcraft");
+			manufacturers.Add ("BELLANCA", "Bellanca Aircraft Company");
+			manufacturers.Add ("CESSNA", "Cessna Aircraft Company");
+			manufacturers.Add ("PIPER", "Piper Aircraft");
+		}
 
 		static void ReachabilityChanged (NetworkReachabilityFlags flags)
 		{
@@ -107,6 +117,16 @@ namespace FlightLog
 				sb.Append (char.ToLowerInvariant (name[i]));
 
 			return sb.ToString ();
+		}
+
+		static string GetManufacturer (string name)
+		{
+			string make;
+
+			if (manufacturers.TryGetValue (name, out make))
+				return make;
+
+			return Normalize (name);
 		}
 
 		static AircraftDetails ParseAircraftDetails (Stream stream)
@@ -155,7 +175,7 @@ namespace FlightLog
 			string make, model;
 
 			if (metadata.TryGetValue (ManufacturerKey, out make))
-				make = Normalize (make);
+				make = GetManufacturer (make);
 			else
 				make = null;
 
