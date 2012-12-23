@@ -111,10 +111,22 @@ namespace FlightLog
 		static string Normalize (string name)
 		{
 			StringBuilder sb = new StringBuilder (name.Length);
+			bool upper = false;
 
 			sb.Append (char.ToUpperInvariant (name[0]));
-			for (int i = 1; i < name.Length; i++)
-				sb.Append (char.ToLowerInvariant (name[i]));
+			for (int i = 1; i < name.Length; i++) {
+				if (char.IsWhiteSpace (name[i])) {
+					sb.Append (name[i]);
+					upper = true;
+					continue;
+				}
+
+				if (upper) {
+					sb.Append (char.ToUpperInvariant (name[i]));
+					upper = false;
+				} else
+					sb.Append (char.ToLowerInvariant (name[i]));
+			}
 
 			return sb.ToString ();
 		}
