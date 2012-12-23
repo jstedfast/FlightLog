@@ -187,7 +187,7 @@ namespace FlightLog {
 			if (!CanDelete (aircraft))
 				return false;
 			
-			if (sqlitedb.Delete<Aircraft> (aircraft) > 0) {
+			if (sqlitedb.Delete<Aircraft> (aircraft.Id) > 0) {
 				PhotoManager.Delete (aircraft.TailNumber);
 				OnAircraftDeleted (aircraft);
 				return true;
@@ -458,7 +458,7 @@ namespace FlightLog {
 		/// </param>
 		public static bool Delete (Flight flight)
 		{
-			if (sqlitedb.Delete<Flight> (flight) > 0) {
+			if (sqlitedb.Delete<Flight> (flight.Id) > 0) {
 				OnFlightDeleted (flight);
 				return true;
 			}
