@@ -115,12 +115,10 @@ namespace FlightLog {
 				return;
 			}
 			
-			NSIndexPath path = NSIndexPath.FromRowSection (section, row);
-			NSIndexPath[] rows = new NSIndexPath[1];
-			rows[0] = path;
+			NSIndexPath path = NSIndexPath.FromRowSection (row, section);
 			
 			// Add the row to the table...
-			tableView.InsertRows (rows, UITableViewRowAnimation.Automatic);
+			tableView.InsertRows (new NSIndexPath[] { path }, UITableViewRowAnimation.Automatic);
 			
 			// Select and scroll to the newly added aircraft...
 			
