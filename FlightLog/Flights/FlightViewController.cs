@@ -293,10 +293,9 @@ namespace FlightLog {
 					row = count - 1;
 			}
 
-			using (var path = NSIndexPath.FromRowSection (row, section)) {
-				tableView.SelectRow (path, true, UITableViewScrollPosition.None);
-				RowSelected (tableView, path);
-			}
+			NSIndexPath path = NSIndexPath.FromRowSection (row, section));
+			tableView.SelectRow (path, true, UITableViewScrollPosition.None);
+			RowSelected (tableView, path);
 		}
 		
 		void OnAddClicked (object sender, EventArgs args)
