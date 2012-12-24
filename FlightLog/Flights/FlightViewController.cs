@@ -258,14 +258,13 @@ namespace FlightLog {
 				tableView.DeleteRows (rows, UITableViewRowAnimation.Automatic);
 			} else {
 				// This section only has the row the user is deleting, so remove the entire section.
-				var sections = NSIndexSet.FromIndex (indexPath.Section);
-				
-				// Reset the models...
-				SearchModel.ReloadData ();
-				Model.ReloadData ();
-				
-				tableView.DeleteSections (sections, UITableViewRowAnimation.Automatic);
-				sections.Dispose ();
+				using (var sections = NSIndexSet.FromIndex (indexPath.Section)) {
+					// Reset the models...
+					SearchModel.ReloadData ();
+					Model.ReloadData ();
+
+					tableView.DeleteSections (sections, UITableViewRowAnimation.Automatic);
+				}
 			}
 			
 			if (tableView != TableView) {
@@ -274,6 +273,29 @@ namespace FlightLog {
 				TableView.ReloadData ();
 			} else if (Model.SectionCount == 0) {
 				OnAddClicked (null, null);
+				return;
+			}
+
+			// Update the selection...
+			int section, row;
+			int count;
+
+			if (indexPath.Section >= model.SectionCount) {
+				// Select the last row of the last section
+				section = model.SectionCount - 1;
+				row = model.GetRowCount (section) - 1;
+			} else {
+				section = indexPath.Section;
+				count = model.GetRowCount (section);
+				if (indexPath.Row < count)
+					row = indexPath.Row;
+				else
+					row = count - 1;
+			}
+
+			using (var path = NSIndexPath.FromRowSection (row, section)) {
+				tableView.SelectRow (path, true, UITableViewScrollPosition.None);
+				RowSelected (tableView, path);
 			}
 		}
 		

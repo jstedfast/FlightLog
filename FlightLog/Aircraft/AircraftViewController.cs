@@ -121,7 +121,7 @@ namespace FlightLog {
 			tableView.InsertRows (new NSIndexPath[] { path }, UITableViewRowAnimation.Automatic);
 			
 			// Select and scroll to the newly added aircraft...
-			
+
 			// From Apple's documentation:
 			//
 			// To scroll to the newly selected row with minimum scrolling, select the row using
@@ -209,14 +209,11 @@ namespace FlightLog {
 		
 		void OnAircraftDeleted (UITableView tableView, NSIndexPath indexPath)
 		{
-			var rows = new NSIndexPath[1];
-			rows[0] = indexPath;
-			
 			// Reset the models...
 			SearchModel.ReloadData ();
 			Model.ReloadData ();
 			
-			tableView.DeleteRows (rows, UITableViewRowAnimation.Automatic);
+			tableView.DeleteRows (new NSIndexPath[] { indexPath }, UITableViewRowAnimation.Automatic);
 			
 			if (tableView != TableView) {
 				// We've already deleted the item from the search model, but we
@@ -224,7 +221,21 @@ namespace FlightLog {
 				TableView.ReloadData ();
 			} else if (Model.SectionCount == 0) {
 				OnAddClicked (null, null);
+				return;
 			}
+
+			// Update the selection...
+			var model = ModelForTableView (tableView);
+			int count = model.GetRowCount (indexPath.Section);
+			NSIndexPath path;
+
+			if (indexPath.Row >= count)
+				path = NSIndexPath.FromRowSection (count - 1, indexPath.Section);
+			else
+				path = indexPath;
+
+			tableView.SelectRow (path, true, UITableViewScrollPosition.None);
+			RowSelected (tableView, path);
 		}
 		
 		void OnAddClicked (object sender, EventArgs args)
