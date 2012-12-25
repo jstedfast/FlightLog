@@ -89,7 +89,7 @@ namespace FlightLog {
 		}
 		
 		public int ValueAsSeconds {
-			set { base.Value = value > 0 ? Math.Round (value / 3600.0, 1).ToString () : string.Empty; }
+			set { base.Value = value > 0 ? Math.Round (value / 3600.0, 1).ToString ("F1") : string.Empty; }
 			get {
 				string str = base.Value;
 				int hours, tenths = 0;
@@ -121,6 +121,7 @@ namespace FlightLog {
 		protected override bool AllowTextChange (string currentText, NSRange changedRange, string replacementText, string result)
 		{
 			int maxHours = MaxValueAsSeconds / 3600;
+			int tenths = -1;
 			int hours = 0;
 			int dot = -1;
 
@@ -142,37 +143,26 @@ namespace FlightLog {
 					if (dot != -1)
 						return false;
 					dot = i;
-				} else {
+				} else if (dot == -1) {
 					hours = (hours * 10) + (result[i] - '0');
+				} else if (tenths == -1) {
+					tenths = result[i] - '0';
+				} else {
+					return false;
 				}
 			}
+
+			if (tenths == -1)
+				tenths = 0;
 
 			// Make sure total entered time is <= the max number of hours
 			if (hours > maxHours)
 				return false;
-			
-			if (dot != -1) {
-				if (dot + 1 == result.Length)
-					return true;
 
-				// Make sure we don't have more than 1 significant decimal point
-				if ((dot + 2) < result.Length)
-					return false;
-				
-				// Make sure the decimal value is in range
-				if ((dot + 1) < result.Length && (result[dot + 1] < '0' || result[dot + 1] > '9'))
-					return false;
-
-				// Parse the tenths digit
-				int tenths;
-				if (!Int32.TryParse (result.Substring (dot + 1), out tenths))
-					return false;
-
-				// Make sure the value does not exceed the maximum number of seconds
-				int seconds = (hours * 3600) + (tenths * 360);
-				if (seconds > MaxValueAsSeconds)
-					return false;
-			}
+			// Make sure the value does not exceed the maximum number of seconds
+			int seconds = (hours * 3600) + (tenths * 360);
+			if (seconds > MaxValueAsSeconds)
+				return false;
 			
 			return true;
 		}
