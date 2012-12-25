@@ -180,21 +180,20 @@ namespace FlightLog {
 			section.Add (aircraft);
 			section.Add (departed);
 
-			airport = new AirportEntryElement ("Visited", Flight.AirportVisited1 ?? "");
+			string str = Flight.AirportVisited;
+			if (!string.IsNullOrEmpty (str)) {
+				foreach (var via in str.Split (new char[] { ',' })) {
+					airport = new AirportEntryElement ("Visited", via.Trim ());
+					airport.EditingCompleted += OnVisitedAirportEdited;
+					section.Add (airport);
+					visited.Add (airport);
+				}
+			}
+
+			airport = new AirportEntryElement ("Visited", string.Empty);
+			airport.EditingCompleted += OnVisitedAirportEdited;
 			section.Add (airport);
 			visited.Add (airport);
-
-			if (true || !string.IsNullOrEmpty (Flight.AirportVisited2)) {
-				airport = new AirportEntryElement ("Visited", Flight.AirportVisited2 ?? "");
-				section.Add (airport);
-				visited.Add (airport);
-			}
-
-			if (true || !string.IsNullOrEmpty (Flight.AirportVisited3)) {
-				airport = new AirportEntryElement ("Visited", Flight.AirportVisited3 ?? "");
-				section.Add (airport);
-				visited.Add (airport);
-			}
 
 			section.Add (arrived);
 
@@ -312,6 +311,23 @@ namespace FlightLog {
 			GetAirportCode (arrived.Value, airports, missing);
 
 			return airports;
+		}
+
+		void OnVisitedAirportEdited (object sender, EventArgs e)
+		{
+			AirportEntryElement airport = (AirportEntryElement) sender;
+			int index = visited.IndexOf (airport);
+			int last = visited.Count - 1;
+
+			using (var path = airport.IndexPath) {
+				if (!string.IsNullOrEmpty (airport.Value) && index == last) {
+					// Add another Visited entry element...
+					airport = new AirportEntryElement ("Visited", string.Empty);
+					airport.EditingCompleted += OnVisitedAirportEdited;
+					Root[path.Section].Insert (path.Row + 1, UITableViewRowAnimation.Automatic, new Element[] { airport });
+					visited.Add (airport);
+				}
+			}
 		}
 
 		void DisableAutoFlightTimes (object sender, EventArgs e)
@@ -542,22 +558,34 @@ namespace FlightLog {
 			// We need at least a departure airport
 			HashSet<string> missing = new HashSet<string> ();
 			List<Airport> airports = new List<Airport> ();
-			string airport;
+			List<string> via = new List<string> ();
+			string code;
 			
-			if ((airport = GetAirportCode (departed.Value, airports, missing)) == null)
+			if ((code = GetAirportCode (departed.Value, airports, missing)) == null)
 				return;
-			
+
 			// Save the values back to the Flight record
-			Flight.Date = date.DateValue;
-			Flight.Aircraft = aircraft.Value;
-			Flight.AirportDeparted = airport;
-			Flight.AirportVisited1 = visited.Count > 0 ? GetAirportCode (visited[0].Value, airports, missing) : null;
-			Flight.AirportVisited2 = visited.Count > 1 ? GetAirportCode (visited[1].Value, airports, missing) : null;
-			Flight.AirportVisited3 = visited.Count > 2 ? GetAirportCode (visited[2].Value, airports, missing) : null;
+			Flight.AirportDeparted = code;
+
+			foreach (var airport in visited) {
+				if (string.IsNullOrEmpty (airport.Value))
+					continue;
+
+				code = GetAirportCode (airport.Value, airports, missing);
+				via.Add (code);
+			}
+
+			if (via.Count > 0)
+				Flight.AirportVisited = string.Join (", ", via);
+			else
+				Flight.AirportVisited = null;
+
 			Flight.AirportArrived = GetAirportCode (arrived.Value, airports, missing);
-			
 			if (Flight.AirportArrived == null)
 				Flight.AirportArrived = Flight.AirportDeparted;
+
+			Flight.Date = date.DateValue;
+			Flight.Aircraft = aircraft.Value;
 			
 			// Flight Time values
 			Flight.FlightTime = total.ValueAsSeconds;

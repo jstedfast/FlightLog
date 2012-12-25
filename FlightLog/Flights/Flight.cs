@@ -35,18 +35,16 @@ namespace FlightLog {
 		[HumanReadableName ("Departed")]
 		AirportDeparted,
 		[HumanReadableName ("Visited")]
-		AirportVisited1,
-		[HumanReadableName ("Visited")]
-		AirportVisited2,
-		[HumanReadableName ("Visited")]
-		AirportVisited3,
-		[HumanReadableName ("Visited")]
 		AirportVisited,
 		[HumanReadableName ("Arrived")]
 		AirportArrived,
 
 		[HumanReadableName ("Flight Time")]
 		FlightTime,
+		[HumanReadableName ("Day Flying")]
+		Day,
+		[HumanReadableName ("Night Flying")]
+		Night,
 		[HumanReadableName ("Cross-Country")]
 		CrossCountry,
 		[HumanReadableName ("Certified Flight Instructor")]
@@ -57,10 +55,6 @@ namespace FlightLog {
 		PilotInCommand,
 		[HumanReadableName ("Second In Command")]
 		SecondInCommand,
-		[HumanReadableName ("Day Flying")]
-		Day,
-		[HumanReadableName ("Night Flying")]
-		Night,
 		[HumanReadableName ("Day Landings")]
 		DayLandings,
 		[HumanReadableName ("Night Landings")]
@@ -127,10 +121,10 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets the ICAO code of the airport departed.
+		/// Gets or sets the FAA code of the airport departed.
 		/// </summary>
 		/// <value>
-		/// The ICAO code of the airport departed.
+		/// The FAA code of the airport departed.
 		/// </value>
 		[Indexed][MaxLength (4)][SQLiteSearchAlias ("departed")]
 		public string AirportDeparted {
@@ -138,10 +132,10 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets the ICAO code of the arrival airport.
+		/// Gets or sets the FAA code of the arrival airport.
 		/// </summary>
 		/// <value>
-		/// The ICAO code of the arrival airport.
+		/// The FAA code of the arrival airport.
 		/// </value>
 		[Indexed][MaxLength (4)][SQLiteSearchAlias ("arrived")]
 		public string AirportArrived {
@@ -149,35 +143,13 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets the ICAO code of the visited airport.
+		/// Gets or sets the FAA code of the visited airport.
 		/// </summary>
 		/// <value>
-		/// The ICAO code of the visited airport.
+		/// The FAA codes of the visited airports.
 		/// </value>
-		[Indexed][MaxLength (4)][SQLiteSearchAlias ("via")]
-		public string AirportVisited1 {
-			get; set;
-		}
-		
-		// <summary>
-		/// Gets or sets the ICAO code of the visited airport.
-		/// </summary>
-		/// <value>
-		/// The ICAO code of the visited airport.
-		/// </value>
-		[Indexed][MaxLength (4)][SQLiteSearchAlias ("via")]
-		public string AirportVisited2 {
-			get; set;
-		}
-		
-		// <summary>
-		/// Gets or sets the ICAO code of the visited airport.
-		/// </summary>
-		/// <value>
-		/// The ICAO code of the visited airport.
-		/// </value>
-		[Indexed][MaxLength (4)][SQLiteSearchAlias ("via")]
-		public string AirportVisited3 {
+		[Indexed][MaxLength (140)][SQLiteSearchAlias ("visited")][SQLiteSearchAlias ("via")]
+		public string AirportVisited {
 			get; set;
 		}
 		
@@ -372,6 +344,10 @@ namespace FlightLog {
 			switch (property) {
 			case FlightProperty.FlightTime:
 				return FlightTime;
+			case FlightProperty.Day:
+				return Day;
+			case FlightProperty.Night:
+				return Night;
 			case FlightProperty.CrossCountry:
 				return CrossCountry;
 			case FlightProperty.CertifiedFlightInstructor:
@@ -382,10 +358,6 @@ namespace FlightLog {
 				return PilotInCommand;
 			case FlightProperty.SecondInCommand:
 				return SecondInCommand;
-			case FlightProperty.Day:
-				return Day;
-			case FlightProperty.Night:
-				return Night;
 			case FlightProperty.InstrumentActual:
 				return InstrumentActual;
 			case FlightProperty.InstrumentHood:

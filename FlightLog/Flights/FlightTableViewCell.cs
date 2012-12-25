@@ -239,30 +239,26 @@ namespace FlightLog {
 						width -= size.Width;
 						x += size.Width;
 					}
-					
+
 					// Render any additional airports visited
-					List<string> visited = new List<string> ();
-					
-					if (flight.AirportVisited1 != null && flight.AirportVisited1.Length > 0)
-						visited.Add (flight.AirportVisited1);
-					if (flight.AirportVisited2 != null && flight.AirportVisited2.Length > 0)
-						visited.Add (flight.AirportVisited2);
-					if (flight.AirportVisited3 != null && flight.AirportVisited3.Length > 0)
-						visited.Add (flight.AirportVisited3);
-					
-					string[] prefix = new string[] { " via ", ", ", ", " };
-					for (int i = 0; i < visited.Count; i++) {
-						textColor.SetColor ();
-						rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
-						size = DrawString (prefix[i], rect, ViaFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
-						width -= size.Width;
-						x += size.Width;
-						
-						airportColor.SetColor ();
-						rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
-						size = DrawString (visited[i], rect, ViaBoldFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
-						width -= size.Width;
-						x += size.Width;
+					if (flight.AirportVisited != null) {
+						var visited = flight.AirportVisited.Split (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+						for (int i = 0; i < visited.Length; i++) {
+							string prefix = i == 0 ? " via " : ", ";
+
+							textColor.SetColor ();
+							rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
+							size = DrawString (prefix, rect, ViaFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+							width -= size.Width;
+							x += size.Width;
+
+							airportColor.SetColor ();
+							rect = new RectangleF (x, bounds.Y + ViaYOffset, width, ViaFontSize);
+							size = DrawString (visited[i], rect, ViaBoldFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
+							width -= size.Width;
+							x += size.Width;
+						}
 					}
 				}
 				

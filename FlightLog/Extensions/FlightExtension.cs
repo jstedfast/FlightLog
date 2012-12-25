@@ -31,23 +31,6 @@ namespace FlightLog
 {
 	public static class FlightExtension
 	{
-		static string GetFlightAirportsVisited (Flight flight)
-		{
-			List<string> visited = new List<string> ();
-
-			if (flight.AirportVisited1 != null && flight.AirportVisited1.Length > 0)
-				visited.Add (flight.AirportVisited1);
-			if (flight.AirportVisited2 != null && flight.AirportVisited2.Length > 0)
-				visited.Add (flight.AirportVisited2);
-			if (flight.AirportVisited3 != null && flight.AirportVisited3.Length > 0)
-				visited.Add (flight.AirportVisited3);
-
-			if (visited.Count == 0)
-				return null;
-
-			return string.Join (", ", visited.ToArray ());
-		}
-
 		internal static string FormatFlightTime (int seconds, bool force)
 		{
 			if (seconds == 0 && !force)
@@ -78,14 +61,8 @@ namespace FlightLog
 				return flight != null ? flight.Aircraft : string.Empty;
 			case FlightProperty.AirportDeparted:
 				return flight != null ? flight.AirportDeparted : string.Empty;
-			case FlightProperty.AirportVisited1:
-				return flight != null ? flight.AirportVisited1 : null;
-			case FlightProperty.AirportVisited2:
-				return flight != null ? flight.AirportVisited2 : null;
-			case FlightProperty.AirportVisited3:
-				return flight != null ? flight.AirportVisited3 : null;
 			case FlightProperty.AirportVisited:
-				return flight != null ? GetFlightAirportsVisited (flight) : null;
+				return flight != null ? flight.AirportVisited : null;
 			case FlightProperty.AirportArrived:
 				return flight != null ? flight.AirportArrived : string.Empty;
 			case FlightProperty.FlightTime:
