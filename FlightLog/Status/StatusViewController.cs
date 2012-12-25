@@ -90,23 +90,25 @@ namespace FlightLog {
 				totals.Add (new Totals (@class.ToHumanReadableName () + " Totals", @class));
 
 			foreach (var flight in LogBook.GetAllFlights ()) {
+				if (!dict.TryGetValue (flight.Aircraft, out aircraft))
+					continue;
+
 				foreach (var total in totals) {
 					if (total.Property is FlightProperty) {
-						time = flight.GetFlightTime ((FlightProperty) total.Property);
-					} else if (dict.TryGetValue (flight.Aircraft, out aircraft)) {
-						if (total.Property is AircraftProperty) {
-							if (!((bool) aircraft.GetValue ((AircraftProperty) total.Property)))
-								continue;
+						if (!aircraft.IsSimulator)
+							time = flight.GetFlightTime ((FlightProperty) total.Property);
+						else
+							time = 0;
+					} else if (total.Property is AircraftProperty) {
+						if (!((bool) aircraft.GetValue ((AircraftProperty) total.Property)))
+							continue;
 
-							time = flight.FlightTime;
-						} else {
-							if (aircraft.Classification != (AircraftClassification) total.Property)
-								continue;
-
-							time = flight.FlightTime;
-						}
+						time = flight.FlightTime;
 					} else {
-						continue;
+						if (aircraft.Classification != (AircraftClassification) total.Property)
+							continue;
+
+						time = flight.FlightTime;
 					}
 
 					if (flight.Date >= sixMonthsAgo) {
@@ -152,7 +154,7 @@ namespace FlightLog {
 		
 		void AddLandingCurrency (Section section, List<Aircraft> list, AircraftClassification @class, bool night, bool tailDragger)
 		{
-			string caption = string.Format ("{0} Current{1}", night ? "Night" : "Day", tailDragger ? " (TailDragger)" : "");
+			string caption = string.Format ("{0} Current{1}", night ? "Night" : "Day", tailDragger ? " (Taildragger)" : "");
 			DateTime oldestLanding = DateTime.Now;
 			int landings = 0;
 			
