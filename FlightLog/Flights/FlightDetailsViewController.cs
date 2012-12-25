@@ -72,6 +72,7 @@ namespace FlightLog {
 				FlightProperty.DualReceived,
 				FlightProperty.PilotInCommand,
 				FlightProperty.SecondInCommand,
+				FlightProperty.CrossCountry,
 				FlightProperty.Night,
 				FlightProperty.DayLandings,
 				FlightProperty.NightLandings,

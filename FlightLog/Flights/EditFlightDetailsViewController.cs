@@ -37,7 +37,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class EditFlightDetailsViewController : DialogViewController
 	{
-		HobbsMeterEntryElement total, dual, night, pic, sic, cfi, actual, hood, simulator;
+		HobbsMeterEntryElement total, dual, night, pic, sic, cfi, xc, actual, hood, simulator;
 		NumericEntryElement landDay, landNight, approaches;
 		LimitedEntryElement remarks, safetyPilot;
 		AirportEntryElement departed, arrived;
@@ -212,8 +212,9 @@ namespace FlightLog {
 				pic = new HobbsMeterEntryElement ("P.I.C.", "Time spent flying as Pilot in Command.", Flight.PilotInCommand);
 			sic = new HobbsMeterEntryElement ("S.I.C.", "Time spent flying as Second in Command.", Flight.SecondInCommand);
 			night = new HobbsMeterEntryElement ("Night Flying", "Time spent flying after dark.", Flight.Night);
+			xc = new HobbsMeterEntryElement ("Cross-Country", "Time spent flying cross-country.", Flight.CrossCountry);
 
-			// When the user enters the total flight time, default PIC, CFI, and/or DualReceived times as appropriate.
+			// When the user enters the total flight time, default XC, PIC, CFI, and/or DualReceived times as appropriate.
 			total.EditingCompleted += OnFlightTimeEntered;
 
 			// Disable auto-setting of the breakdown times if any of them are manually set.
@@ -221,6 +222,7 @@ namespace FlightLog {
 			cfi.EditingCompleted += DisableAutoFlightTimes;
 			pic.EditingCompleted += DisableAutoFlightTimes;
 			sic.EditingCompleted += DisableAutoFlightTimes;
+			xc.EditingCompleted += DisableAutoFlightTimes;
 
 			var section = new Section ("Flight Time");
 			section.Add (total);
@@ -231,6 +233,7 @@ namespace FlightLog {
 			if (certification >= PilotCertification.Private || Flight.SecondInCommand > 0)
 				section.Add (sic);
 			section.Add (night);
+			section.Add (xc);
 
 			return new RootElement ("Flight Time", 0, 0) { section };
 		}
@@ -295,6 +298,22 @@ namespace FlightLog {
 			return new Section ("Remarks") { remarks };
 		}
 
+		List<Airport> GetAirports ()
+		{
+			HashSet<string> missing = new HashSet<string> ();
+			List<Airport> airports = new List<Airport> ();
+
+			if (GetAirportCode (departed.Value, airports, missing) == null)
+				return null;
+
+			foreach (var via in visited)
+				GetAirportCode (via.Value, airports, missing);
+
+			GetAirportCode (arrived.Value, airports, missing);
+
+			return airports;
+		}
+
 		void DisableAutoFlightTimes (object sender, EventArgs e)
 		{
 			autoFlightTimes = false;
@@ -302,19 +321,27 @@ namespace FlightLog {
 
 		void OnFlightTimeEntered (object sender, EventArgs e)
 		{
+			int seconds = total.ValueAsSeconds;
+
 			if (autoFlightTimes) {
 				if (certification == PilotCertification.Student) {
-					dual.ValueAsSeconds = total.ValueAsSeconds;
-				} else if (false /* IsFlightInstructor */) {
-					cfi.ValueAsSeconds = total.ValueAsSeconds;
+					dual.ValueAsSeconds = seconds;
 				} else {
-					pic.ValueAsSeconds = total.ValueAsSeconds;
+					pic.ValueAsSeconds = seconds;
+				}
+
+				var craft = LogBook.GetAircraft (aircraft.Value);
+				if (craft != null) {
+					double minimum = GetMinimumCrossCountryDistance (craft);
+					var airports = GetAirports ();
+
+					if (airports != null && IsCrossCountry (airports, minimum))
+						xc.ValueAsSeconds = seconds;
 				}
 			}
 
 			// Cap the time limit for each of the time-based entry elements to the total time.
-			int seconds = total.ValueAsSeconds;
-
+			simulator.MaxValueAsSeconds = seconds;
 			actual.MaxValueAsSeconds = seconds;
 			hood.MaxValueAsSeconds = seconds;
 			night.MaxValueAsSeconds = seconds;
@@ -322,6 +349,7 @@ namespace FlightLog {
 			cfi.MaxValueAsSeconds = seconds;
 			pic.MaxValueAsSeconds = seconds;
 			sic.MaxValueAsSeconds = seconds;
+			xc.MaxValueAsSeconds = seconds;
 		}
 		
 		public override void LoadView ()
@@ -367,8 +395,23 @@ namespace FlightLog {
 				}
 			}
 		}
+
+		static double GetMinimumCrossCountryDistance (Aircraft aircraft)
+		{
+			// SportPilot + PoweredParachute = 15nm
+			if (aircraft.Category == AircraftCategory.PoweredParachute)
+				return 15.0;
+
+			// SportPilot = 25nm
+
+			// Rotorcraft = 25nm
+			if (aircraft.Category == AircraftCategory.Rotorcraft)
+				return 25.0;
+
+			return 50.0;
+		}
 		
-		static bool IsCrossCountry (List<Airport> airports)
+		static bool IsCrossCountry (List<Airport> airports, double minimum)
 		{
 			if (airports.Count < 2)
 				return false;
@@ -381,7 +424,7 @@ namespace FlightLog {
 				// The FAA only classifies flights where the pilot touches down
 				// at one or more airports that are greater than 50 nautical miles
 				// from the point of origin.
-				if (distance > 50.0)
+				if (distance > minimum)
 					return true;
 			}
 			
@@ -423,39 +466,53 @@ namespace FlightLog {
 			
 			public override void Clicked (UIAlertView alertview, int buttonIndex)
 			{
-				if (buttonIndex == 1 /* Yes */)
-					editor.Flight.IsCrossCountry = true;
+				if (buttonIndex == 0 /* No */)
+					editor.Flight.CrossCountry = 0;
 				
 				editor.SaveAndClose ();
 			}
 		}
 		
-		void ShowCrossCountryAlert (HashSet<string> missing)
+		void ShowCrossCountryAlert (Aircraft aircraft, string origin, HashSet<string> missing, double minimum)
 		{
-			string title = missing.Count > 1 ? "Missing Airports" : "Missing Airport";
 			StringBuilder message = new StringBuilder ();
+			string title = "Cross-Country Alert";
 			int i = 0;
-			
-			if (missing.Count > 1)
-				message.Append ("The following airports are unknown: ");
-			else
-				message.Append ("The following airport is unknown: ");
-			
-			foreach (var airport in missing) {
-				if (i > 0) {
-					if (i + 1 == missing.Count)
-						message.Append (" and ");
-					else
-						message.Append (", ");
+
+			if (missing.Count > 0) {
+				message.Append ("Could not verify that this flight was Cross-Country according to FAA regulations because ");
+
+				if (missing.Count > 1)
+					message.Append ("the following airports are unknown: ");
+				else
+					message.Append ("the following airport is unknown: ");
+
+				foreach (var airport in missing) {
+					if (i > 0) {
+						if (i + 1 == missing.Count)
+							message.Append (" and ");
+						else
+							message.Append (", ");
+					}
+
+					message.Append (airport);
 				}
 
-				message.Append (airport);
+				message.AppendLine (".");
+				message.AppendLine ();
+
+				if (missing.Count > 1)
+					message.AppendFormat ("Are any of these airports greater than {0} nautical miles from {1}?", minimum, origin);
+				else
+					message.AppendFormat ("Is this airport greater than {0} nautical miles from {1}?", minimum, origin);
+
+				message.AppendLine ();
+			} else {
+				message.AppendFormat ("None of the airports listed are greater than {0} nautical miles from {1}", minimum, origin);
+				message.AppendLine ();
+				message.AppendLine ();
+				message.AppendLine ("Are you sure that this was a Cross-Country flight according to FAA regulations?");
 			}
-			
-			message.AppendLine (".");
-			message.AppendLine ();
-			
-			message.AppendLine ("Was this flight a Cross-Country flight?");
 			
 			del = new CrossCountryAlertDelegate (this);
 			alert = new UIAlertView (title, message.ToString (), del, "No", "Yes");
@@ -508,9 +565,8 @@ namespace FlightLog {
 			Flight.SecondInCommand = sic.ValueAsSeconds;
 			Flight.PilotInCommand = pic.ValueAsSeconds;
 			Flight.DualReceived = dual.ValueAsSeconds;
+			Flight.CrossCountry = xc.ValueAsSeconds;
 			Flight.Night = night.ValueAsSeconds;
-			
-			Flight.Day = Flight.FlightTime - Flight.Night;
 			
 			// Landings
 			Flight.NightLandings = landNight.Value;
@@ -530,19 +586,21 @@ namespace FlightLog {
 				Flight.InstrumentSafetyPilot = safetyPilot.Value;
 			}
 
+			if (Flight.InstrumentSimulator == 0)
+				Flight.Day = Flight.FlightTime - Flight.Night;
+			else
+				Flight.Day = 0;
+
 			// Remarks
 			Flight.Remarks = remarks.Value;
 			
-			// Note: Cross-Country needs to be done last in case we are forced to pop up
-			// an alert dialog.
-			if (missing.Count > 0) {
-				ShowCrossCountryAlert (missing);
+			// Verify that the flight was really cross-country.
+			var craft = LogBook.GetAircraft (Flight.Aircraft);
+			double minimum = GetMinimumCrossCountryDistance (craft);
+			if (Flight.CrossCountry > 0 && !IsCrossCountry (airports, minimum)) {
+				ShowCrossCountryAlert (craft, Flight.AirportDeparted, missing, minimum);
 				return;
 			}
-
-			// FIXME: Doesn't count as Cross-Country if you are the acting Safety-Pilot
-			// for another pilot who is under the hood.
-			Flight.IsCrossCountry = IsCrossCountry (airports);
 			
 			SaveAndClose ();
 		}

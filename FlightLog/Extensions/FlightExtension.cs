@@ -90,8 +90,8 @@ namespace FlightLog
 				return flight != null ? flight.AirportArrived : string.Empty;
 			case FlightProperty.FlightTime:
 				return flight != null ? FormatFlightTime (flight.FlightTime, true) : string.Empty;
-			case FlightProperty.IsCrossCountry:
-				return flight != null && flight.IsCrossCountry ? "Yes" : null;
+			case FlightProperty.CrossCountry:
+				return flight != null ? FormatFlightTime (flight.CrossCountry, false) : null;
 			case FlightProperty.CertifiedFlightInstructor:
 				return flight != null ? FormatFlightTime (flight.CertifiedFlightInstructor, false) : null;
 			case FlightProperty.DualReceived:

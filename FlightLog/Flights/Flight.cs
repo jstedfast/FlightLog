@@ -48,7 +48,7 @@ namespace FlightLog {
 		[HumanReadableName ("Flight Time")]
 		FlightTime,
 		[HumanReadableName ("Cross-Country")]
-		IsCrossCountry,
+		CrossCountry,
 		[HumanReadableName ("Certified Flight Instructor")]
 		CertifiedFlightInstructor,
 		[HumanReadableName ("Dual Received")]
@@ -182,17 +182,6 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets whether this flight counts as a cross-country flight.
-		/// </summary>
-		/// <value>
-		/// <c>true</c> if this flight was a cross-country flight; or <c>false</c> otherwise.
-		/// </value>
-		[SQLiteSearchAlias ("xc")]
-		public bool IsCrossCountry {
-			get; set;
-		}
-		
-		/// <summary>
 		/// Gets or sets the number of day landings.
 		/// </summary>
 		/// <value>
@@ -232,6 +221,28 @@ namespace FlightLog {
 		public int CertifiedFlightInstructor {
 			get; set;
 		}
+
+		/// <summary>
+		/// Gets or sets the time spent flying cross-country.
+		/// </summary>
+		/// <value>
+		/// The time spent flying cross-country, in seconds.
+		/// </value>
+		[SQLiteSearchAlias ("xc")]
+		public int CrossCountry {
+			get; set;
+		}
+
+		/// <summary>
+		/// Gets or sets the dual time received (for student pilots).
+		/// </summary>
+		/// <value>
+		/// The dual time received, in seconds.
+		/// </value>
+		[SQLiteSearchAlias ("dual")]
+		public int DualReceived {
+			get; set;
+		}
 		
 		/// <summary>
 		/// Gets or sets the time spent flying as "Pilot in Command" or Solo (for student pilots).
@@ -239,6 +250,7 @@ namespace FlightLog {
 		/// <value>
 		/// The time spent flying as pilot in command, in seconds.
 		/// </value>
+		[SQLiteSearchAlias ("pic")]
 		public int PilotInCommand {
 			get; set;
 		}
@@ -249,17 +261,8 @@ namespace FlightLog {
 		/// <value>
 		/// The time spent flying as second in command, in seconds.
 		/// </value>
+		[SQLiteSearchAlias ("sic")]
 		public int SecondInCommand {
-			get; set;
-		}
-		
-		/// <summary>
-		/// Gets or sets the dual time received (for student pilots).
-		/// </summary>
-		/// <value>
-		/// The dual time received, in seconds.
-		/// </value>
-		public int DualReceived {
 			get; set;
 		}
 		
@@ -368,8 +371,8 @@ namespace FlightLog {
 			switch (property) {
 			case FlightProperty.FlightTime:
 				return FlightTime;
-			case FlightProperty.IsCrossCountry:
-				return IsCrossCountry ? FlightTime : 0;
+			case FlightProperty.CrossCountry:
+				return CrossCountry;
 			case FlightProperty.CertifiedFlightInstructor:
 				return CertifiedFlightInstructor;
 			case FlightProperty.DualReceived:
