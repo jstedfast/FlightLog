@@ -249,6 +249,7 @@ namespace FlightLog {
 		/// <value>
 		/// The time spent flying as certified flight instructor, in seconds.
 		/// </value>
+		[SQLiteSearchAlias ("cfi")]
 		public int CertifiedFlightInstructor {
 			get; set;
 		}
