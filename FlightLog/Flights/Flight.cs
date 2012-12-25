@@ -211,14 +211,24 @@ namespace FlightLog {
 		public int FlightTime {
 			get; set;
 		}
-		
+
 		/// <summary>
-		/// Gets or sets the time spent flying as certified flight instructor.
+		/// Gets or sets the time spent flying during daylight hours.
 		/// </summary>
 		/// <value>
-		/// The time spent flying as certified flight instructor, in seconds.
+		/// The time spent flying during daylight hours, in seconds.
 		/// </value>
-		public int CertifiedFlightInstructor {
+		public int Day {
+			get; set;
+		}
+
+		/// <summary>
+		/// Gets or sets the time spent flying during the night.
+		/// </summary>
+		/// <value>
+		/// The time spent flying during the night, in seconds.
+		/// </value>
+		public int Night {
 			get; set;
 		}
 
@@ -230,6 +240,16 @@ namespace FlightLog {
 		/// </value>
 		[SQLiteSearchAlias ("xc")]
 		public int CrossCountry {
+			get; set;
+		}
+
+		/// <summary>
+		/// Gets or sets the time spent flying as certified flight instructor.
+		/// </summary>
+		/// <value>
+		/// The time spent flying as certified flight instructor, in seconds.
+		/// </value>
+		public int CertifiedFlightInstructor {
 			get; set;
 		}
 
@@ -263,26 +283,6 @@ namespace FlightLog {
 		/// </value>
 		[SQLiteSearchAlias ("sic")]
 		public int SecondInCommand {
-			get; set;
-		}
-		
-		/// <summary>
-		/// Gets or sets the time spent flying during the night.
-		/// </summary>
-		/// <value>
-		/// The time spent flying during the night, in seconds.
-		/// </value>
-		public int Night {
-			get; set;
-		}
-		
-		/// <summary>
-		/// Gets or sets the time spent flying during daylight hours.
-		/// </summary>
-		/// <value>
-		/// The time spent flying during daylight hours, in seconds.
-		/// </value>
-		public int Day {
 			get; set;
 		}
 		#endregion
