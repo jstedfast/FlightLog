@@ -93,12 +93,12 @@ namespace FlightLog {
 				if (!dict.TryGetValue (flight.Aircraft, out aircraft))
 					continue;
 
+				if (aircraft.IsSimulator)
+					continue;
+
 				foreach (var total in totals) {
 					if (total.Property is FlightProperty) {
-						if (!aircraft.IsSimulator)
-							time = flight.GetFlightTime ((FlightProperty) total.Property);
-						else
-							time = 0;
+						time = flight.GetFlightTime ((FlightProperty) total.Property);
 					} else if (total.Property is AircraftProperty) {
 						if (!((bool) aircraft.GetValue ((AircraftProperty) total.Property)))
 							continue;
