@@ -35,10 +35,13 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class CurrencyTableViewCell : UITableViewCell
 	{
+		UIColor defaultColor;
+
 		public CurrencyTableViewCell (UITableViewCellStyle style, NSString key) : base (style, key)
 		{
 			DetailTextLabel.TextAlignment = UITextAlignment.Right;
 			DetailTextLabel.HighlightedTextColor = UIColor.White;
+			defaultColor = DetailTextLabel.TextColor;
 		}
 		
 		public DateTime ExpirationDate {
@@ -47,7 +50,7 @@ namespace FlightLog {
 				
 				if (value > now) {
 					if (value.AddMonths (-1) > now)
-						DetailTextLabel.TextColor = UIColor.Green;
+						DetailTextLabel.TextColor = defaultColor; //UIColor.FromRGB (64, 176, 16);
 					else
 						DetailTextLabel.TextColor = UIColor.Orange;
 					DetailTextLabel.Text = string.Format ("Current until {0}", value.ToShortDateString ());
