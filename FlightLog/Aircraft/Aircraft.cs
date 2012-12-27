@@ -327,6 +327,7 @@ namespace FlightLog {
 		/// <value>
 		/// <c>true</c> if this aircraft is complex; otherwise, <c>false</c>.
 		/// </value>
+		[SQLiteSearchAlias ("complex")]
 		public bool IsComplex {
 			get; set;
 		}
@@ -339,6 +340,7 @@ namespace FlightLog {
 		/// <value>
 		/// <c>true</c> if this aircraft is high performance; otherwise, <c>false</c>.
 		/// </value>
+		[SQLiteSearchAlias ("high-perf")]
 		public bool IsHighPerformance {
 			get; set;
 		}
@@ -349,6 +351,7 @@ namespace FlightLog {
 		/// <value>
 		/// <c>true</c> if this aircraft is a tail-dragger; otherwise, <c>false</c>.
 		/// </value>
+		[SQLiteSearchAlias ("taildragger")][SQLiteSearchAlias ("tailwheel")]
 		public bool IsTailDragger {
 			get; set;
 		}
@@ -359,6 +362,7 @@ namespace FlightLog {
 		/// <value>
 		/// <c>true</c> if this aircraft is a simulator; otherwise, <c>false</c>.
 		/// </value>
+		[SQLiteSearchAlias ("simulator")][SQLiteSearchAlias ("sim")]
 		public bool IsSimulator {
 			get; set;
 		}
