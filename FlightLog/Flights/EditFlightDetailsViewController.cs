@@ -347,13 +347,11 @@ namespace FlightLog {
 				}
 
 				var craft = LogBook.GetAircraft (aircraft.Value);
-				if (craft != null) {
-					double minimum = GetMinimumCrossCountryDistance (craft);
-					var airports = GetAirports ();
+				double minimum = GetMinimumCrossCountryDistance (craft);
+				var airports = GetAirports ();
 
-					if (airports != null && IsCrossCountry (airports, minimum))
-						xc.ValueAsSeconds = seconds;
-				}
+				if (airports != null && IsCrossCountry (airports, minimum))
+					xc.ValueAsSeconds = seconds;
 			}
 
 			// Cap the time limit for each of the time-based entry elements to the total time.
@@ -414,15 +412,17 @@ namespace FlightLog {
 
 		static double GetMinimumCrossCountryDistance (Aircraft aircraft)
 		{
-			// SportPilot + PoweredParachute = 15nm
-			if (aircraft.Category == AircraftCategory.PoweredParachute)
-				return 15.0;
+			if (aircraft != null) {
+				// SportPilot + PoweredParachute = 15nm
+				if (aircraft.Category == AircraftCategory.PoweredParachute)
+					return 15.0;
 
-			// SportPilot = 25nm
+				// SportPilot = 25nm
 
-			// Rotorcraft = 25nm
-			if (aircraft.Category == AircraftCategory.Rotorcraft)
-				return 25.0;
+				// Rotorcraft = 25nm
+				if (aircraft.Category == AircraftCategory.Rotorcraft)
+					return 25.0;
+			}
 
 			return 50.0;
 		}
@@ -495,7 +495,11 @@ namespace FlightLog {
 			string title = "Cross-Country Alert";
 			int i = 0;
 
-			if (missing.Count > 0) {
+			if (aircraft == null) {
+				message.AppendLine ("The classification of the aircraft you referenced is unknown.");
+				message.AppendLine ();
+				message.AppendLine ("Are you sure that this was a Cross-Country flight according to FAA regulations?");
+			} else if (missing.Count > 0) {
 				message.Append ("Could not verify that this flight was Cross-Country according to FAA regulations because ");
 
 				if (missing.Count > 1)
