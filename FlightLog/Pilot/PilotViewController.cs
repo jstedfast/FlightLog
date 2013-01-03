@@ -70,7 +70,7 @@ namespace FlightLog {
 			string caption;
 
 			foreach (AircraftEndorsement endorsement in Enum.GetValues (typeof (AircraftEndorsement))) {
-				if (!mask.HasFlag (endorsement))
+				if (endorsement == AircraftEndorsement.None || !mask.HasFlag (endorsement))
 					continue;
 
 				caption = endorsement.ToHumanReadableName ();
