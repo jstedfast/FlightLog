@@ -151,24 +151,26 @@ namespace FlightLog {
 				otherTotals
 			});
 		}
-		
-		void AddLandingCurrency (Section section, List<Aircraft> list, AircraftClassification @class, bool night, bool tailDragger)
+
+		void AddLandingCurrency (Section section, List<Aircraft> aircraft, AircraftClassification @class, bool night, bool tailDragger)
 		{
 			string caption = string.Format ("{0} Current{1}", night ? "Night" : "Day", tailDragger ? " (Taildragger)" : "");
 			DateTime oldestLanding = DateTime.Now;
 			int landings = 0;
-			
-			foreach (var flight in LogBook.GetFlightsForPassengerCurrencyRequirements (list, night)) {
-				landings += flight.NightLandings;
-				
-				if (!night)
-					landings += flight.DayLandings;
-				
-				oldestLanding = flight.Date;
-				
-				if (landings >= 3) {
-					section.Add (new CurrencyElement (caption, oldestLanding.AddDays (90)));
-					return;
+
+			if (aircraft != null && aircraft.Count > 0) {
+				foreach (var flight in LogBook.GetFlightsForPassengerCurrencyRequirements (aircraft, night)) {
+					landings += flight.NightLandings;
+
+					if (!night)
+						landings += flight.DayLandings;
+
+					oldestLanding = flight.Date;
+
+					if (landings >= 3) {
+						section.Add (new CurrencyElement (caption, oldestLanding.AddDays (90)));
+						return;
+					}
 				}
 			}
 			
@@ -181,12 +183,16 @@ namespace FlightLog {
 			// Day/Night currency is per-AircraftClassification and TailDragger vs not.
 			foreach (var value in Enum.GetValues (typeof (AircraftClassification))) {
 				AircraftClassification @class = (AircraftClassification) value;
-				
-				List<Aircraft> list = LogBook.GetAircraft (@class, false);
-				if (list == null || list.Count == 0)
+				AircraftEndorsement endorsement;
+
+				if (!Enum.TryParse<AircraftEndorsement> (@class.ToString (), out endorsement))
 					continue;
-				
+
+				if (!LogBook.Pilot.Endorsements.HasFlag (endorsement))
+					continue;
+
 				AircraftCategory category = Aircraft.GetCategoryFromClass (@class);
+				List<Aircraft> list = LogBook.GetAircraft (@class, false);
 				Section section;
 				string caption;
 				
@@ -195,25 +201,27 @@ namespace FlightLog {
 				else
 					caption = @class.ToHumanReadableName ();
 				
-				section = new Section (caption);
-				
+				section = new Section (string.Format ("{0} Currency", caption));
+
 				// Only Airplanes can be tail-draggers
 				if (category == AircraftCategory.Airplane) {
-					List<Aircraft> taildraggers = new List<Aircraft> ();
-					foreach (var aircraft in list) {
-						if (aircraft.IsTailDragger)
-							taildraggers.Add (aircraft);
-					}
-					
-					if (taildraggers.Count > 0) {
-						AddLandingCurrency (section, taildraggers, @class, false, true);
-						AddLandingCurrency (section, taildraggers, @class, true, true);
+					if (LogBook.Pilot.Endorsements.HasFlag (AircraftEndorsement.AirplaneTailDragger)) {
+						List<Aircraft> taildraggers = new List<Aircraft> ();
+						foreach (var aircraft in list) {
+							if (aircraft.IsTailDragger)
+								taildraggers.Add (aircraft);
+						}
+
+						if (taildraggers.Count > 0) {
+							AddLandingCurrency (section, taildraggers, @class, false, true);
+							AddLandingCurrency (section, taildraggers, @class, true, true);
+						}
 					}
 				}
 				
 				AddLandingCurrency (section, list, @class, false, false);
 				AddLandingCurrency (section, list, @class, true, false);
-				
+
 				Root.Add (section);
 			}
 		}
@@ -226,24 +234,26 @@ namespace FlightLog {
 			return expires;
 		}
 		
-		void AddInstrumentCurrency (Section section, List<Aircraft> list, AircraftCategory category)
+		void AddInstrumentCurrency (Section section, List<Aircraft> aircraft, AircraftCategory category)
 		{
-			string caption = "Instrument Current";
+			string caption = category.ToHumanReadableName ();
 			DateTime oldestApproach = DateTime.Now;
 			int approaches = 0;
 			int holds = 0;
-			
-			foreach (var flight in LogBook.GetFlightsForInstrumentCurrencyRequirements (list)) {
-				approaches += flight.InstrumentApproaches;
-				if (flight.InstrumentHoldingProcedures)
-					holds++;
 
-				oldestApproach = flight.Date;
-				
-				if (approaches >= 6 && holds > 0) {
-					DateTime expires = GetInstrumentCurrencyExipirationDate (oldestApproach);
-					section.Add (new CurrencyElement (caption, expires));
-					return;
+			if (aircraft != null && aircraft.Count > 0) {
+				foreach (var flight in LogBook.GetFlightsForInstrumentCurrencyRequirements (aircraft)) {
+					approaches += flight.InstrumentApproaches;
+					if (flight.InstrumentHoldingProcedures)
+						holds++;
+
+					oldestApproach = flight.Date;
+
+					if (approaches >= 6 && holds > 0) {
+						DateTime expires = GetInstrumentCurrencyExipirationDate (oldestApproach);
+						section.Add (new CurrencyElement (caption, expires));
+						return;
+					}
 				}
 			}
 
@@ -253,17 +263,22 @@ namespace FlightLog {
 		
 		void LoadInstrumentCurrency ()
 		{
+			Section section = new Section ("Instrument Currency");
+
 			// Instrument currency is per-AircraftCategory
 			foreach (var value in Enum.GetValues (typeof (AircraftCategory))) {
 				AircraftCategory category = (AircraftCategory) value;
-				List<Aircraft> list = LogBook.GetAircraft (category, false);
-				if (list == null || list.Count == 0)
+				AircraftEndorsement mask = Pilot.GetEndorsementMask (category);
+
+				if ((LogBook.Pilot.Endorsements & mask) == 0)
 					continue;
-				
-				Section section = new Section (category.ToHumanReadableName ());
+
+				List<Aircraft> list = LogBook.GetAircraft (category, false);
 				AddInstrumentCurrency (section, list, category);
-				Root.Add (section);
 			}
+
+			if (section.Count > 0)
+				Root.Add (section);
 		}
 		
 		void LoadSummary ()

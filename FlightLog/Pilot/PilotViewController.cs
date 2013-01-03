@@ -34,7 +34,7 @@ namespace FlightLog {
 	public class PilotViewController : DialogViewController
 	{
 		DateEntryElement birthday, medical, review;
-		RootElement certification;
+		RootElement certification, endorsements;
 		LimitedEntryElement name;
 		BooleanElement cfi, ifr;
 
@@ -65,25 +65,88 @@ namespace FlightLog {
 			return root;
 		}
 
+		static void PopulateEndorsementSection (Section section, AircraftEndorsement endorsements, AircraftEndorsement mask)
+		{
+			string caption;
+
+			foreach (AircraftEndorsement endorsement in Enum.GetValues (typeof (AircraftEndorsement))) {
+				if (!mask.HasFlag (endorsement))
+					continue;
+
+				caption = endorsement.ToHumanReadableName ();
+				section.Add (new BooleanElement (caption, endorsements.HasFlag (endorsement), endorsement.ToString ()));
+			}
+		}
+
+		static RootElement CreateEndorsementsElement (AircraftEndorsement endorsements)
+		{
+			RootElement root = new RootElement ("Aircraft Endorsements");
+			Section section;
+
+			section = new Section ("Airplane Endorsements");
+			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.Airplane));
+			root.Add (section);
+
+			section = new Section ("Rotorcraft Endorsements");
+			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.Rotorcraft));
+			root.Add (section);
+
+			section = new Section ("Glider Endorsements");
+			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.Glider));
+			root.Add (section);
+
+			section = new Section ("Lighter-Than-Air Endorsements");
+			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.LighterThanAir));
+			root.Add (section);
+
+			section = new Section ("Powered-Lift Endorsements");
+			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.PoweredLift));
+			root.Add (section);
+
+			section = new Section ("Powered-Parachute Endorsements");
+			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.PoweredParachute));
+			root.Add (section);
+
+			section = new Section ("Weight-Shift-Control Endorsements");
+			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.WeightShiftControl));
+			root.Add (section);
+
+			return root;
+		}
+
 		public override void LoadView ()
 		{
 			name = new LimitedEntryElement ("Name", "Enter the name of the pilot.", Pilot.Name);
 			cfi = new BooleanElement ("Certified Flight Instructor", Pilot.IsCertifiedFlightInstructor);
 			ifr = new BooleanElement ("Instrument Rated / In-Training", Pilot.IsInstrumentRated);
 			certification = CreatePilotCertificationElement (Pilot.Certification);
+			endorsements = CreateEndorsementsElement (Pilot.Endorsements);
 			birthday = new DateEntryElement ("Date of Birth", Pilot.BirthDate);
 			medical = new DateEntryElement ("Last Medical Exam", Pilot.LastMedicalExam);
 			review = new DateEntryElement ("Last Flight Review", Pilot.LastFlightReview);
 
 			base.LoadView ();
 
-			Root.Add (new Section ("Pilot Information") { name, birthday, certification, ifr, cfi });
+			Root.Add (new Section ("Pilot Information") { name, birthday, certification, endorsements, ifr, cfi });
 			Root.Add (new Section ("Pilot Status") { medical, review });
 		}
 
-		public override void ViewWillDisappear (bool animated)
+		void Save ()
 		{
+			AircraftEndorsement endorsements = AircraftEndorsement.None;
+			int endorsement = 1 << 0;
+
+			foreach (var section in this.endorsements) {
+				foreach (var element in section) {
+					if (((BooleanElement) element).Value)
+						endorsements |= (AircraftEndorsement) endorsement;
+
+					endorsement <<= 1;
+				}
+			}
+
 			Pilot.Certification = (PilotCertification) certification.RadioSelected;
+			Pilot.Endorsements = endorsements;
 			Pilot.IsCertifiedFlightInstructor = cfi.Value;
 			Pilot.IsInstrumentRated = ifr.Value;
 			Pilot.BirthDate = birthday.DateValue;
@@ -93,6 +156,18 @@ namespace FlightLog {
 			Pilot.LastFlightReview = review.DateValue;
 
 			LogBook.Update (Pilot);
+		}
+
+		public override void ViewWillAppear (bool animated)
+		{
+			Save ();
+
+			base.ViewWillAppear (animated);
+		}
+
+		public override void ViewWillDisappear (bool animated)
+		{
+			Save ();
 
 			base.ViewWillDisappear (animated);
 		}

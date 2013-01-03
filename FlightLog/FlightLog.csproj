@@ -140,6 +140,9 @@
     <Compile Include="Elements\DateEntryElement.cs" />
     <Compile Include="Status\CurrencyElement.cs" />
     <Compile Include="Status\StatusViewController.cs" />
+    <Compile Include="Aircraft\AircraftCategory.cs" />
+    <Compile Include="Aircraft\AircraftClassification.cs" />
+    <Compile Include="Aircraft\AircraftEndorsement.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />

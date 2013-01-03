@@ -152,66 +152,6 @@ namespace FlightLog {
 		WilsonAircraft
 	}
 #endif
-	
-	public enum AircraftCategory {
-		Airplane           = 0,
-		Rotorcraft         = 10,
-		Glider             = 20,
-		[HumanReadableName ("Lighter-Than-Air")]
-		LighterThanAir     = 30,
-		[HumanReadableName ("Powered-Lift")]
-		PoweredLift        = 40,
-		[HumanReadableName ("Powered-Parachute")]
-		PoweredParachute   = 50,
-		[HumanReadableName ("Weight-Shift-Control")]
-		WeightShiftControl = 60
-	}
-	
-	public enum AircraftClassification {
-		#region Airplane
-		[HumanReadableName ("Single-Engine Land")]
-		SingleEngineLand       = (int) AircraftCategory.Airplane,
-		[HumanReadableName ("Multi-Engine Land")]
-		MultiEngineLand,
-		[HumanReadableName ("Single-Engine Sea")]
-		SingleEngineSea,
-		[HumanReadableName ("Multi-Engine Sea")]
-		MultiEngineSea,
-		#endregion
-		
-		#region Rotorcraft
-		Helicoptor             = (int) AircraftCategory.Rotorcraft,
-		Gryoplane,
-		#endregion
-		
-		#region Glider
-		Glider                 = (int) AircraftCategory.Glider,
-		#endregion
-		
-		#region LighterThanAir
-		Airship                = (int) AircraftCategory.LighterThanAir,
-		Balloon,
-		#endregion
-		
-		#region PoweredLift
-		[HumanReadableName ("Powered-Lift")]
-		PoweredLift            = (int) AircraftCategory.PoweredLift,
-		#endregion
-		
-		#region PoweredParachute
-		[HumanReadableName ("Powered-Parachute Land")]
-		PoweredParachuteLand   = (int) AircraftCategory.PoweredParachute,
-		[HumanReadableName ("Powered-Parachute Sea")]
-		PoweredParachuteSea,
-		#endregion
-		
-		#region WeightShiftControl
-		[HumanReadableName ("Weight-Shift-Control Land")]
-		WeightShiftControlLand = (int) AircraftCategory.WeightShiftControl,
-		[HumanReadableName ("Weight-Shift-Control Sea")]
-		WeightShiftControlSea,
-		#endregion
-	}
 
 	public enum AircraftProperty {
 		TailNumber,

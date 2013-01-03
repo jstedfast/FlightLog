@@ -40,6 +40,47 @@ namespace FlightLog {
 			LastFlightReview = WrightBrosFirstFlight;
 		}
 
+		public static AircraftEndorsement GetEndorsementMask (AircraftCategory category)
+		{
+			AircraftEndorsement mask = AircraftEndorsement.None;
+
+			switch (category) {
+			case AircraftCategory.Airplane:
+				mask |= AircraftEndorsement.AirplaneSingleEngineLand;
+				mask |= AircraftEndorsement.AirplaneSingleEngineSea;
+				mask |= AircraftEndorsement.AirplaneMultiEngineLand;
+				mask |= AircraftEndorsement.AirplaneMultiEngineSea;
+				mask |= AircraftEndorsement.AirplaneTailDragger;
+				break;
+			case AircraftCategory.Rotorcraft:
+				mask |= AircraftEndorsement.RotorcraftHelicoptor;
+				mask |= AircraftEndorsement.RotorcraftGryoplane;
+				break;
+			case AircraftCategory.Glider:
+				mask = AircraftEndorsement.Glider;
+				break;
+			case AircraftCategory.LighterThanAir:
+				mask |= AircraftEndorsement.LighterThanAirAirship;
+				mask |= AircraftEndorsement.LighterThanAirBalloon;
+				break;
+			case AircraftCategory.PoweredLift:
+				mask = AircraftEndorsement.PoweredLift;
+				break;
+			case AircraftCategory.PoweredParachute:
+				mask |= AircraftEndorsement.PoweredParachuteLand;
+				mask |= AircraftEndorsement.PoweredParachuteSea;
+				break;
+			case AircraftCategory.WeightShiftControl:
+				mask |= AircraftEndorsement.WeightShiftControlLand;
+				mask |= AircraftEndorsement.WeightShiftControlSea;
+				break;
+			default:
+				throw new ArgumentOutOfRangeException ();
+			}
+
+			return mask;
+		}
+
 		[PrimaryKey][AutoIncrement]
 		public int Id {
 			get; set;
@@ -55,6 +96,10 @@ namespace FlightLog {
 		}
 
 		public PilotCertification Certification {
+			get; set;
+		}
+
+		public AircraftEndorsement Endorsements {
 			get; set;
 		}
 
