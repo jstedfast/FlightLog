@@ -143,6 +143,7 @@
     <Compile Include="Aircraft\AircraftCategory.cs" />
     <Compile Include="Aircraft\AircraftClassification.cs" />
     <Compile Include="Aircraft\AircraftEndorsement.cs" />
+    <Compile Include="Pilot\InstrumentRating.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Airports\AirportViewController.xib" />

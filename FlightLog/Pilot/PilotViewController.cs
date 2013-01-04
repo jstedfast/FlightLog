@@ -35,8 +35,8 @@ namespace FlightLog {
 	{
 		DateEntryElement birthday, medical, review;
 		RootElement certification, endorsements;
+		BooleanElement cfi, aifr, hifr, lifr;
 		LimitedEntryElement name;
-		BooleanElement cfi, ifr;
 
 		public PilotViewController (Pilot pilot) : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
@@ -96,7 +96,9 @@ namespace FlightLog {
 		{
 			name = new LimitedEntryElement ("Name", "Enter the name of the pilot.", Pilot.Name);
 			cfi = new BooleanElement ("Certified Flight Instructor", Pilot.IsCertifiedFlightInstructor);
-			ifr = new BooleanElement ("Instrument Rated / In-Training", Pilot.IsInstrumentRated);
+			aifr = new BooleanElement ("Instrument Rated (Airplane)", Pilot.InstrumentRatings.HasFlag (InstrumentRating.Airplane));
+			hifr = new BooleanElement ("Instrument Rated (Helicopter)", Pilot.InstrumentRatings.HasFlag (InstrumentRating.Helicopter));
+			lifr = new BooleanElement ("Instrument Rated (Powered-Lift)", Pilot.InstrumentRatings.HasFlag (InstrumentRating.PoweredLift));
 			certification = CreatePilotCertificationElement (Pilot.Certification);
 			endorsements = CreateEndorsementsElement (Pilot.Endorsements);
 			birthday = new DateEntryElement ("Date of Birth", Pilot.BirthDate);
@@ -105,28 +107,36 @@ namespace FlightLog {
 
 			base.LoadView ();
 
-			Root.Add (new Section ("Pilot Information") { name, birthday, certification, endorsements, ifr, cfi });
+			Root.Add (new Section ("Pilot Information") { name, birthday, certification, endorsements, aifr, hifr, lifr, cfi });
 			Root.Add (new Section ("Pilot Status") { medical, review });
 		}
 
 		void Save ()
 		{
 			AircraftEndorsement endorsements = AircraftEndorsement.None;
-			int endorsement = 1 << 0;
+			InstrumentRating ratings = InstrumentRating.None;
+			int flag = 1 << 0;
 
 			foreach (var section in this.endorsements) {
 				foreach (var element in section) {
 					if (((BooleanElement) element).Value)
-						endorsements |= (AircraftEndorsement) endorsement;
+						endorsements |= (AircraftEndorsement) flag;
 
-					endorsement <<= 1;
+					flag <<= 1;
 				}
 			}
+
+			if (aifr.Value)
+				ratings |= InstrumentRating.Airplane;
+			if (hifr.Value)
+				ratings |= InstrumentRating.Helicopter;
+			if (lifr.Value)
+				ratings |= InstrumentRating.PoweredLift;
 
 			Pilot.Certification = (PilotCertification) certification.RadioSelected;
 			Pilot.Endorsements = endorsements;
 			Pilot.IsCertifiedFlightInstructor = cfi.Value;
-			Pilot.IsInstrumentRated = ifr.Value;
+			Pilot.InstrumentRatings = ratings;
 			Pilot.BirthDate = birthday.DateValue;
 			Pilot.Name = name.Value;
 

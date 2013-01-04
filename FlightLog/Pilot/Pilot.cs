@@ -106,11 +106,11 @@ namespace FlightLog {
 			get; set;
 		}
 
-		public bool IsCertifiedFlightInstructor {
+		public InstrumentRating InstrumentRatings {
 			get; set;
 		}
 
-		public bool IsInstrumentRated {
+		public bool IsCertifiedFlightInstructor {
 			get; set;
 		}
 

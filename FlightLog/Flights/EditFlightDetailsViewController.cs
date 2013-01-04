@@ -250,21 +250,12 @@ namespace FlightLog {
 			};
 		}
 
-		bool EditInstrumentExperience {
-			get {
-				return Flight.InstrumentActual > 0 || Flight.InstrumentHood > 0 || Flight.InstrumentSimulator > 0 ||
-					Flight.InstrumentApproaches > 0 || Flight.InstrumentHoldingProcedures ||
-						LogBook.Pilot.IsInstrumentRated;
-			}
-		}
-
 		Section CreateExperienceSection ()
 		{
 			var section = new Section ("Flight Experience");
 
 			section.Add (CreateFlightTimeDetailsElement ());
-			if (EditInstrumentExperience)
-				section.Add (CreateInstrumentTimeDetailsElement ());
+			section.Add (CreateInstrumentTimeDetailsElement ());
 
 			return section;
 		}
@@ -373,8 +364,7 @@ namespace FlightLog {
 			Root.Add (CreateFlightSection ());
 			Root.Add (CreateLandingsSection ());
 			Root.Add (CreateExperienceSection ());
-			if (EditInstrumentExperience)
-				Root.Add (CreateInstrumentSection ());
+			Root.Add (CreateInstrumentSection ());
 			Root.Add (CreateRemarksSection ());
 			
 			cancel = new UIBarButtonItem (UIBarButtonSystemItem.Cancel, OnCancelClicked);
@@ -604,19 +594,17 @@ namespace FlightLog {
 			Flight.NightLandings = landNight.Value;
 			Flight.DayLandings = landDay.Value;
 
-			if (EditInstrumentExperience) {
-				// Flight Time values
-				Flight.InstrumentSimulator = simulator.ValueAsSeconds;
-				Flight.InstrumentActual = actual.ValueAsSeconds;
-				Flight.InstrumentHood = hood.ValueAsSeconds;
+			// Flight Time values
+			Flight.InstrumentSimulator = simulator.ValueAsSeconds;
+			Flight.InstrumentActual = actual.ValueAsSeconds;
+			Flight.InstrumentHood = hood.ValueAsSeconds;
 
-				// Holding Procedures and Approaches
-				Flight.InstrumentHoldingProcedures = holdingProcedures.Value;
-				Flight.InstrumentApproaches = approaches.Value;
+			// Holding Procedures and Approaches
+			Flight.InstrumentHoldingProcedures = holdingProcedures.Value;
+			Flight.InstrumentApproaches = approaches.Value;
 
-				// Safety Pilot info
-				Flight.InstrumentSafetyPilot = safetyPilot.Value;
-			}
+			// Safety Pilot info
+			Flight.InstrumentSafetyPilot = safetyPilot.Value;
 
 			if (Flight.InstrumentSimulator == 0)
 				Flight.Day = Flight.FlightTime - Flight.Night;

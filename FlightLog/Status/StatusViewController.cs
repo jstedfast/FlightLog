@@ -241,9 +241,8 @@ namespace FlightLog {
 			return expires;
 		}
 		
-		void AddInstrumentCurrency (Section section, List<Aircraft> aircraft, AircraftCategory category)
+		void AddInstrumentCurrency (Section section, string caption, List<Aircraft> aircraft)
 		{
-			string caption = category.ToHumanReadableName ();
 			DateTime oldestApproach = DateTime.Now;
 			int approaches = 0;
 			int holds = 0;
@@ -271,17 +270,23 @@ namespace FlightLog {
 		void LoadInstrumentCurrency ()
 		{
 			Section section = new Section ("Instrument Currency");
+			AircraftCategory category;
+			List<Aircraft> list;
 
 			// Instrument currency is per-AircraftCategory
-			foreach (var value in Enum.GetValues (typeof (AircraftCategory))) {
-				AircraftCategory category = (AircraftCategory) value;
-				AircraftEndorsement mask = Pilot.GetEndorsementMask (category);
+			if (LogBook.Pilot.InstrumentRatings.HasFlag (InstrumentRating.Airplane)) {
+				list = LogBook.GetAircraft (AircraftCategory.Airplane, false);
+				AddInstrumentCurrency (section, "Airplane", list);
+			}
 
-				if ((LogBook.Pilot.Endorsements & mask) == 0)
-					continue;
+			if (LogBook.Pilot.InstrumentRatings.HasFlag (InstrumentRating.Helicopter)) {
+				list = LogBook.GetAircraft (AircraftClassification.Helicoptor, false);
+				AddInstrumentCurrency (section, "Helicopter", list);
+			}
 
-				List<Aircraft> list = LogBook.GetAircraft (category, false);
-				AddInstrumentCurrency (section, list, category);
+			if (LogBook.Pilot.InstrumentRatings.HasFlag (InstrumentRating.PoweredLift)) {
+				list = LogBook.GetAircraft (AircraftClassification.PoweredLift, false);
+				AddInstrumentCurrency (section, "Powered-Lift", list);
 			}
 
 			if (section.Count > 0)
