@@ -30,20 +30,18 @@ namespace FlightLog {
 	public enum AircraftClassification {
 		#region Airplane
 		[HumanReadableName ("Single-Engine Land")]
-		AirplaneSingleEngineLand = (int) AircraftCategory.Airplane,
+		SingleEngineLand         = (int) AircraftCategory.Airplane,
 		[HumanReadableName ("Multi-Engine Land")]
-		AirplaneMultiEngineLand,
+		MultiEngineLand,
 		[HumanReadableName ("Single-Engine Sea")]
-		AirplaneSingleEngineSea,
+		SingleEngineSea,
 		[HumanReadableName ("Multi-Engine Sea")]
-		AirplaneMultiEngineSea,
+		MultiEngineSea,
 		#endregion
 
 		#region Rotorcraft
-		[HumanReadableName ("Helicoptor")]
-		RotorcraftHelicoptor     = (int) AircraftCategory.Rotorcraft,
-		[HumanReadableName ("Gyroplane")]
-		RotorcraftGryoplane,
+		Helicoptor               = (int) AircraftCategory.Rotorcraft,
+		Gryoplane,
 		#endregion
 
 		#region Glider
