@@ -79,6 +79,7 @@ namespace FlightLog {
 			totals.Add (new Totals ("Pilot-in-Command Totals", FlightProperty.PilotInCommand));
 			totals.Add (new Totals ("Certified Flight Instructor Totals", FlightProperty.CertifiedFlightInstructor));
 			totals.Add (new Totals ("Cross-Country Totals", FlightProperty.CrossCountry));
+			totals.Add (new Totals ("Cross-Country (PIC) Totals", FlightProperty.CrossCountryPIC));
 			totals.Add (new Totals ("Night Totals", FlightProperty.Night));
 			totals.Add (new Totals ("Instrument (Actual) Totals", FlightProperty.InstrumentActual));
 			totals.Add (new Totals ("Instrument (Hood) Totals", FlightProperty.InstrumentHood));

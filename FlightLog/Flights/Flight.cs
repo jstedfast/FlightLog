@@ -47,6 +47,8 @@ namespace FlightLog {
 		Night,
 		[HumanReadableName ("Cross-Country")]
 		CrossCountry,
+		[HumanReadableName ("Cross-Country (PIC)")]
+		CrossCountryPIC,
 		[HumanReadableName ("Certified Flight Instructor")]
 		CertifiedFlightInstructor,
 		[HumanReadableName ("Dual Received")]
@@ -350,6 +352,8 @@ namespace FlightLog {
 				return Night;
 			case FlightProperty.CrossCountry:
 				return CrossCountry;
+			case FlightProperty.CrossCountryPIC:
+				return Math.Min (CrossCountry, PilotInCommand);
 			case FlightProperty.CertifiedFlightInstructor:
 				return CertifiedFlightInstructor;
 			case FlightProperty.DualReceived:
