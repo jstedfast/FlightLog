@@ -33,52 +33,57 @@ namespace FlightLog {
 
 		#region Airplane
 		[HumanReadableName ("Single-Engine Land")]
-		AirplaneSingleEngineLand       = 1 << 0,
+		SingleEngineLand               = 1 << 0,
 		[HumanReadableName ("Multi-Engine Land")]
-		AirplaneMultiEngineLand        = 1 << 1,
+		MultiEngineLand                = 1 << 1,
 		[HumanReadableName ("Single-Engine Sea")]
-		AirplaneSingleEngineSea        = 1 << 2,
+		SingleEngineSea                = 1 << 2,
 		[HumanReadableName ("Multi-Engine Sea")]
-		AirplaneMultiEngineSea         = 1 << 3,
+		MultiEngineSea                 = 1 << 3,
+
+		[HumanReadableName ("Complex")]
+		Complex                        = 1 << 4,
+		[HumanReadableName ("High-Performance")]
+		HighPerformance                = 1 << 5,
 		[HumanReadableName ("Taildragger")]
-		AirplaneTailDragger            = 1 << 4,
+		TailDragger                    = 1 << 6,
 		#endregion
 
 		#region Rotorcraft
 		[HumanReadableName ("Helicoptor")]
-		RotorcraftHelicoptor           = 1 << 5,
+		Helicoptor                     = 1 << 7,
 		[HumanReadableName ("Gyroplane")]
-		RotorcraftGryoplane            = 1 << 6,
+		Gryoplane                      = 1 << 8,
 		#endregion
 
 		#region Glider
-		Glider                         = 1 << 7,
+		Glider                         = 1 << 9,
 		#endregion
 
 		#region LighterThanAir
 		[HumanReadableName ("Airship")]
-		LighterThanAirAirship          = 1 << 8,
+		Airship                        = 1 << 10,
 		[HumanReadableName ("Balloon")]
-		LighterThanAirBalloon          = 1 << 9,
+		Balloon                        = 1 << 11,
 		#endregion
 
 		#region PoweredLift
 		[HumanReadableName ("Powered-Lift")]
-		PoweredLift                    = 1 << 10,
+		PoweredLift                    = 1 << 12,
 		#endregion
 
 		#region PoweredParachute
 		[HumanReadableName ("Powered-Parachute Land")]
-		PoweredParachuteLand           = 1 << 11,
+		PoweredParachuteLand           = 1 << 13,
 		[HumanReadableName ("Powered-Parachute Sea")]
-		PoweredParachuteSea            = 1 << 12,
+		PoweredParachuteSea            = 1 << 14,
 		#endregion
 
 		#region WeightShiftControl
 		[HumanReadableName ("Weight-Shift-Control Land")]
-		WeightShiftControlLand         = 1 << 13,
+		WeightShiftControlLand         = 1 << 15,
 		[HumanReadableName ("Weight-Shift-Control Sea")]
-		WeightShiftControlSea          = 1 << 14,
+		WeightShiftControlSea          = 1 << 16,
 		#endregion
 	}
 }

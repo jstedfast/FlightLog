@@ -80,36 +80,14 @@ namespace FlightLog {
 
 		static RootElement CreateEndorsementsElement (AircraftEndorsement endorsements)
 		{
-			RootElement root = new RootElement ("Aircraft Endorsements");
+			RootElement root = new RootElement ("Aircraft Ratings & Endorsements");
 			Section section;
 
-			section = new Section ("Airplane Endorsements");
-			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.Airplane));
-			root.Add (section);
-
-			section = new Section ("Rotorcraft Endorsements");
-			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.Rotorcraft));
-			root.Add (section);
-
-			section = new Section ("Glider Endorsements");
-			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.Glider));
-			root.Add (section);
-
-			section = new Section ("Lighter-Than-Air Endorsements");
-			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.LighterThanAir));
-			root.Add (section);
-
-			section = new Section ("Powered-Lift Endorsements");
-			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.PoweredLift));
-			root.Add (section);
-
-			section = new Section ("Powered-Parachute Endorsements");
-			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.PoweredParachute));
-			root.Add (section);
-
-			section = new Section ("Weight-Shift-Control Endorsements");
-			PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (AircraftCategory.WeightShiftControl));
-			root.Add (section);
+			foreach (AircraftCategory category in Enum.GetValues (typeof (AircraftCategory))) {
+				section = new Section (category.ToHumanReadableName ());
+				PopulateEndorsementSection (section, endorsements, Pilot.GetEndorsementMask (category));
+				root.Add (section);
+			}
 
 			return root;
 		}

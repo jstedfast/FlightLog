@@ -46,22 +46,25 @@ namespace FlightLog {
 
 			switch (category) {
 			case AircraftCategory.Airplane:
-				mask |= AircraftEndorsement.AirplaneSingleEngineLand;
-				mask |= AircraftEndorsement.AirplaneSingleEngineSea;
-				mask |= AircraftEndorsement.AirplaneMultiEngineLand;
-				mask |= AircraftEndorsement.AirplaneMultiEngineSea;
-				mask |= AircraftEndorsement.AirplaneTailDragger;
+				mask |= AircraftEndorsement.SingleEngineLand;
+				mask |= AircraftEndorsement.SingleEngineSea;
+				mask |= AircraftEndorsement.MultiEngineLand;
+				mask |= AircraftEndorsement.MultiEngineSea;
+
+				mask |= AircraftEndorsement.Complex;
+				mask |= AircraftEndorsement.HighPerformance;
+				mask |= AircraftEndorsement.TailDragger;
 				break;
 			case AircraftCategory.Rotorcraft:
-				mask |= AircraftEndorsement.RotorcraftHelicoptor;
-				mask |= AircraftEndorsement.RotorcraftGryoplane;
+				mask |= AircraftEndorsement.Helicoptor;
+				mask |= AircraftEndorsement.Gryoplane;
 				break;
 			case AircraftCategory.Glider:
 				mask = AircraftEndorsement.Glider;
 				break;
 			case AircraftCategory.LighterThanAir:
-				mask |= AircraftEndorsement.LighterThanAirAirship;
-				mask |= AircraftEndorsement.LighterThanAirBalloon;
+				mask |= AircraftEndorsement.Airship;
+				mask |= AircraftEndorsement.Balloon;
 				break;
 			case AircraftCategory.PoweredLift:
 				mask = AircraftEndorsement.PoweredLift;

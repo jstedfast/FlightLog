@@ -84,11 +84,22 @@ namespace FlightLog {
 			totals.Add (new Totals ("Instrument (Actual) Totals", FlightProperty.InstrumentActual));
 			totals.Add (new Totals ("Instrument (Hood) Totals", FlightProperty.InstrumentHood));
 
-			totals.Add (new Totals ("Complex Totals", AircraftProperty.IsComplex));
-			totals.Add (new Totals ("High-Performance Totals", AircraftProperty.IsHighPerformance));
-			totals.Add (new Totals ("Taildragger Totals", AircraftProperty.IsTailDragger));
-			foreach (AircraftClassification @class in Enum.GetValues (typeof (AircraftClassification)))
-				totals.Add (new Totals (@class.ToHumanReadableName () + " Totals", @class));
+			if (LogBook.Pilot.Endorsements.HasFlag (AircraftEndorsement.Complex))
+				totals.Add (new Totals ("Complex Totals", AircraftProperty.IsComplex));
+			if (LogBook.Pilot.Endorsements.HasFlag (AircraftEndorsement.HighPerformance))
+				totals.Add (new Totals ("High-Performance Totals", AircraftProperty.IsHighPerformance));
+			if (LogBook.Pilot.Endorsements.HasFlag (AircraftEndorsement.TailDragger))
+				totals.Add (new Totals ("Taildragger Totals", AircraftProperty.IsTailDragger));
+
+			foreach (AircraftClassification @class in Enum.GetValues (typeof (AircraftClassification))) {
+				AircraftCategory category = Aircraft.GetCategoryFromClass (@class);
+				string title = @class.ToHumanReadableName () + " Totals";
+
+				if (category == AircraftCategory.Airplane)
+					title = "Airplane " + title;
+
+				totals.Add (new Totals (title, @class));
+			}
 
 			foreach (var flight in LogBook.GetAllFlights ()) {
 				if (!dict.TryGetValue (flight.Aircraft, out aircraft))
@@ -153,9 +164,9 @@ namespace FlightLog {
 			});
 		}
 
-		void AddLandingCurrency (Section section, List<Aircraft> aircraft, AircraftClassification @class, bool night, bool tailDragger)
+		void AddLandingCurrency (Section section, List<Aircraft> aircraft, bool night)
 		{
-			string caption = string.Format ("{0} Current{1}", night ? "Night" : "Day", tailDragger ? " (Taildragger)" : "");
+			string caption = string.Format ("{0} Current", night ? "Night" : "Day");
 			DateTime oldestLanding = DateTime.Now;
 			int landings = 0;
 
@@ -181,9 +192,24 @@ namespace FlightLog {
 		
 		void LoadDayAndNightCurrency ()
 		{
-			// Day/Night currency is per-AircraftClassification and TailDragger vs not.
-			foreach (var value in Enum.GetValues (typeof (AircraftClassification))) {
-				AircraftClassification @class = (AircraftClassification) value;
+			if (LogBook.Pilot.Endorsements.HasFlag (AircraftEndorsement.TailDragger)) {
+				var list = LogBook.GetAircraft (AircraftCategory.Airplane, false);
+				List<Aircraft> taildraggers = new List<Aircraft> ();
+
+				foreach (var aircraft in list) {
+					if (aircraft.IsTailDragger)
+						taildraggers.Add (aircraft);
+				}
+
+				var section = new Section ("Taildragger Currency");
+				AddLandingCurrency (section, taildraggers, false);
+				AddLandingCurrency (section, taildraggers, true);
+				Root.Add (section);
+			}
+
+			// Day/Night currency is per-AircraftClassification
+			foreach (AircraftClassification @class in Enum.GetValues (typeof (AircraftClassification))) {
+				AircraftCategory category = Aircraft.GetCategoryFromClass (@class);
 				AircraftEndorsement endorsement;
 
 				if (!Enum.TryParse<AircraftEndorsement> (@class.ToString (), out endorsement))
@@ -192,37 +218,17 @@ namespace FlightLog {
 				if (!LogBook.Pilot.Endorsements.HasFlag (endorsement))
 					continue;
 
-				AircraftCategory category = Aircraft.GetCategoryFromClass (@class);
-				List<Aircraft> list = LogBook.GetAircraft (@class, false);
-				Section section;
+				var list = LogBook.GetAircraft (@class, false);
 				string caption;
 				
 				if (category == AircraftCategory.Airplane)
-					caption = string.Format ("{0} {1}", category.ToHumanReadableName (), @class.ToHumanReadableName ());
+					caption = "Airplane " + @class.ToHumanReadableName ();
 				else
 					caption = @class.ToHumanReadableName ();
 				
-				section = new Section (string.Format ("{0} Currency", caption));
-
-				// Only Airplanes can be tail-draggers
-				if (category == AircraftCategory.Airplane) {
-					if (LogBook.Pilot.Endorsements.HasFlag (AircraftEndorsement.AirplaneTailDragger)) {
-						List<Aircraft> taildraggers = new List<Aircraft> ();
-						foreach (var aircraft in list) {
-							if (aircraft.IsTailDragger)
-								taildraggers.Add (aircraft);
-						}
-
-						if (taildraggers.Count > 0) {
-							AddLandingCurrency (section, taildraggers, @class, false, true);
-							AddLandingCurrency (section, taildraggers, @class, true, true);
-						}
-					}
-				}
-				
-				AddLandingCurrency (section, list, @class, false, false);
-				AddLandingCurrency (section, list, @class, true, false);
-
+				var section = new Section (string.Format ("{0} Currency", caption));
+				AddLandingCurrency (section, list, false);
+				AddLandingCurrency (section, list, true);
 				Root.Add (section);
 			}
 		}
