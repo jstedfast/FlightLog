@@ -50,11 +50,36 @@ namespace FlightLog {
 
 	public class StatusViewController : DialogViewController
 	{
+		bool dirty = true;
+		bool disposed;
+
 		public StatusViewController () : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
 			TabBarItem.Image = UIImage.FromBundle ("Images/ekg");
+			LogBook.PilotUpdated += PilotChanged;
+			LogBook.AircraftAdded += AircraftChanged;
+			LogBook.AircraftDeleted += AircraftChanged;
+			LogBook.AircraftUpdated += AircraftChanged;
+			LogBook.FlightAdded += FlightChanged;
+			LogBook.FlightDeleted += FlightChanged;
+			LogBook.FlightUpdated += FlightChanged;
 			EnableSearch = false;
 			Title = "Status";
+		}
+
+		void PilotChanged (object sender, EventArgs e)
+		{
+			dirty = true;
+		}
+
+		void AircraftChanged (object sender, AircraftEventArgs e)
+		{
+			dirty = true;
+		}
+
+		void FlightChanged (object sender, FlightEventArgs e)
+		{
+			dirty = true;
 		}
 
 		static DateTime GetMonthsAgo (int months)
@@ -270,7 +295,6 @@ namespace FlightLog {
 		void LoadInstrumentCurrency ()
 		{
 			Section section = new Section ("Instrument Currency");
-			AircraftCategory category;
 			List<Aircraft> list;
 
 			// Instrument currency is per-AircraftCategory
@@ -302,14 +326,28 @@ namespace FlightLog {
 
 		public override void ViewWillAppear (bool animated)
 		{
-			Root.Clear ();
-			LoadSummary ();
+			if (dirty) {
+				Root.Clear ();
+				LoadSummary ();
+				dirty = false;
+			}
 			
 			base.ViewWillAppear (animated);
 		}
 
 		protected override void Dispose (bool disposing)
 		{
+			if (disposing && !disposed) {
+				LogBook.PilotUpdated -= PilotChanged;
+				LogBook.AircraftAdded -= AircraftChanged;
+				LogBook.AircraftDeleted -= AircraftChanged;
+				LogBook.AircraftUpdated -= AircraftChanged;
+				LogBook.FlightAdded -= FlightChanged;
+				LogBook.FlightDeleted -= FlightChanged;
+				LogBook.FlightUpdated -= FlightChanged;
+				disposed = true;
+			}
+
 			base.Dispose (disposing);
 		}
 	}
