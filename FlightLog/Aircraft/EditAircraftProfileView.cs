@@ -40,7 +40,8 @@ namespace FlightLog {
 		enum PhotoResponse {
 			CapturePhoto,
 			ChoosePhoto,
-			DefaultPhoto
+			FlightAware,
+			UnsetPhoto
 		}
 
 		enum TableSections {
@@ -66,7 +67,7 @@ namespace FlightLog {
 		static UIColor NormalButtonColor = UIColor.White;
 
 		CancellationTokenSource cancelMakeModel, cancelPhoto;
-		PhotoResponse[] buttons = new PhotoResponse[3];
+		PhotoResponse[] buttons = new PhotoResponse[Enum.GetValues (typeof (PhotoResponse)).Length];
 		Task taskMakeModel, taskPhoto;
 		LimitedEntryElement make, model;
 		AircraftEntryElement tailNumber;
@@ -140,7 +141,7 @@ namespace FlightLog {
 			}, TaskScheduler.FromCurrentSynchronizationContext ());
 		}
 
-		void FetchPhotograph ()
+		void FetchPhotograph (bool showError)
 		{
 			CancelPhotoTask ();
 
@@ -151,6 +152,11 @@ namespace FlightLog {
 						Photograph = UIImage.LoadFromData (data);
 					}
 				} catch {
+					if (showError) {
+						string message = string.Format ("Could not locate a photo for {0}", TailNumber);
+						UIAlertView alert = new UIAlertView ("FlightAware.com", message, null, "Dismiss", null);
+						alert.Show ();
+					}
 				} finally {
 					cancelPhoto = null;
 					taskPhoto = null;
@@ -167,7 +173,7 @@ namespace FlightLog {
 				FetchMakeAndModel ();
 
 			if (Photograph == null)
-				FetchPhotograph ();
+				FetchPhotograph (false);
 		}
 		
 		Section CreateTailNumberSection ()
@@ -345,8 +351,11 @@ namespace FlightLog {
 				picker.ShowsCameraControls = true;
 				picker.AllowsEditing = true;
 				break;
-			default:
-				FetchPhotograph ();
+			case PhotoResponse.FlightAware:
+				FetchPhotograph (true);
+				break;
+			case PhotoResponse.UnsetPhoto:
+				Photograph = null;
 				break;
 			}
 
@@ -373,10 +382,15 @@ namespace FlightLog {
 			buttons[index++] = PhotoResponse.ChoosePhoto;
 			sheet.AddButton ("Choose Photo");
 
-			//if (!string.IsNullOrEmpty (TailNumber)) {
-			//	buttons[index++] = PhotoResponse.DefaultPhoto;
-			//	sheet.AddButton ("Default Photo");
-			//}
+			if (!string.IsNullOrEmpty (TailNumber)) {
+				buttons[index++] = PhotoResponse.FlightAware;
+				sheet.AddButton ("FlightAware Photo");
+			}
+
+			if (Photograph != null) {
+				buttons[index++] = PhotoResponse.UnsetPhoto;
+				sheet.AddButton ("Unset Photo");
+			}
 
 			if (index == 1) {
 				OnActionSheetDismissed (sheet, 0);
