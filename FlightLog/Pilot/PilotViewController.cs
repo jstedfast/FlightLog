@@ -113,8 +113,10 @@ namespace FlightLog {
 
 		void Save ()
 		{
+			PilotCertification cert = (PilotCertification) certification.RadioSelected;
 			AircraftEndorsement endorsements = AircraftEndorsement.None;
 			InstrumentRating ratings = InstrumentRating.None;
+			bool changed = false;
 			int flag = 1 << 0;
 
 			foreach (var section in this.endorsements) {
@@ -133,17 +135,48 @@ namespace FlightLog {
 			if (lifr.Value)
 				ratings |= InstrumentRating.PoweredLift;
 
-			Pilot.Certification = (PilotCertification) certification.RadioSelected;
-			Pilot.Endorsements = endorsements;
-			Pilot.IsCertifiedFlightInstructor = cfi.Value;
-			Pilot.InstrumentRatings = ratings;
-			Pilot.BirthDate = birthday.DateValue;
-			Pilot.Name = name.Value;
+			if (Pilot.Certification != cert) {
+				Pilot.Certification = cert;
+				changed = true;
+			}
 
-			Pilot.LastMedicalExam = medical.DateValue;
-			Pilot.LastFlightReview = review.DateValue;
+			if (Pilot.Endorsements != endorsements) {
+				Pilot.Endorsements = endorsements;
+				changed = true;
+			}
 
-			LogBook.Update (Pilot);
+			if (Pilot.IsCertifiedFlightInstructor != cfi.Value) {
+				Pilot.IsCertifiedFlightInstructor = cfi.Value;
+				changed = true;
+			}
+
+			if (Pilot.InstrumentRatings != ratings) {
+				Pilot.InstrumentRatings = ratings;
+				changed = true;
+			}
+
+			if (Pilot.BirthDate != birthday.DateValue) {
+				Pilot.BirthDate = birthday.DateValue;
+				changed = true;
+			}
+
+			if (Pilot.Name != name.Value) {
+				Pilot.Name = name.Value;
+				changed = true;
+			}
+
+			if (Pilot.LastMedicalExam != medical.DateValue) {
+				Pilot.LastMedicalExam = medical.DateValue;
+				changed = true;
+			}
+
+			if (Pilot.LastFlightReview != review.DateValue) {
+				Pilot.LastFlightReview = review.DateValue;
+				changed = true;
+			}
+
+			if (changed)
+				LogBook.Update (Pilot);
 		}
 
 		public override void ViewWillAppear (bool animated)
