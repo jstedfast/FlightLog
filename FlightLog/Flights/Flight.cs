@@ -145,7 +145,7 @@ namespace FlightLog {
 		}
 		
 		/// <summary>
-		/// Gets or sets the FAA code of the visited airport.
+		/// Gets or sets the FAA code of the visited airport(s).
 		/// </summary>
 		/// <value>
 		/// The FAA codes of the visited airports.

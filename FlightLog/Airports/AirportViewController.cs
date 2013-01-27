@@ -56,6 +56,7 @@ namespace FlightLog {
 				annotationView = new MKPinAnnotationView (annotation, "annotationViewID");
 			
 			annotationView.Annotation = (MKAnnotation) annotation;
+			annotationView.CanShowCallout = true;
 			
 			return annotationView;
 		}

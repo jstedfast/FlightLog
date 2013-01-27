@@ -43,13 +43,13 @@ namespace FlightLog {
 		
 		public override string Title {
 			get {
-				return Airport.ICAO;
+				return Airport.Name;
 			}
 		}
 		
 		public override string Subtitle {
 			get {
-				return Airport.Name;
+				return Airport.FAA; // + " (##.#nm away)"
 			}
 		}
 		
