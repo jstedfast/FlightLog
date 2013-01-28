@@ -142,6 +142,21 @@ namespace FlightLog {
 				manager.UpdatedLocation += UpdatedLocation;
 			}
 
+			if (CLLocationManager.LocationServicesEnabled)
+				manager.StartUpdatingLocation ();
+
+			//if (CLLocationManager.HeadingAvailable)
+			//	manager.StartUpdatingHeading ();
+
+			mapView.GetViewForAnnotation += GetAirportAnnotationView;
+			mapView.RegionChanged += MapRegionChanged;
+			mapType.ValueChanged += MapTypeChanged;
+		}
+
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+
 			// Default to the region for North America
 			double minLatitude = 37.37 - (28.49 / 2);
 			double maxLatitude = 37.37 + (28.49 / 2);
@@ -167,25 +182,20 @@ namespace FlightLog {
 			}
 
 			coordinates = new CLLocationCoordinate2D ((minLatitude + maxLatitude) / 2, (minLongitide + maxLongitude) / 2);
-			double spanLongitutde = Math.Abs (maxLongitude - minLongitide);
+			double spanLongitude = Math.Abs (maxLongitude - minLongitide);
 			double spanLatitude = Math.Abs (maxLatitude - minLatitude);
+
+			if (initialized) {
+				spanLongitude = Math.Max (spanLongitude, 1.0) * 1.25;
+				spanLatitude = Math.Max (spanLatitude, 1.0) * 1.25;
+			}
 
 			// Get the region for North America
 			MKCoordinateRegion region = new MKCoordinateRegion (
-				coordinates, new MKCoordinateSpan (Math.Max (spanLatitude, 1.0), Math.Max (spanLongitutde, 1.0))
+				coordinates, new MKCoordinateSpan (spanLatitude, spanLongitude)
 			);
-			
-			mapView.SetRegion (region, false);
 
-			//if (CLLocationManager.LocationServicesEnabled)
-			//	manager.StartUpdatingLocation ();
-
-			//if (CLLocationManager.HeadingAvailable)
-			//	manager.StartUpdatingHeading ();
-			
-			mapView.GetViewForAnnotation += GetAirportAnnotationView;
-			mapView.RegionChanged += MapRegionChanged;
-			mapType.ValueChanged += MapTypeChanged;
+			mapView.SetRegion (region, animated);
 		}
 
 		void UpdateLocation (CLLocation location)
@@ -195,7 +205,9 @@ namespace FlightLog {
 			);
 
 			coordinates = location.Coordinate;
-			mapView.SetRegion (region, true);
+
+			if (!visited)
+				mapView.SetRegion (region, true);
 		}
 
 		void UpdatedLocation (object sender, CLLocationUpdatedEventArgs e)
