@@ -802,6 +802,35 @@ namespace FlightLog {
 		{
 			return sqlitedb.Query<Flight> ("select distinct InstrumentSafetyPilot from Flight where InstrumentSafetyPilot like ?", text + "%").Select (flight => flight.InstrumentSafetyPilot).ToList ();
 		}
+
+		/// <summary>
+		/// Gets a list of the visited airports.
+		/// </summary>
+		/// <returns>A list of the visited airports.</returns>
+		public static List<string> GetVisitedAirports ()
+		{
+			HashSet<string> airports = new HashSet<string> ();
+
+			foreach (var flight in sqlitedb.Query<Flight> ("select distinct AirportDeparted from Flight")) {
+				if (flight.AirportDeparted != null)
+					airports.Add (flight.AirportDeparted);
+			}
+
+			foreach (var flight in sqlitedb.Query<Flight> ("select distinct AirportArrived from Flight")) {
+				if (flight.AirportArrived != null)
+					airports.Add (flight.AirportArrived);
+			}
+
+			foreach (var flight in sqlitedb.Query<Flight> ("select distinct AirportVisited from Flight")) {
+				if (flight.AirportVisited != null) {
+					foreach (var visited in flight.AirportVisited.Split (new char [] { ',' }, StringSplitOptions.RemoveEmptyEntries)) {
+						airports.Add (visited.Trim ());
+					}
+				}
+			}
+
+			return airports.ToList ();
+		}
 		#endregion
 	}
 }

@@ -112,6 +112,28 @@ namespace FlightLog {
 			
 			return results.Count > 0 ? results[0] : null;
 		}
+
+		static IEnumerable<Airport> EnumerateAirports (string query, params object[] args)
+		{
+			var cmd = sqlitedb.CreateCommand (query.Replace ("*", "count (*)"), args);
+			int count = cmd.ExecuteScalar<int> ();
+			List<Airport> airports;
+			int offset = 0;
+			int limit;
+
+			while (offset < count) {
+				limit = Math.Min (count - offset, 64);
+				cmd = sqlitedb.CreateCommand (query + " limit " + limit + " offset " + offset, args);
+				airports = cmd.ExecuteQuery<Airport> ();
+
+				foreach (var airport in airports)
+					yield return airport;
+
+				offset += limit;
+			}
+
+			yield break;
+		}
 		
 		/// <summary>
 		/// Gets a list of all airports.
@@ -119,9 +141,9 @@ namespace FlightLog {
 		/// <returns>
 		/// A list of all airports.
 		/// </returns>
-		public static List<Airport> GetAllAirports ()
+		public static IEnumerable<Airport> GetAllAirports ()
 		{
-			return sqlitedb.Query<Airport> ("select * from Airport");
+			return EnumerateAirports ("select * from Airport");
 		}
 		
 		/// <summary>
@@ -133,15 +155,15 @@ namespace FlightLog {
 		/// <param name='region'>
 		/// The map region.
 		/// </param>
-		public static List<Airport> GetAirports (MKCoordinateRegion region)
+		public static IEnumerable<Airport> GetAirports (MKCoordinateRegion region)
 		{
+			string query = "select * from Airport where Latitude between ? and ? and Longitude between ? and ?";
 			double longMin = region.Center.Longitude - region.Span.LongitudeDelta / 2.0;
 			double longMax = region.Center.Longitude + region.Span.LongitudeDelta / 2.0;
 			double latMin = region.Center.Latitude - region.Span.LatitudeDelta / 2.0;
 			double latMax = region.Center.Latitude + region.Span.LatitudeDelta / 2.0;
-			
-			return sqlitedb.Query<Airport> ("select * from Airport where Latitude between ? and ? and Longitude between ? and ?",
-				latMin, latMax, longMin, longMax);
+
+			return EnumerateAirports (query, latMin, latMax, longMin, longMax);
 		}
 		
 		static bool IsPossibleCode (string query)
@@ -228,6 +250,23 @@ namespace FlightLog {
 		static double ToRadians (double degrees)
 		{
 			return degrees * Math.PI / 180;
+		}
+
+		public static double GetDistanceFrom (Airport airport, CLLocationCoordinate2D location)
+		{
+			// Calculates distance between 2 locations on Earth using the Haversine formula.
+			// http://www.movable-type.co.uk/scripts/latlong.html
+			double distLongitude = ToRadians (airport.Longitude - location.Longitude);
+			double distLatitude = ToRadians (airport.Latitude - location.Latitude);
+
+			double a = Math.Pow (Math.Sin (distLatitude / 2), 2) +
+				Math.Pow (Math.Sin (distLongitude / 2), 2) *
+					Math.Cos (ToRadians (location.Latitude)) *
+					Math.Cos (ToRadians (airport.Latitude));
+
+			double c = 2 * Math.Atan2 (Math.Sqrt (a), Math.Sqrt (1 - a));
+
+			return c * MeanEarthRadius / MetersPerNauticalMile;
 		}
 		
 		public static double GetDistanceBetween (Airport depart, Airport arrive)
