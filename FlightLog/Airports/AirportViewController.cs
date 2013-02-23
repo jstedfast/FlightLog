@@ -91,7 +91,7 @@ namespace FlightLog {
 				if (annotations.ContainsKey (airport.FAA)) {
 					// This airport is already in view...
 					annotation = annotations[airport.FAA];
-					annotation.CurrentLocation = coordinates;
+					annotation.UserCoordinates = coordinates;
 					annotations.Remove (airport.FAA);
 				} else {
 					// This is a new annotation, keep track of it in 'added'

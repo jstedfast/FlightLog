@@ -32,9 +32,9 @@ using MonoTouch.MapKit;
 namespace FlightLog {
 	public class AirportAnnotation : MKAnnotation
 	{
-		public AirportAnnotation (Airport airport, CLLocationCoordinate2D location)
+		public AirportAnnotation (Airport airport, CLLocationCoordinate2D userCoordinates)
 		{
-			CurrentLocation = location;
+			UserCoordinates = userCoordinates;
 			Airport = airport;
 		}
 		
@@ -48,13 +48,13 @@ namespace FlightLog {
 			}
 		}
 
-		public CLLocationCoordinate2D CurrentLocation {
+		public CLLocationCoordinate2D UserCoordinates {
 			get; set;
 		}
 		
 		public override string Subtitle {
 			get {
-				var distance = Airports.GetDistanceFrom (Airport, CurrentLocation);
+				var distance = Airports.GetDistanceFrom (Airport, UserCoordinates);
 
 				return string.Format ("{0} ({1}nm away)", Airport.FAA, distance.ToString ("F1"));
 			}
