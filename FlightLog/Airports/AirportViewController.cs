@@ -151,6 +151,7 @@ namespace FlightLog {
 			mapView.GetViewForAnnotation += GetAirportAnnotationView;
 			mapView.RegionChanged += MapRegionChanged;
 			mapType.ValueChanged += MapTypeChanged;
+			MapTypeChanged (null, null);
 		}
 
 		public override void ViewWillAppear (bool animated)
