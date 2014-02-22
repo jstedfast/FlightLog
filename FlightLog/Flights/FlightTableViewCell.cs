@@ -26,12 +26,10 @@
 
 using System;
 using System.Drawing;
-using System.Collections;
 using System.Collections.Generic;
 
 using MonoTouch.CoreGraphics;
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -88,10 +86,12 @@ namespace FlightLog {
 		
 		class FlightCellView : UIView
 		{
+			readonly FlightTableViewCell cell;
 			Flight flight;
 			
-			public FlightCellView ()
+			public FlightCellView (FlightTableViewCell cell)
 			{
+				this.cell = cell;
 			}
 			
 			/// <summary>
@@ -149,7 +149,7 @@ namespace FlightLog {
 				}
 			}
 			
-			static Dictionary<int, UIImage> CalendarImages = new Dictionary<int, UIImage> ();
+			static readonly Dictionary<int, UIImage> CalendarImages = new Dictionary<int, UIImage> ();
 			static UIImage CalendarImageForDate (DateTime date)
 			{
 				int key = (date.Month << 5) | date.Day;
@@ -171,17 +171,14 @@ namespace FlightLog {
 				if (time > 0.9 && time < 1.1)
 					return "1 hour";
 				
-				return time.ToString () + " hours";
+				return time + " hours";
 			}
 			
 			public override void Draw (RectangleF area)
 			{
-				CGContext ctx = UIGraphics.GetCurrentContext ();
-				
-				// Superview is the container, its superview is the UITableViewCell
-				bool highlighted = (Superview.Superview as UITableViewCell).Selected;
 				UIColor textColor, airportColor, aircraftColor, remarksColor;
-				
+				CGContext ctx = UIGraphics.GetCurrentContext ();
+				bool highlighted = cell.Selected;
 				var bounds = Bounds;
 				var midx = bounds.Width / 2;
 				
@@ -312,7 +309,7 @@ namespace FlightLog {
 			}
 		}
 		
-		FlightCellView view;
+		readonly FlightCellView view;
 		
 		public FlightTableViewCell (NSString key) : base (UITableViewCellStyle.Default, key)
 		{
@@ -320,7 +317,7 @@ namespace FlightLog {
 			Accessory = UITableViewCellAccessory.None;
 			ContentMode = UIViewContentMode.Left;
 			ContentView.ClipsToBounds = true;
-			view = new FlightCellView ();
+			view = new FlightCellView (this);
 			
 			ContentView.Add (view);
 		}

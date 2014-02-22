@@ -97,7 +97,7 @@ namespace FlightLog {
 			get {
 				string value = base.Value;
 				
-				if (value == null || value.Length == 0)
+				if (string.IsNullOrEmpty (value))
 					return null;
 				
 				return value;

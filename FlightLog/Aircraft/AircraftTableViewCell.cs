@@ -93,10 +93,12 @@ namespace FlightLog {
 		
 		public class AircraftCellView : UIView
 		{
+			readonly AircraftTableViewCell cell;
 			Aircraft aircraft;
 			
-			public AircraftCellView ()
+			public AircraftCellView (AircraftTableViewCell cell)
 			{
+				this.cell = cell;
 			}
 			
 			/// <summary>
@@ -116,12 +118,9 @@ namespace FlightLog {
 			/// <summary>
 			/// Formats the flight time into a more friendly format.
 			/// </summary>
-			/// <returns>
-			/// A friendly formatted string for the given flight time.
-			/// </returns>
-			/// <param name='flightTime'>
-			/// Flight time in seconds.
-			/// </param>
+			/// <returns>A friendly formatted string for the given flight time.</returns>
+			/// <param name="flightTime">Flight time in seconds.</param>
+			/// <param name="simulator"><c>true</c> if the flight was in a simulator.</param>
 			static string FormatFlightTime (int flightTime, bool simulator)
 			{
 				if (flightTime == 0) {
@@ -132,13 +131,9 @@ namespace FlightLog {
 				}
 				
 				double hours = Math.Round (flightTime / 3600.0, 1);
-				
-				if (hours == 1.0) {
-					if (simulator)
-						return "1 hour logged in this simulator.";
-					else
-						return "1 hour logged in this aircraft.";
-				}
+
+				if (hours >= 0.99 && hours <= 1.01)
+					return simulator ? "1 hour logged in this simulator." : "1 hour logged in this aircraft.";
 				
 				return string.Format ("{0} hours logged in this {1}.", hours, simulator ? "simulator" : "aircraft");
 			}
@@ -146,9 +141,7 @@ namespace FlightLog {
 			public override void Draw (RectangleF rect)
 			{
 				CGContext ctx = UIGraphics.GetCurrentContext ();
-				
-				// Superview is the container, its superview is the UITableViewCell
-				bool highlighted = (Superview.Superview as UITableViewCell).Selected;
+				bool highlighted = cell.Selected;
 				UIColor textColor, tailColor;
 				
 				var bounds = Bounds;
@@ -205,7 +198,7 @@ namespace FlightLog {
 		{
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			ContentView.ClipsToBounds = true;
-			view = new AircraftCellView ();
+			view = new AircraftCellView (this);
 			ContentView.Add (view);
 		}
 		

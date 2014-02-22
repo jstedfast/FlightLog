@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 // 
 
-using System;
 using System.Drawing;
 
 using MonoTouch.Foundation;
@@ -41,7 +40,7 @@ namespace FlightLog {
 		public DialogView (RectangleF frame, UITableViewStyle style, RootElement root) : base (frame)
 		{
 			tableView = MakeTableView (new RectangleF (0, 0, frame.Width, frame.Height), style);
-			tableView.BackgroundView.Alpha = 0.0f;
+			//tableView.BackgroundView.Alpha = 0.0f;
 			tableView.AutosizesSubviews = true;
 			
 			BackgroundColor = UIColor.Clear;
@@ -77,7 +76,7 @@ namespace FlightLog {
 		
 		class Source : UITableViewSource
 		{
-			DialogView dialog;
+			readonly DialogView dialog;
 			
 			public Source (DialogView dialog)
 			{
@@ -112,10 +111,7 @@ namespace FlightLog {
 			{
 				var view = Root[section].HeaderView;
 				
-				if (view != null)
-					return view.Frame.Height;
-				
-				return -1.0f;
+				return view != null ? view.Frame.Height : -1.0f;
 			}
 			
 			public override string TitleForFooter (UITableView tableView, int section)
@@ -132,10 +128,7 @@ namespace FlightLog {
 			{
 				var view = Root[section].FooterView;
 				
-				if (view != null)
-					return view.Frame.Height;
-				
-				return -1.0f;
+				return view != null ? view.Frame.Height : -1.0f;
 			}
 			
 			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
