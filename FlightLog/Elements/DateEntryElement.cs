@@ -145,9 +145,7 @@ namespace FlightLog {
 				
 				cancel = new UIBarButtonItem (UIBarButtonSystemItem.Cancel);
 				NavigationItem.LeftBarButtonItem = cancel;
-				cancel.Clicked += (sender, e) => {
-					Popover.Dismiss (true);
-				};
+				cancel.Clicked += (sender, e) => Popover.Dismiss (true);
 				
 				//editTime = new UIBarButtonItem ("Time", UIBarButtonItemStyle.Plain, OnEditClicked);
 				//NavigationItem.RightBarButtonItem = editTime;
@@ -238,7 +236,10 @@ namespace FlightLog {
 			
 			public override void WillShowViewController (UINavigationController navController, UIViewController viewController, bool animated)
 			{
-				viewController.ContentSizeForViewInPopover = DatePickerSize;
+				if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
+					viewController.PreferredContentSize = DatePickerSize;
+				else
+					viewController.ContentSizeForViewInPopover = DatePickerSize;
 			}
 		}
 		
@@ -254,9 +255,15 @@ namespace FlightLog {
 			picker = new DatePickerController (DateValue);
 			nav = new UINavigationController (picker);
 			popover = new UIPopoverController (nav);
-			
-			picker.ContentSizeForViewInPopover = DatePickerSize;
-			nav.ContentSizeForViewInPopover = DatePickerSize;
+
+			if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0)) {
+				picker.PreferredContentSize = DatePickerSize;
+				nav.PreferredContentSize = DatePickerSize;
+			} else {
+				picker.ContentSizeForViewInPopover = DatePickerSize;
+				nav.ContentSizeForViewInPopover = DatePickerSize;
+			}
+
 			popover.PopoverContentSize = DatePickerSize;
 			
 			nav.Delegate = new DatePickerNavigationDelegate ();
