@@ -38,7 +38,7 @@ namespace FlightLog {
 
 	public static class Settings
 	{
-		static NSUserDefaults settings = NSUserDefaults.StandardUserDefaults;
+		static readonly NSUserDefaults settings = NSUserDefaults.StandardUserDefaults;
 
 		public static FlightTimeFormat FlightTimeFormat {
 			get {

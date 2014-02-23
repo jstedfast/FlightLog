@@ -25,7 +25,6 @@
 // 
 
 using System;
-using System.Drawing;
 using System.Collections.Generic;
 
 using MonoTouch.Foundation;
@@ -37,7 +36,7 @@ namespace FlightLog {
 	{
 		static readonly NSString AircraftTableViewCellKey = new NSString ("Aircraft");
 
-		NSIndexPath[] selectedRow = new NSIndexPath[2];
+		readonly NSIndexPath[] selectedRow = new NSIndexPath[2];
 		UIBarButtonItem addAircraft;
 		NSIndexPath updating;
 		bool searching;
@@ -118,7 +117,7 @@ namespace FlightLog {
 			NSIndexPath path = NSIndexPath.FromRowSection (row, section);
 			
 			// Add the row to the table...
-			tableView.InsertRows (new NSIndexPath[] { path }, UITableViewRowAnimation.Automatic);
+			tableView.InsertRows (new [] { path }, UITableViewRowAnimation.Automatic);
 			
 			// Select and scroll to the newly added aircraft...
 
@@ -187,13 +186,13 @@ namespace FlightLog {
 			
 			if (index == -1 || !model.IndexToSectionAndRow (index, out section, out row)) {
 				// The aircraft no longer exists in this model (doesn't match search criteria?)
-				NSIndexPath[] rows = new NSIndexPath[1];
+				var rows = new NSIndexPath[1];
 				rows[0] = updating;
-				
+
 				tableView.DeleteRows (rows, UITableViewRowAnimation.Automatic);
 			} else {
 				// Reload the row.
-				NSIndexPath[] rows = new NSIndexPath[1];
+				var rows = new NSIndexPath[1];
 				rows[0] = updating;
 				
 				tableView.ReloadRows (rows, UITableViewRowAnimation.None);
@@ -213,7 +212,7 @@ namespace FlightLog {
 			SearchModel.ReloadData ();
 			Model.ReloadData ();
 			
-			tableView.DeleteRows (new NSIndexPath[] { indexPath }, UITableViewRowAnimation.Automatic);
+			tableView.DeleteRows (new [] { indexPath }, UITableViewRowAnimation.Automatic);
 			
 			if (tableView != TableView) {
 				// We've already deleted the item from the search model, but we
@@ -292,7 +291,7 @@ namespace FlightLog {
 		
 		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, Aircraft aircraft)
 		{
-			AircraftTableViewCell cell = tableView.DequeueReusableCell (AircraftTableViewCellKey) as AircraftTableViewCell;
+			var cell = tableView.DequeueReusableCell (AircraftTableViewCellKey) as AircraftTableViewCell;
 			
 			if (cell == null)
 				cell = new AircraftTableViewCell (AircraftTableViewCellKey);

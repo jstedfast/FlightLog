@@ -24,21 +24,17 @@
 // THE SOFTWARE.
 // 
 
-using System;
-using System.Text;
 using System.Drawing;
-using System.Collections;
 using System.Collections.Generic;
 
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
 	public class AircraftEntryElement : LimitedEntryElement
 	{
 		static readonly NSString AircraftEntryElementCellKey = new NSString ("AircraftEntryElement");
-		static char[] NotAllowedInTheUS = new char[] { 'I', 'O', 'i', 'o' };
+		static readonly char[] NotAllowedInTheUS = { 'I', 'O', 'i', 'o' };
 #if ENABLE_GLOBAL_SUPPORT
 		static string[] PrefixesStartingWithDigits = new string[] {
 			"4K", "8P", "9A", "5B", "4L", "9G", "3X", "8R", "6Y", "5Y", "9K", "7P",

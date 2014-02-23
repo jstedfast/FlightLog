@@ -25,11 +25,8 @@
 // 
 
 using System;
-using System.Linq;
 using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 using MonoTouch.CoreLocation;
 using MonoTouch.MapKit;
@@ -177,7 +174,7 @@ namespace FlightLog {
 			return true;
 		}
 		
-		static char[] LikeSpecials = new char[] { '\\', '_', '%' };
+		static readonly char[] LikeSpecials = { '\\', '_', '%' };
 		
 		static string EscapeTextForLike (string text)
 		{
@@ -194,8 +191,6 @@ namespace FlightLog {
 				case '_': // matches any single character
 				case '%': // matches any sequence of zero or more characters
 					sb.Append ('\\');
-					break;
-				default:
 					break;
 				}
 				
@@ -237,11 +232,12 @@ namespace FlightLog {
 					return sqlitedb.Query<Airport> ("select * from Airport where FAA like ? or ICAO like ? or IATA like ?",
 						codeLike, codeLike, codeLike, pattern);
 				}
-			} else if (escaped.Length > contains.Length) {
-				return sqlitedb.Query<Airport> ("select * from Airport where Name like ? escape ?", pattern, '\\');
-			} else {
-				return sqlitedb.Query<Airport> ("select * from Airport where Name like ?", pattern);
 			}
+
+			if (escaped.Length > contains.Length)
+				return sqlitedb.Query<Airport> ("select * from Airport where Name like ? escape ?", pattern, '\\');
+
+			return sqlitedb.Query<Airport> ("select * from Airport where Name like ?", pattern);
 		}
 		
 		const double MetersPerNauticalMile = 1852;

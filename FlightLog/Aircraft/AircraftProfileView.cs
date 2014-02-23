@@ -24,11 +24,9 @@
 // THE SOFTWARE.
 // 
 
-using System;
 using System.Drawing;
 
 using MonoTouch.CoreGraphics;
-using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
@@ -51,13 +49,13 @@ namespace FlightLog {
 		const float RemarksYOffset = ModelYOffset + AircraftModelFontSize + TextPadding * 3;
 		const float ProfileHeight = PhotoHeight + YBorderPadding * 2;
 		
-		static UIFont AircraftModelFont = UIFont.BoldSystemFontOfSize (AircraftModelFontSize);
-		static UIFont AircraftMakeFont = UIFont.BoldSystemFontOfSize (AircraftMakeFontSize);
-		static UIFont RemarksFont = UIFont.ItalicSystemFontOfSize (RemarksFontSize);
-		static RectangleF PhotoRect = new RectangleF (0.0f, 0.0f, PhotoWidth, PhotoHeight);
-		static CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
-		static UIColor TextColor = UIColor.FromRGB (76, 86, 108);
-		static UIImage DefaultPhoto;
+		static readonly UIFont AircraftModelFont = UIFont.BoldSystemFontOfSize (AircraftModelFontSize);
+		static readonly UIFont AircraftMakeFont = UIFont.BoldSystemFontOfSize (AircraftMakeFontSize);
+		static readonly UIFont RemarksFont = UIFont.ItalicSystemFontOfSize (RemarksFontSize);
+		static readonly RectangleF PhotoRect = new RectangleF (0.0f, 0.0f, PhotoWidth, PhotoHeight);
+		static readonly CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
+		static readonly UIColor TextColor = UIColor.FromRGB (76, 86, 108);
+		static readonly UIImage DefaultPhoto;
 		
 		static AircraftProfileView ()
 		{

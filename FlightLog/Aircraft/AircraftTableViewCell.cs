@@ -26,13 +26,9 @@
 
 using System;
 using System.Drawing;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
 
 using MonoTouch.CoreGraphics;
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -123,13 +119,9 @@ namespace FlightLog {
 			/// <param name="simulator"><c>true</c> if the flight was in a simulator.</param>
 			static string FormatFlightTime (int flightTime, bool simulator)
 			{
-				if (flightTime == 0) {
-					if (simulator)
-						return "No time logged in this simulator.";
-					else
-						return "No time logged in this aircraft.";
-				}
-				
+				if (flightTime == 0)
+					return simulator ? "No time logged in this simulator." : "No time logged in this aircraft.";
+
 				double hours = Math.Round (flightTime / 3600.0, 1);
 
 				if (hours >= 0.99 && hours <= 1.01)
@@ -181,18 +173,16 @@ namespace FlightLog {
 				DrawString (aircraft.Model ?? "", modelBounds, AircraftModelFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				DrawString (aircraft.Make ?? "", makeBounds, AircraftMakeFont, UILineBreakMode.TailTruncation, UITextAlignment.Left);
 				
-				string logged = FormatFlightTime (Aircraft.TotalFlightTime, Aircraft.IsSimulator);
+				var logged = FormatFlightTime (Aircraft.TotalFlightTime, Aircraft.IsSimulator);
 				DrawString (logged, timeBounds, FlightTimeFont, UILineBreakMode.TailTruncation);
 				
-				UIImage photo = PhotoManager.Load (aircraft.TailNumber, true);
-				if (photo == null)
-					photo = DefaultPhoto;
+				var photo = PhotoManager.Load (aircraft.TailNumber, true) ?? DefaultPhoto;
 				
 				photo.Draw (new RectangleF (PhotoXPad, PhotoYPad, PhotoWidth, PhotoHeight));
 			}
 		}
 		
-		AircraftCellView view;
+		readonly AircraftCellView view;
 		
 		public AircraftTableViewCell (NSString key) : base (UITableViewCellStyle.Default, key)
 		{

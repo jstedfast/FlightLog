@@ -59,15 +59,15 @@ namespace FlightLog {
 		const float TableViewOffset = XBorderPadding + PhotoWidth + 20.0f;
 		const float ProfileHeight = PhotoHeight + YBorderPadding * 2;
 		
-		static RectangleF PhotoRect = new RectangleF (XBorderPadding, YBorderPadding, PhotoWidth, PhotoHeight);
-		static CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
-		static UIFont AddPhotoFont = UIFont.BoldSystemFontOfSize (AddPhotoFontSize);
-		static UIColor AddPhotoTextColor = UIColor.FromRGB (76, 86, 108);
-		static UIColor HighlightedButtonColor = UIColor.LightGray;
-		static UIColor NormalButtonColor = UIColor.White;
+		static readonly RectangleF PhotoRect = new RectangleF (XBorderPadding, YBorderPadding, PhotoWidth, PhotoHeight);
+		static readonly CGPath PhotoBorder = GraphicsUtil.MakeRoundedRectPath (PhotoRect, 12.0f);
+		static readonly UIFont AddPhotoFont = UIFont.BoldSystemFontOfSize (AddPhotoFontSize);
+		static readonly UIColor AddPhotoTextColor = UIColor.FromRGB (76, 86, 108);
+		static readonly UIColor HighlightedButtonColor = UIColor.LightGray;
+		static readonly UIColor NormalButtonColor = UIColor.White;
 
+		readonly PhotoResponse[] buttons = new PhotoResponse[Enum.GetValues (typeof (PhotoResponse)).Length];
 		CancellationTokenSource cancelMakeModel, cancelPhoto;
-		PhotoResponse[] buttons = new PhotoResponse[Enum.GetValues (typeof (PhotoResponse)).Length];
 		Task taskMakeModel, taskPhoto;
 		LimitedEntryElement make, model;
 		AircraftEntryElement tailNumber;
@@ -83,10 +83,10 @@ namespace FlightLog {
 		public EditAircraftProfileView (RectangleF frame) : base (frame)
 		{
 			BackgroundColor = UIColor.Clear;
-			
+
 			float dialogWidth = frame.Width - TableViewOffset - XBorderPadding - 55.0f;
-			RectangleF dialogFrame = new RectangleF (TableViewOffset, YBorderPadding, dialogWidth, PhotoHeight);
-			RootElement root = new RootElement (null);
+			var dialogFrame = new RectangleF (TableViewOffset, YBorderPadding, dialogWidth, PhotoHeight);
+			var root = new RootElement (null);
 			root.Add (CreateTailNumberSection ());
 			root.Add (CreateMakeAndModelSection ());
 			dialog = new DialogView (dialogFrame, root);
@@ -153,8 +153,8 @@ namespace FlightLog {
 					}
 				} catch {
 					if (showError) {
-						string message = string.Format ("Could not locate a photo for {0}", TailNumber);
-						UIAlertView alert = new UIAlertView ("FlightAware.com", message, null, "Dismiss", null);
+						var message = string.Format ("Could not locate a photo for {0}", TailNumber);
+						var alert = new UIAlertView ("FlightAware.com", message, null, "Dismiss", null);
 						alert.Show ();
 					}
 				} finally {
@@ -181,7 +181,7 @@ namespace FlightLog {
 			tailNumber = new AircraftEntryElement ("");
 			tailNumber.EditingCompleted += OnTailNumberEntered;
 
-			return new Section () { tailNumber };
+			return new Section { tailNumber };
 		}
 		
 		Section CreateMakeAndModelSection ()
@@ -208,8 +208,8 @@ namespace FlightLog {
 				float[] gradColors;
 				CGPath container;
 				
-				gradColors = new float [] { 0.23f, 0.23f, 0.23f, alpha, 0.67f, 0.67f, 0.67f, alpha };
-				using (var gradient = new CGGradient (cs, gradColors, new float [] { 0.0f, 1.0f })) {
+				gradColors = new [] { 0.23f, 0.23f, 0.23f, alpha, 0.67f, 0.67f, 0.67f, alpha };
+				using (var gradient = new CGGradient (cs, gradColors, new [] { 0.0f, 1.0f })) {
 					ctx.DrawLinearGradient (gradient, topCenter, bottomCenter, 0);
 				}
 				
@@ -221,7 +221,7 @@ namespace FlightLog {
 				background.SetFill ();
 				ctx.FillRect (bg);
 				
-				gradColors = new float [] {
+				gradColors = new [] {
 					0.0f, 0.0f, 0.0f, 0.75f,
 					0.0f, 0.0f, 0.0f, 0.65f,
 					0.0f, 0.0f, 0.0f, 0.35f,
@@ -261,11 +261,11 @@ namespace FlightLog {
 		public override void Draw (RectangleF rect)
 		{
 			CGContext ctx = UIGraphics.GetCurrentContext ();
-			
+
 			if (Photograph == null) {
 				DrawAddPhotoButton (ctx);
 				
-				RectangleF addPhotoRect = new RectangleF (XBorderPadding, AddPhotoYOffset, PhotoWidth, AddPhotoFontSize);
+				var addPhotoRect = new RectangleF (XBorderPadding, AddPhotoYOffset, PhotoWidth, AddPhotoFontSize);
 				AddPhotoTextColor.SetColor ();
 				
 				DrawString ("Add Photo", addPhotoRect, AddPhotoFont, UILineBreakMode.WordWrap, UITextAlignment.Center);
@@ -296,7 +296,7 @@ namespace FlightLog {
 		}
 		
 		class AircraftPhotoPickerDelegate : UIImagePickerControllerDelegate {
-			EditAircraftProfileView profile;
+			readonly EditAircraftProfileView profile;
 			
 			public AircraftPhotoPickerDelegate (EditAircraftProfileView profile)
 			{
@@ -310,7 +310,7 @@ namespace FlightLog {
 		}
 		
 		class PhotoActionSheetDelegate : UIActionSheetDelegate {
-			EditAircraftProfileView profile;
+			readonly EditAircraftProfileView profile;
 			
 			public PhotoActionSheetDelegate (EditAircraftProfileView profile)
 			{
@@ -402,7 +402,7 @@ namespace FlightLog {
 			sheet.ShowFrom (PhotoRect, this, true);
 		}
 		
-		void OnPhotoSaved (UIImage photo, NSError error)
+		static void OnPhotoSaved (UIImage photo, NSError error)
 		{
 			// dispose of the full-size photograph
 			photo.Dispose ();
@@ -431,17 +431,17 @@ namespace FlightLog {
 		
 		bool IsInsidePhotoButton (NSSet touches)
 		{
-			var touched = touches.AnyObject as UITouch;
+			var touched = (UITouch) touches.AnyObject;
 			var location = touched.LocationInView (this);
 			
 			return PhotoRect.Contains (location);
 		}
 		
-		public override void TouchesBegan (NSSet touches, UIEvent uievent)
+		public override void TouchesBegan (NSSet touches, UIEvent evt)
 		{
-			base.TouchesBegan (touches, uievent);
+			base.TouchesBegan (touches, evt);
 			
-			if (uievent.Type != UIEventType.Touches)
+			if (evt.Type != UIEventType.Touches)
 				return;
 			
 			if (IsInsidePhotoButton (touches)) {
@@ -450,9 +450,9 @@ namespace FlightLog {
 			}
 		}
 		
-		public override void TouchesCancelled (NSSet touches, UIEvent uievent)
+		public override void TouchesCancelled (NSSet touches, UIEvent evt)
 		{
-			base.TouchesCancelled (touches, uievent);
+			base.TouchesCancelled (touches, evt);
 			
 			if (pressed) {
 				SetNeedsDisplay ();
@@ -460,9 +460,9 @@ namespace FlightLog {
 			}
 		}
 		
-		public override void TouchesMoved (NSSet touches, UIEvent uievent)
+		public override void TouchesMoved (NSSet touches, UIEvent evt)
 		{
-			base.TouchesMoved (touches, uievent);
+			base.TouchesMoved (touches, evt);
 			
 			if (pressed && !IsInsidePhotoButton (touches)) {
 				SetNeedsDisplay ();
@@ -470,9 +470,9 @@ namespace FlightLog {
 			}
 		}
 		
-		public override void TouchesEnded (NSSet touches, UIEvent uievent)
+		public override void TouchesEnded (NSSet touches, UIEvent evt)
 		{
-			base.TouchesEnded (touches, uievent);
+			base.TouchesEnded (touches, evt);
 			
 			if (!pressed)
 				return;

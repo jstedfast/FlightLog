@@ -24,8 +24,6 @@
 // THE SOFTWARE.
 // 
 
-using System;
-
 using MonoTouch.Dialog;
 
 namespace FlightLog {

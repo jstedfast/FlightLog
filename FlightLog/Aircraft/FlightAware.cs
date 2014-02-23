@@ -27,12 +27,9 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Xml;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 using MonoTouch.SystemConfiguration;
 using MonoTouch.CoreFoundation;
@@ -87,16 +84,16 @@ namespace FlightLog
 			doc.Load (stream);
 
 			foreach (var div in doc.DocumentNode.SelectNodes ("//div").Where (tag => tag.HasAttributes)) {
-				var attr = div.Attributes.Where (x => x.Name == "class").FirstOrDefault ();
+				var attr = div.Attributes.FirstOrDefault (x => x.Name == "class");
 
 				if (attr == null || attr.Value != "track-panel-header")
 					continue;
 
-				var a = div.ChildNodes.Where (tag => tag.Name == "a" && tag.HasChildNodes && tag.FirstChild.Name == "img").FirstOrDefault ();
+				var a = div.ChildNodes.FirstOrDefault (tag => tag.Name == "a" && tag.HasChildNodes && tag.FirstChild.Name == "img");
 				if (a == null || !a.HasAttributes)
 					continue;
 
-				var href = a.Attributes.Where (x => x.Name == "href").FirstOrDefault ();
+				var href = a.Attributes.FirstOrDefault (x => x.Name == "href");
 				if (href == null)
 					continue;
 
@@ -112,15 +109,15 @@ namespace FlightLog
 
 		static string ScrapeHtmlForPhotoUrl (Stream stream)
 		{
-			HtmlDocument doc = new HtmlDocument ();
+			var doc = new HtmlDocument ();
 
 			doc.Load (stream);
 
 			foreach (var img in doc.DocumentNode.SelectNodes ("//img").Where (tag => tag.HasAttributes)) {
-				var attr = img.Attributes.Where (x => x.Name == "id").FirstOrDefault ();
+				var attr = img.Attributes.FirstOrDefault (x => x.Name == "id");
 
 				if (attr != null && attr.Value == "photo_main") {
-					var src = img.Attributes.Where (x => x.Name == "src").FirstOrDefault ();
+					var src = img.Attributes.FirstOrDefault (x => x.Name == "src");
 					if (src == null)
 						continue;
 
@@ -137,7 +134,8 @@ namespace FlightLog
 
 		static Stream RequestStream (string url, CancellationToken cancelToken, bool keepAlive)
 		{
-			HttpWebRequest request = (HttpWebRequest) WebRequest.Create (url);
+			var request = (HttpWebRequest) WebRequest.Create (url);
+
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.AllowAutoRedirect = true;
 			request.KeepAlive = keepAlive;
@@ -149,7 +147,7 @@ namespace FlightLog
 			using (var response = (HttpWebResponse) request.GetResponse ()) {
 				var stream = response.GetResponseStream ();
 				var mem = new MemoryStream ();
-				byte[] buf = new byte[4096];
+				var buf = new byte[4096];
 				int nread;
 
 				do {

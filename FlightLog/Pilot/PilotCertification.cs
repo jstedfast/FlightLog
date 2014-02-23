@@ -24,8 +24,6 @@
 // THE SOFTWARE.
 //
 
-using System;
-
 namespace FlightLog {
 	public enum PilotCertification {
 		[HumanReadableName ("Student Pilot")]

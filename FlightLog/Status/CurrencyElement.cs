@@ -25,9 +25,7 @@
 // 
 
 using System;
-using System.Drawing;
 
-using MonoTouch.CoreGraphics;
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
@@ -35,7 +33,7 @@ using MonoTouch.UIKit;
 namespace FlightLog {
 	public class CurrencyTableViewCell : UITableViewCell
 	{
-		UIColor defaultColor;
+		readonly UIColor defaultColor;
 
 		public CurrencyTableViewCell (UITableViewCellStyle style, NSString key) : base (style, key)
 		{
@@ -86,7 +84,7 @@ namespace FlightLog {
 		
 		public override UITableViewCell GetCell (UITableView tv)
 		{
-			CurrencyTableViewCell cell = tv.DequeueReusableCell (CurrencyElementCellKey) as CurrencyTableViewCell;
+			var cell = tv.DequeueReusableCell (CurrencyElementCellKey) as CurrencyTableViewCell;
 			
 			if (cell == null)
 				cell = new CurrencyTableViewCell (UITableViewCellStyle.Value1, CurrencyElementCellKey);

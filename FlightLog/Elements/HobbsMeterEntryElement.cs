@@ -25,11 +25,8 @@
 // 
 
 using System;
-using System.Text;
-using System.Drawing;
 
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -67,7 +64,7 @@ namespace FlightLog {
 				string str = base.Value;
 				float value;
 				
-				if (str == null || str.Length == 0)
+				if (string.IsNullOrEmpty (str))
 					return 0.0f;
 				
 				if (float.TryParse (str, out value)) {
@@ -95,7 +92,7 @@ namespace FlightLog {
 				int hours, tenths = 0;
 				int dot;
 				
-				if (str == null || str.Length == 0)
+				if (string.IsNullOrEmpty (str))
 					return 0;
 				
 				if ((dot = str.IndexOf ('.')) != -1) {
@@ -108,7 +105,7 @@ namespace FlightLog {
 					
 					str = str.Substring (dot + 1);
 					if (str.Length > 0 && str[0] >= '0' && str[0] <= '9')
-						tenths = (int) (str[0] - '0');
+						tenths = str[0] - '0';
 				} else {
 					if (!Int32.TryParse (str, out hours))
 						return 0;

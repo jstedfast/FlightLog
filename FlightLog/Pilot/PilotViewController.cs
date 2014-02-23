@@ -26,7 +26,6 @@
 
 using System;
 
-using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
@@ -52,8 +51,8 @@ namespace FlightLog {
 
 		static RootElement CreatePilotCertificationElement (PilotCertification certification)
 		{
-			RootElement root = new RootElement ("Pilot Certification", new RadioGroup ("PilotCertification", 0));
-			Section section = new Section ();
+			var root = new RootElement ("Pilot Certification", new RadioGroup ("PilotCertification", 0));
+			var section = new Section ();
 
 			foreach (PilotCertification value in Enum.GetValues (typeof (PilotCertification)))
 				section.Add (new RadioElement (value.ToHumanReadableName (), "PilotCertification"));
@@ -80,7 +79,7 @@ namespace FlightLog {
 
 		static RootElement CreateEndorsementsElement (AircraftEndorsement endorsements)
 		{
-			RootElement root = new RootElement ("Aircraft Ratings & Endorsements");
+			var root = new RootElement ("Aircraft Ratings & Endorsements");
 			Section section;
 
 			foreach (AircraftCategory category in Enum.GetValues (typeof (AircraftCategory))) {
@@ -113,9 +112,9 @@ namespace FlightLog {
 
 		void Save ()
 		{
-			PilotCertification cert = (PilotCertification) certification.RadioSelected;
-			AircraftEndorsement endorsements = AircraftEndorsement.None;
-			InstrumentRating ratings = InstrumentRating.None;
+			var cert = (PilotCertification) certification.RadioSelected;
+			var endorsements = AircraftEndorsement.None;
+			var ratings = InstrumentRating.None;
 			bool changed = false;
 			int flag = 1 << 0;
 

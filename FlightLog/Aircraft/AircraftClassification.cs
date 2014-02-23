@@ -24,13 +24,11 @@
 // THE SOFTWARE.
 //
 
-using System;
-
 namespace FlightLog {
 	public enum AircraftClassification {
 		#region Airplane
 		[HumanReadableName ("Single-Engine Land")]
-		SingleEngineLand         = (int) AircraftCategory.Airplane,
+		SingleEngineLand         = AircraftCategory.Airplane,
 		[HumanReadableName ("Multi-Engine Land")]
 		MultiEngineLand,
 		[HumanReadableName ("Single-Engine Sea")]
@@ -40,34 +38,34 @@ namespace FlightLog {
 		#endregion
 
 		#region Rotorcraft
-		Helicoptor               = (int) AircraftCategory.Rotorcraft,
+		Helicoptor               = AircraftCategory.Rotorcraft,
 		Gryoplane,
 		#endregion
 
 		#region Glider
-		Glider                   = (int) AircraftCategory.Glider,
+		Glider                   = AircraftCategory.Glider,
 		#endregion
 
 		#region LighterThanAir
-		Airship                  = (int) AircraftCategory.LighterThanAir,
+		Airship                  = AircraftCategory.LighterThanAir,
 		Balloon,
 		#endregion
 
 		#region PoweredLift
 		[HumanReadableName ("Powered-Lift")]
-		PoweredLift              = (int) AircraftCategory.PoweredLift,
+		PoweredLift              = AircraftCategory.PoweredLift,
 		#endregion
 
 		#region PoweredParachute
 		[HumanReadableName ("Powered-Parachute Land")]
-		PoweredParachuteLand     = (int) AircraftCategory.PoweredParachute,
+		PoweredParachuteLand     = AircraftCategory.PoweredParachute,
 		[HumanReadableName ("Powered-Parachute Sea")]
 		PoweredParachuteSea,
 		#endregion
 
 		#region WeightShiftControl
 		[HumanReadableName ("Weight-Shift-Control Land")]
-		WeightShiftControlLand   = (int) AircraftCategory.WeightShiftControl,
+		WeightShiftControlLand   = AircraftCategory.WeightShiftControl,
 		[HumanReadableName ("Weight-Shift-Control Sea")]
 		WeightShiftControlSea,
 		#endregion

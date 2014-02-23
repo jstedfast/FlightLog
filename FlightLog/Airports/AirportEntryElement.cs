@@ -24,17 +24,15 @@
 // THE SOFTWARE.
 // 
 
-using System;
 using System.Drawing;
 
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
 	public class AirportEntryElement : LimitedEntryElement
 	{
-		static NSString AirportEntryElementCellKey = new NSString ("AirportEntryElement");
+		static readonly NSString AirportEntryElementCellKey = new NSString ("AirportEntryElement");
 
 		public AirportEntryElement (string caption, string value) : base (caption, "Enter the airport's FAA, ICAO, or IATA code.", value, 4)
 		{

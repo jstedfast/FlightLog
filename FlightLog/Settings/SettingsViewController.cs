@@ -26,7 +26,6 @@
 
 using System;
 
-using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
@@ -45,8 +44,8 @@ namespace FlightLog
 
 		static RootElement CreateFlightTimeFormatElement (FlightTimeFormat format)
 		{
-			RootElement root = new RootElement ("Flight Time Format", new RadioGroup ("FlightTimeFormat", 0));
-			Section section = new Section ();
+			var root = new RootElement ("Flight Time Format", new RadioGroup ("FlightTimeFormat", 0));
+			var section = new Section ();
 
 			foreach (FlightTimeFormat value in Enum.GetValues (typeof (FlightTimeFormat)))
 				section.Add (new RadioElement (value.ToHumanReadableName (), "FlightTimeFormat"));

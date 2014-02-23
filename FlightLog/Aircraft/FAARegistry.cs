@@ -27,7 +27,6 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Xml;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -65,7 +64,7 @@ namespace FlightLog
 		const string ModelKey = "Model";
 		const string HostName = "registry.faa.gov";
 
-		static Dictionary<string, string> manufacturers;
+		static readonly Dictionary<string, string> manufacturers;
 		static NetworkReachability reachability = null;
 		static NetworkReachabilityFlags flags;
 		static bool haveFlags = false;
@@ -110,25 +109,25 @@ namespace FlightLog
 
 		static string Normalize (string name)
 		{
-			StringBuilder sb = new StringBuilder (name.Length);
+			var builder = new StringBuilder (name.Length);
 			bool upper = false;
 
-			sb.Append (char.ToUpperInvariant (name[0]));
+			builder.Append (char.ToUpperInvariant (name[0]));
 			for (int i = 1; i < name.Length; i++) {
 				if (char.IsWhiteSpace (name[i])) {
-					sb.Append (name[i]);
+					builder.Append (name[i]);
 					upper = true;
 					continue;
 				}
 
 				if (upper) {
-					sb.Append (char.ToUpperInvariant (name[i]));
+					builder.Append (char.ToUpperInvariant (name[i]));
 					upper = false;
 				} else
-					sb.Append (char.ToLowerInvariant (name[i]));
+					builder.Append (char.ToLowerInvariant (name[i]));
 			}
 
-			return sb.ToString ();
+			return builder.ToString ();
 		}
 
 		static string GetManufacturer (string name)
@@ -143,8 +142,8 @@ namespace FlightLog
 
 		static AircraftDetails ParseAircraftDetails (Stream stream)
 		{
-			Dictionary<string, string> metadata = new Dictionary<string, string> (StringComparer.InvariantCultureIgnoreCase);
-			HtmlDocument doc = new HtmlDocument ();
+			var metadata = new Dictionary<string, string> (StringComparer.InvariantCultureIgnoreCase);
+			var doc = new HtmlDocument ();
 			HtmlNode description = null;
 			string key = null;
 
@@ -152,7 +151,7 @@ namespace FlightLog
 
 			foreach (var h3 in doc.DocumentNode.SelectNodes ("//h3")) {
 				if (h3.InnerText == "Aircraft Description" && h3.ParentNode.Name == "div") {
-					var table = h3.ParentNode.ChildNodes.Where (tag => tag.Name == "table").FirstOrDefault ();
+					var table = h3.ParentNode.ChildNodes.FirstOrDefault (tag => tag.Name == "table");
 					if (table == null)
 						continue;
 
@@ -169,7 +168,7 @@ namespace FlightLog
 					string value;
 
 					if (td.HasChildNodes) {
-						var span = td.ChildNodes.Where (tag => tag.Name == "span" || tag.Name == "strong").FirstOrDefault ();
+						var span = td.ChildNodes.FirstOrDefault (tag => tag.Name == "span" || tag.Name == "strong");
 						value = span != null ? span.InnerText.Trim () : td.InnerText.Trim ();
 					} else {
 						value = td.InnerText.Trim ();
@@ -200,7 +199,8 @@ namespace FlightLog
 		static AircraftDetails RequestAircraftDetails (string tailNumber, CancellationToken cancelToken)
 		{
 			string url = "http://" + HostName + "/aircraftinquiry/NNum_Results.aspx?NNumbertxt=" + tailNumber;
-			HttpWebRequest request = (HttpWebRequest) WebRequest.Create (url);
+			var request = (HttpWebRequest) WebRequest.Create (url);
+
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.AllowAutoRedirect = true;
 			request.UserAgent = UserAgent;
@@ -212,7 +212,7 @@ namespace FlightLog
 			using (var response = (HttpWebResponse) request.GetResponse ()) {
 				var stream = response.GetResponseStream ();
 				using (var mem = new MemoryStream ()) {
-					byte[] buf = new byte[4096];
+					var buf = new byte[4096];
 					int nread;
 
 					do {

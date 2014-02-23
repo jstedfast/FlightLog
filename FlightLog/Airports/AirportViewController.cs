@@ -26,7 +26,6 @@
 
 using System;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 
 using MonoTouch.CoreLocation;
@@ -52,12 +51,11 @@ namespace FlightLog {
 		
 		MKAnnotationView GetAirportAnnotationView (MKMapView map, NSObject annotation)
 		{
-			MKAnnotationView view = mapView.DequeueReusableAnnotation ("AirportAnnotation");
+			var view = mapView.DequeueReusableAnnotation ("AirportAnnotation");
+
+			view = view ?? new MKPinAnnotationView (annotation, "AirportAnnotation");
 			
-			if (view == null)
-				view = new MKPinAnnotationView (annotation, "AirportAnnotation");
-			
-			view.Annotation = (MKAnnotation) annotation;
+			view.Annotation = annotation;
 			view.CanShowCallout = true;
 			
 			return view;
@@ -81,8 +79,8 @@ namespace FlightLog {
 		
 		void MapRegionChanged (object sender, MKMapViewChangeEventArgs e)
 		{
-			Dictionary<string, AirportAnnotation> current = new Dictionary<string, AirportAnnotation> ();
-			List<AirportAnnotation> added = new List<AirportAnnotation> ();
+			var current = new Dictionary<string, AirportAnnotation> ();
+			var added = new List<AirportAnnotation> ();
 			
 			// Query for the list of airports in the new region
 			foreach (var airport in GetAirports (mapView.Region)) {
@@ -192,7 +190,7 @@ namespace FlightLog {
 			}
 
 			// Get the region for North America
-			MKCoordinateRegion region = new MKCoordinateRegion (
+			var region = new MKCoordinateRegion (
 				coordinates, new MKCoordinateSpan (spanLatitude, spanLongitude)
 			);
 
@@ -201,7 +199,7 @@ namespace FlightLog {
 
 		void UpdateLocation (CLLocation location)
 		{
-			MKCoordinateRegion region = new MKCoordinateRegion (
+			var region = new MKCoordinateRegion (
 				location.Coordinate, new MKCoordinateSpan (1.0, 1.0)
 			);
 

@@ -28,7 +28,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Collections;
 using System.Collections.Generic;
 
 using MonoTouch.SQLite;
@@ -119,9 +118,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Add the specified aircraft to the LogBook.
 		/// </summary>
-		/// <param name='aircraft'>
-		/// The aircraft to add to the LogBook.
-		/// </param>
+		/// <param name="aircraft">The aircraft to add to the LogBook.</param>
 		public static bool Add (Aircraft aircraft)
 		{
 			if (Contains (aircraft))
@@ -138,12 +135,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Determines whether the specified aircraft can be deleted.
 		/// </summary>
-		/// <returns>
-		/// <c>true</c> if the specified aircraft can be deleted; otherwise, <c>false</c>.
-		/// </returns>
-		/// <param name='aircraft'>
-		/// The aircraft to to delete.
-		/// </param>
+		/// <returns><c>true</c> if the specified aircraft can be deleted; otherwise, <c>false</c>.</returns>
+		/// <param name="aircraft">The aircraft to to delete.</param>
 		public static bool CanDelete (Aircraft aircraft)
 		{
 			return sqlitedb.Query<Flight> ("select 1 from Flight where Aircraft = ?", aircraft.TailNumber).Count == 0;
@@ -152,12 +145,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Checks whether or not the LogBook contains the specified aircraft.
 		/// </summary>
-		/// <returns>
-		/// <c>true</c> if the specified aircraft is already in the LogBook; otherwise, <c>false</c>.
-		/// </returns>
-		/// <param name='aircraft'>
-		/// The aircraft to check for.
-		/// </param>
+		/// <returns><c>true</c> if the specified aircraft is already in the LogBook; otherwise, <c>false</c>.</returns>
+		/// <param name="aircraft">The aircraft to check for.</param>
 		public static bool Contains (Aircraft aircraft)
 		{
 			return sqlitedb.Query<Flight> ("select 1 from Aircraft where TailNumber = ?", aircraft.TailNumber).Count == 1;
@@ -179,9 +168,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Delete the specified aircraft from the LogBook.
 		/// </summary>
-		/// <param name='aircraft'>
-		/// The aircraft to delete from the LogBook.
-		/// </param>
+		/// <param name="aircraft">The aircraft to delete from the LogBook.</param>
 		public static bool Delete (Aircraft aircraft)
 		{
 			if (!CanDelete (aircraft))
@@ -239,9 +226,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Update the specified aircraft.
 		/// </summary>
-		/// <param name='aircraft'>
-		/// The aircraft to update.
-		/// </param>
+		/// <param name="aircraft">The aircraft to update.</param>
 		public static bool Update (Aircraft aircraft)
 		{
 			OnAircraftWillUpdate (aircraft);
@@ -250,9 +235,9 @@ namespace FlightLog {
 				OnAircraftUpdated (aircraft);
 				aircraft.OnUpdated ();
 				return true;
-			} else {
-				OnAircraftUpdateFailed (aircraft);
 			}
+
+			OnAircraftUpdateFailed (aircraft);
 			
 			return false;
 		}
@@ -260,9 +245,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of all of the registered aircraft.
 		/// </summary>
-		/// <returns>
-		/// A list of all of the registered aircraft.
-		/// </returns>
+		/// <returns>A list of all of the registered aircraft.</returns>
 		public static List<Aircraft> GetAllAircraft ()
 		{
 			return sqlitedb.Query<Aircraft> ("select * from Aircraft");
@@ -271,12 +254,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of all of the registered aircraft.
 		/// </summary>
-		/// <returns>
-		/// A list of all of the registered aircraft.
-		/// </returns>
-		/// <param name='includeSimulators'>
-		/// Specifies whether or not simulators should be included.
-		/// </param>
+		/// <returns>A list of all of the registered aircraft.</returns>
+		/// <param name="includeSimulators">Specifies whether or not simulators should be included.</param>
 		public static List<Aircraft> GetAllAircraft (bool includeSimulators)
 		{
 			if (includeSimulators)
@@ -288,12 +267,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of aircraft up to a specified limit.
 		/// </summary>
-		/// <returns>
-		/// A list of aircraft, up to the specified limit.
-		/// </returns>
-		/// <param name='limit'>
-		/// The number of aircraft to limit the results to.
-		/// </param>
+		/// <returns>A list of aircraft, up to the specified limit.</returns>
+		/// <param name="limit">The number of aircraft to limit the results to.</param>
 		public static List<Aircraft> GetAircraft (int limit)
 		{
 			return sqlitedb.Query<Aircraft> ("select * from Aircraft limit ?", limit);
@@ -302,16 +277,12 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of all of the aircraft of the specified category.
 		/// </summary>
-		/// <returns>
-		/// A list of all of the aircraft of the specified category
-		/// </returns>
-		/// <param name='category'>
-		/// The category of aircraft requested.
-		/// </param>
+		/// <returns>A list of all of the aircraft of the specified category.</returns>
+		/// <param name="category">The category of aircraft requested.</param>
 		public static List<Aircraft> GetAircraft (AircraftCategory category)
 		{
-			AircraftClassification firstClass = (AircraftClassification) (int) category;
-			AircraftClassification lastClass = firstClass + Aircraft.CategoryStep;
+			var firstClass = (AircraftClassification) (int) category;
+			var lastClass = firstClass + Aircraft.CategoryStep;
 			
 			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification between ? and ?",
 				firstClass, lastClass);
@@ -320,22 +291,16 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of all of the aircraft of the specified category.
 		/// </summary>
-		/// <returns>
-		/// A list of all of the aircraft of the specified category
-		/// </returns>
-		/// <param name='category'>
-		/// The category of aircraft requested.
-		/// </param>
-		/// <param name='includeSimulators'>
-		/// Specifies whether or not simulators should be included.
-		/// </param>
+		/// <returns>A list of all of the aircraft of the specified category.</returns>
+		/// <param name="category">The category of aircraft requested.</param>
+		/// <param name="includeSimulators">Specifies whether or not simulators should be included.</param>
 		public static List<Aircraft> GetAircraft (AircraftCategory category, bool includeSimulators)
 		{
 			if (includeSimulators)
 				return GetAircraft (category);
 			
-			AircraftClassification firstClass = (AircraftClassification) (int) category;
-			AircraftClassification lastClass = firstClass + Aircraft.CategoryStep;
+			var firstClass = (AircraftClassification) (int) category;
+			var lastClass = firstClass + Aircraft.CategoryStep;
 			
 			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification between ? and ? and IsSimulator = ?",
 				firstClass, lastClass, false);
@@ -344,12 +309,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of aircraft of the specified classification.
 		/// </summary>
-		/// <returns>
-		/// A list of aircraft.
-		/// </returns>
-		/// <param name='classification'>
-		/// The classification of aircraft requested.
-		/// </param>
+		/// <returns>A list of aircraft.</returns>
+		/// <param name="classification">The classification of aircraft requested.</param>
 		public static List<Aircraft> GetAircraft (AircraftClassification classification)
 		{
 			return sqlitedb.Query<Aircraft> ("select * from Aircraft where Classification = ?", classification);
@@ -358,15 +319,9 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of aircraft of the specified classification.
 		/// </summary>
-		/// <returns>
-		/// A list of aircraft.
-		/// </returns>
-		/// <param name='classification'>
-		/// The classification of aircraft requested.
-		/// </param>
-		/// <param name='includeSimulators'>
-		/// Specifies whether or not simulators should be included.
-		/// </param>
+		/// <returns>A list of aircraft.</returns>
+		/// <param name="classification">The classification of aircraft requested.</param>
+		/// <param name="includeSimulators">Specifies whether or not simulators should be included.</param>
 		public static List<Aircraft> GetAircraft (AircraftClassification classification, bool includeSimulators)
 		{
 			if (includeSimulators)
@@ -379,12 +334,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets the aircraft specified by the given tail number.
 		/// </summary>
-		/// <returns>
-		/// The aircraft specified by the given tail number.
-		/// </returns>
-		/// <param name='tailNumber'>
-		/// The tail number of the desired aircraft.
-		/// </param>
+		/// <returns>The aircraft specified by the given tail number.</returns>
+		/// <param name="tailNumber">The tail number of the desired aircraft.</param>
 		public static Aircraft GetAircraft (string tailNumber)
 		{
 			var results = sqlitedb.Query<Aircraft> ("select * from Aircraft where TailNumber = ?", tailNumber);
@@ -395,12 +346,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets the aircraft matching the provided string.
 		/// </summary>
-		/// <returns>
-		/// The list of matching aircraft.
-		/// </returns>
-		/// <param name='text'>
-		/// The text to match against.
-		/// </param>
+		/// <returns>The list of matching aircraft.</returns>
+		/// <param name="text">The text to match against.</param>
 		public static List<Aircraft> GetMatchingAircraft (string text)
 		{
 			return sqlitedb.Query<Aircraft> ("select * from Aircraft where TailNumber like ?", "%" + text + "%");
@@ -424,9 +371,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Add the specified Flight entry.
 		/// </summary>
-		/// <param name='flight'>
-		/// The Flight entry to add.
-		/// </param>
+		/// <param name="flight">The Flight entry to add.</param>
 		public static bool Add (Flight flight)
 		{
 			if (sqlitedb.Insert (flight) > 0) {
@@ -453,9 +398,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Delete the specified Flight entry.
 		/// </summary>
-		/// <param name='flight'>
-		/// The Flight entry to delete.
-		/// </param>
+		/// <param name="flight">The Flight entry to delete.</param>
 		public static bool Delete (Flight flight)
 		{
 			if (sqlitedb.Delete<Flight> (flight.Id) > 0) {
@@ -509,9 +452,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Update the specified Flight entry.
 		/// </summary>
-		/// <param name='entry'>
-		/// The Flight entry to update.
-		/// </param>
+		/// <param name="flight">The Flight entry to update.</param>
 		public static bool Update (Flight flight)
 		{
 			OnFlightWillUpdate (flight);
@@ -520,9 +461,9 @@ namespace FlightLog {
 				OnFlightUpdated (flight);
 				flight.OnUpdated ();
 				return true;
-			} else {
-				OnFlightUpdateFailed (flight);
 			}
+
+			OnFlightUpdateFailed (flight);
 			
 			return false;
 		}
@@ -552,9 +493,7 @@ namespace FlightLog {
 		/// <summary>
 		/// Enumerates all of the logged flights.
 		/// </summary>
-		/// <returns>
-		/// A list of all of the logged flights.
-		/// </returns>
+		/// <returns>A list of all of the logged flights.</returns>
 		public static IEnumerable<Flight> GetAllFlights ()
 		{
 			return EnumerateFlights ("select * from Flight");
@@ -563,15 +502,9 @@ namespace FlightLog {
 		/// <summary>
 		/// Enumerates the logged flights between the specified dates.
 		/// </summary>
-		/// <returns>
-		/// A list of the logged flights between the specified dates.
-		/// </returns>
-		/// <param name='start'>
-		/// The start date.
-		/// </param>
-		/// <param name='end'>
-		/// The end date.
-		/// </param>
+		/// <returns>A list of the logged flights between the specified dates.</returns>
+		/// <param name="start">The start date.</param>
+		/// <param name="end">The end date.</param>
 		public static IEnumerable<Flight> GetFlights (DateTime start, DateTime end)
 		{
 			var query = "select * from Flight where Date between ? and ?";
@@ -582,12 +515,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Enumerates the logged flights since the specified date.
 		/// </summary>
-		/// <returns>
-		/// A list of the logged flights since the specified date.
-		/// </returns>
-		/// <param name='since'>
-		/// The start date.
-		/// </param>
+		/// <returns>A list of the logged flights since the specified date.</returns>
+		/// <param name="since">The start date.</param>
 		public static IEnumerable<Flight> GetFlights (DateTime since)
 		{
 			var query = "select * from Flight where Date >= ?";
@@ -598,12 +527,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Enumerates the logged flights flown with the specified aircraft.
 		/// </summary>
-		/// <returns>
-		/// A list of the logged flights flown with the specified aircraft.
-		/// </returns>
-		/// <param name='aircraft'>
-		/// The aircraft of interest.
-		/// </param>
+		/// <returns>A list of the logged flights flown with the specified aircraft.</returns>
+		/// <param name="aircraft">The aircraft of interest.</param>
 		public static IEnumerable<Flight> GetFlights (Aircraft aircraft)
 		{
 			var query = "select * from Flight where Aircraft = ?";
@@ -614,15 +539,9 @@ namespace FlightLog {
 		/// <summary>
 		/// Enumerates the logged flights flown with the specified aircraft since the specified date.
 		/// </summary>
-		/// <returns>
-		/// A list of the logged flights flown with the specified aircraft since the specified date.
-		/// </returns>
-		/// <param name='aircraft'>
-		/// The aircraft of interest.
-		/// </param>
-		/// <param name='since'>
-		/// The start date.
-		/// </param>
+		/// <returns>A list of the logged flights flown with the specified aircraft since the specified date.</returns>
+		/// <param name="aircraft">The aircraft of interest.</param>
+		/// <param name="since">The start date.</param>
 		public static IEnumerable<Flight> GetFlights (Aircraft aircraft, DateTime since)
 		{
 			var query = "select * from Flight where Aircraft = ? and Date >= ?";
@@ -634,24 +553,16 @@ namespace FlightLog {
 		/// Gets the most recent flights flown with the specified list of aircraft,
 		/// going back no farther than the specified date.
 		/// </summary>
-		/// <returns>
-		/// The flights matching the criterian provided.
-		/// </returns>
-		/// <param name='aircraft'>
-		/// The list of aircraft.
-		/// </param>
-		/// <param name='earliest'>
-		/// The earliest date to match back to.
-		/// </param>
-		/// <param name='limit'>
-		/// The maximum number of matches to return.
-		/// </param>
+		/// <returns>The flights matching the criterian provided.</returns>
+		/// <param name="aircraft">The list of aircraft.</param>
+		/// <param name="earliest">The earliest date to match back to.</param>
+		/// <param name="limit">The maximum number of matches to return.</param>
 		public static List<Flight> GetFlights (List<Aircraft> aircraft, DateTime earliest, int limit)
 		{
 			if (aircraft.Count == 0)
 				return new List<Flight> ();
 			
-			StringBuilder query = new StringBuilder ("select * from Flight where ");
+			var query = new StringBuilder ("select * from Flight where ");
 			int i;
 			
 			if (aircraft.Count > 1) {
@@ -665,7 +576,7 @@ namespace FlightLog {
 			
 			query.Append (" and Date >= ? order by Date desc limit ?");
 			
-			object[] args = new object [aircraft.Count + 2];
+			var args = new object [aircraft.Count + 2];
 			for (i = 0; i < aircraft.Count; i++)
 				args[i] = aircraft[i].TailNumber;
 			
@@ -685,19 +596,13 @@ namespace FlightLog {
 		/// <summary>
 		/// Enumerates flights useful for checking FAA passenger currency requirements.
 		/// </summary>
-		/// <returns>
-		/// The flights for passenger currency requirements.
-		/// </returns>
-		/// <param name='aircraft'>
-		/// The list of aircraft that can count towards the requirements.
-		/// </param>
-		/// <param name='night'>
-		/// Specifies whether or not the query should only include night landings.
-		/// </param>
+		/// <returns>The flights for passenger currency requirements.</returns>
+		/// <param name="aircraft">The list of aircraft that can count towards the requirements.</param>
+		/// <param name="night">Specifies whether or not the query should only include night landings.</param>
 		public static IEnumerable<Flight> GetFlightsForPassengerCurrencyRequirements (List<Aircraft> aircraft, bool night)
 		{
-			StringBuilder query = new StringBuilder ("select * from Flight where ");
-			object[] args = new object [aircraft.Count + 2 + (night ? 0 : 1)];
+			var query = new StringBuilder ("select * from Flight where ");
+			var args = new object [aircraft.Count + 2 + (night ? 0 : 1)];
 			DateTime ninetyDaysAgo = GetNinetyDaysAgo ();
 			int i = 1;
 			
@@ -733,9 +638,9 @@ namespace FlightLog {
 		// This actually gets the start of the month six months prior to the current month
 		static DateTime GetSixMonthsAgo ()
 		{
-			DateTime today = DateTime.Today;
-			TimeSpan thisMonth = new TimeSpan (today.Day - 1, 0, 0, 0, 0);
-			TimeSpan oneDay = new TimeSpan (24, 0, 0);
+			var today = DateTime.Today;
+			var thisMonth = new TimeSpan (today.Day - 1, 0, 0, 0, 0);
+			var oneDay = new TimeSpan (24, 0, 0);
 			int months = 0;
 			
 			DateTime date = today.Subtract (thisMonth);
@@ -753,17 +658,13 @@ namespace FlightLog {
 		/// <summary>
 		/// Enumerates flights useful for checking FAA instrument currency requirements.
 		/// </summary>
-		/// <returns>
-		/// The flights for instrument currency requirements.
-		/// </returns>
-		/// <param name='aircraft'>
-		/// The list of aircraft that can count toward the requirements.
-		/// </param>
+		/// <returns>The flights for instrument currency requirements.</returns>
+		/// <param name="aircraft">The list of aircraft that can count toward the requirements.</param>
 		public static IEnumerable<Flight> GetFlightsForInstrumentCurrencyRequirements (List<Aircraft> aircraft)
 		{
-			StringBuilder query = new StringBuilder ("select * from Flight where ");
-			object[] args = new object [aircraft.Count + 3];
-			DateTime sixMonthsAgo = GetSixMonthsAgo ();
+			var query = new StringBuilder ("select * from Flight where ");
+			var args = new object [aircraft.Count + 3];
+			var sixMonthsAgo = GetSixMonthsAgo ();
 			int i = 1;
 			
 			args[0] = aircraft[0].TailNumber;
@@ -792,12 +693,8 @@ namespace FlightLog {
 		/// <summary>
 		/// Gets a list of safety pilots matching the provided string.
 		/// </summary>
-		/// <returns>
-		/// The list of matching safety pilots.
-		/// </returns>
-		/// <param name='text'>
-		/// The text to match against.
-		/// </param>
+		/// <returns>The list of matching safety pilots.</returns>
+		/// <param name="text">The text to match against.</param>
 		public static List<string> GetMatchingSafetyPilots (string text)
 		{
 			return sqlitedb.Query<Flight> ("select distinct InstrumentSafetyPilot from Flight where InstrumentSafetyPilot like ?", text + "%").Select (flight => flight.InstrumentSafetyPilot).ToList ();
@@ -809,7 +706,7 @@ namespace FlightLog {
 		/// <returns>A list of the visited airports.</returns>
 		public static List<string> GetVisitedAirports ()
 		{
-			HashSet<string> airports = new HashSet<string> ();
+			var airports = new HashSet<string> ();
 
 			foreach (var flight in sqlitedb.Query<Flight> ("select distinct AirportDeparted from Flight")) {
 				if (flight.AirportDeparted != null)

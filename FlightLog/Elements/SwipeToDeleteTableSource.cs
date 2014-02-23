@@ -32,7 +32,7 @@ using MonoTouch.UIKit;
 
 namespace FlightLog {
 	public class SwipeToDeleteTableSource : DialogViewController.Source {
-		Func<Element, bool> canDeleteElement;
+		readonly Func<Element, bool> canDeleteElement;
 		
 		public SwipeToDeleteTableSource (DialogViewController dvc, Func<Element, bool> canDeleteElement) : base (dvc)
 		{

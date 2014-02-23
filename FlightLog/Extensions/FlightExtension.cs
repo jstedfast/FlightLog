@@ -25,7 +25,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 
 namespace FlightLog
 {
@@ -42,7 +41,7 @@ namespace FlightLog
 				if (time > 0.9 && time < 1.1)
 					return "1 hour";
 
-				return time.ToString () + " hours";
+				return time + " hours";
 			} else {
 				int hh = seconds / 3600;
 				int mm = (seconds % 3600) / 60;

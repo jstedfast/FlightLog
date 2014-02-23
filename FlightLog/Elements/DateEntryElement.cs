@@ -35,7 +35,7 @@ namespace FlightLog {
 	public class DateEntryElement : Element
 	{
 		static readonly NSString FlightDateEntryElementCellKey = new NSString ("FlightDateEntryElement");
-		static SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
+		static readonly SizeF DatePickerSize = new SizeF (316.0f, 216.0f);
 		DatePickerController picker;
 		UIPopoverController popover;
 		UINavigationController nav;
@@ -53,7 +53,7 @@ namespace FlightLog {
 			get { return FlightDateEntryElementCellKey; }
 		}
 		
-		string FormatDateTime (DateTime date)
+		static string FormatDateTime (DateTime date)
 		{
 			//return date.ToString ("f");
 			return date.ToLongDateString ();
@@ -234,7 +234,7 @@ namespace FlightLog {
 			{
 			}
 			
-			public override void WillShowViewController (UINavigationController navController, UIViewController viewController, bool animated)
+			public override void WillShowViewController (UINavigationController navigationController, UIViewController viewController, bool animated)
 			{
 				if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
 					viewController.PreferredContentSize = DatePickerSize;

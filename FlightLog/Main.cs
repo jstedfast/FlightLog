@@ -24,11 +24,6 @@
 // THE SOFTWARE.
 // 
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
-using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
 namespace FlightLog {

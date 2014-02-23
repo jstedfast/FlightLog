@@ -25,7 +25,6 @@
 // 
 
 using System;
-using System.Drawing;
 using System.Collections.Generic;
 
 using MonoTouch.Foundation;
@@ -37,7 +36,7 @@ namespace FlightLog {
 	{
 		static readonly NSString FlightTableViewCellKey = new NSString ("Flight");
 
-		NSIndexPath[] selectedRow = new NSIndexPath[2];
+		readonly NSIndexPath[] selectedRow = new NSIndexPath[2];
 		UIBarButtonItem addFlight;
 		NSIndexPath updating;
 		bool searching;
@@ -125,17 +124,17 @@ namespace FlightLog {
 				tableView.ReloadData ();
 				return;
 			}
-			
-			NSIndexPath path = NSIndexPath.FromRowSection (row, section);
-			
+
+			var path = NSIndexPath.FromRowSection (row, section);
+
 			if (model.GetRowCount (section) == 1) {
 				// The new flight entry is in a new section...
-				NSIndexSet sections = NSIndexSet.FromIndex (section);
+				var sections = NSIndexSet.FromIndex (section);
 				tableView.InsertSections (sections, UITableViewRowAnimation.Automatic);
 				sections.Dispose ();
 			} else {
 				// Add the row for the new flight log entry...
-				NSIndexPath[] rows = new NSIndexPath[1];
+				var rows = new NSIndexPath[1];
 				rows[0] = path;
 				
 				tableView.InsertRows (rows, UITableViewRowAnimation.Automatic);
@@ -212,23 +211,23 @@ namespace FlightLog {
 				// The flight no longer exists in this model/view...
 				if (loner) {
 					// The flight log entry was a 'loner', e.g. it was the only flight in its section.
-					NSIndexSet sections = NSIndexSet.FromIndex (updating.Section);
+					var sections = NSIndexSet.FromIndex (updating.Section);
 					tableView.DeleteSections (sections, UITableViewRowAnimation.Automatic);
 					sections.Dispose ();
 				} else {
-					NSIndexPath[] rows = new NSIndexPath[1];
+					var rows = new NSIndexPath[1];
 					rows[0] = updating;
-					
+
 					tableView.DeleteRows (rows, UITableViewRowAnimation.Automatic);
 				}
 			} else if (updating.Section != section || updating.Row != row) {
 				// The flight changed position in the current table view - need to move it.
-				NSIndexPath path = NSIndexPath.FromRowSection (row, section);
+				var path = NSIndexPath.FromRowSection (row, section);
 				tableView.MoveRow (updating, path);
 				path.Dispose ();
 			} else {
 				// Flight is in the same location, just needs to update its values...
-				NSIndexPath[] rows = new NSIndexPath[1];
+				var rows = new NSIndexPath[1];
 				rows[0] = updating;
 				
 				tableView.ReloadRows (rows, UITableViewRowAnimation.None);
@@ -357,7 +356,7 @@ namespace FlightLog {
 		
 		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, Flight flight)
 		{
-			FlightTableViewCell cell = tableView.DequeueReusableCell (FlightTableViewCellKey) as FlightTableViewCell;
+			var cell = tableView.DequeueReusableCell (FlightTableViewCellKey) as FlightTableViewCell;
 			
 			if (cell == null)
 				cell = new FlightTableViewCell (FlightTableViewCellKey);

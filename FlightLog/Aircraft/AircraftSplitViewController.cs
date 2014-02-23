@@ -24,9 +24,6 @@
 // THE SOFTWARE.
 // 
 
-using System;
-using System.Drawing;
-
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -59,8 +56,7 @@ namespace FlightLog {
 		protected override void Dispose (bool disposing)
 		{
 			if (disposing) {
-				if (controllers != null)
-					controllers = null;
+				controllers = null;
 
 				if (overview != null) {
 					overview.Dispose ();

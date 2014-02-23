@@ -25,11 +25,8 @@
 // 
 
 using System;
-using System.Text;
-using System.Drawing;
 
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog {
@@ -78,7 +75,7 @@ namespace FlightLog {
 				string str = base.Value;
 				int value;
 				
-				if (str == null || str.Length == 0)
+				if (string.IsNullOrEmpty (str))
 					return 0;
 				
 				if (Int32.TryParse (str, out value)) {

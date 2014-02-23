@@ -25,10 +25,8 @@
 // 
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
-using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
@@ -89,9 +87,9 @@ namespace FlightLog {
 
 		void LoadFlightTimeTotals ()
 		{
-			List<Totals> totals = new List<Totals> ();
-			DateTime twelveMonthsAgo = GetMonthsAgo (12);
-			DateTime sixMonthsAgo = GetMonthsAgo (6);
+			var totals = new List<Totals> ();
+			var twelveMonthsAgo = GetMonthsAgo (12);
+			var sixMonthsAgo = GetMonthsAgo (6);
 			Dictionary<string, Aircraft> dict;
 			Aircraft aircraft;
 			int time;
@@ -189,10 +187,10 @@ namespace FlightLog {
 			});
 		}
 
-		void AddLandingCurrency (Section section, List<Aircraft> aircraft, bool night)
+		static void AddLandingCurrency (Section section, List<Aircraft> aircraft, bool night)
 		{
 			string caption = string.Format ("{0} Current", night ? "Night" : "Day");
-			DateTime oldestLanding = DateTime.Now;
+			DateTime oldestLanding;
 			int landings = 0;
 
 			if (aircraft != null && aircraft.Count > 0) {
@@ -219,7 +217,7 @@ namespace FlightLog {
 		{
 			if (LogBook.Pilot.Endorsements.HasFlag (AircraftEndorsement.TailDragger)) {
 				var list = LogBook.GetAircraft (AircraftCategory.Airplane, false);
-				List<Aircraft> taildraggers = new List<Aircraft> ();
+				var taildraggers = new List<Aircraft> ();
 
 				foreach (var aircraft in list) {
 					if (aircraft.IsTailDragger)
@@ -260,15 +258,15 @@ namespace FlightLog {
 		
 		static DateTime GetInstrumentCurrencyExipirationDate (DateTime oldest)
 		{
-			TimeSpan offset = new TimeSpan (oldest.Day, oldest.Hour, oldest.Minute, oldest.Second, oldest.Millisecond);
-			DateTime expires = oldest.Subtract (offset).AddMonths (7);
+			var offset = new TimeSpan (oldest.Day, oldest.Hour, oldest.Minute, oldest.Second, oldest.Millisecond);
+			var expires = oldest.Subtract (offset).AddMonths (7);
 			
 			return expires;
 		}
 		
-		void AddInstrumentCurrency (Section section, string caption, List<Aircraft> aircraft)
+		static void AddInstrumentCurrency (Section section, string caption, List<Aircraft> aircraft)
 		{
-			DateTime oldestApproach = DateTime.Now;
+			DateTime oldestApproach;
 			int approaches = 0;
 			int holds = 0;
 
@@ -294,7 +292,7 @@ namespace FlightLog {
 		
 		void LoadInstrumentCurrency ()
 		{
-			Section section = new Section ("Instrument Currency");
+			var section = new Section ("Instrument Currency");
 			List<Aircraft> list;
 
 			// Instrument currency is per-AircraftCategory

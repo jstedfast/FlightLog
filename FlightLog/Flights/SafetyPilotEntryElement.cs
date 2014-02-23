@@ -25,13 +25,9 @@
 //
 
 using System;
-using System.Text;
-using System.Drawing;
-using System.Collections;
 using System.Collections.Generic;
 
 using MonoTouch.Foundation;
-using MonoTouch.Dialog;
 using MonoTouch.UIKit;
 
 namespace FlightLog
@@ -56,7 +52,7 @@ namespace FlightLog
 			get {
 				string value = base.Value;
 
-				if (value == null || value.Length == 0)
+				if (string.IsNullOrEmpty (value))
 					return null;
 
 				return value;
@@ -102,7 +98,7 @@ namespace FlightLog
 					// Figure out the maximum amount of matching text so that we can complete up to that far...
 					int maxLength = matches[0].Length;
 					for (int i = 1; i < matches.Count; i++) {
-						int n = 0;
+						int n;
 
 						for (n = 0; n < Math.Min (matches[i].Length, maxLength); n++) {
 							if (matches[0][n] != matches[i][n])

@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 // 
 
-using System;
 using System.Drawing;
 
 using MonoTouch.Foundation;
@@ -86,8 +85,8 @@ namespace FlightLog {
 		{
 			if (recalc) {
 				using (var font = UIFont.FromName ("Helvetica", 17f)) {
-					SizeF size = new SizeF (320f, float.MaxValue);
-					string[] lines = new string[nVisibleLines];
+					var size = new SizeF (320f, float.MaxValue);
+					var lines = new string[nVisibleLines];
 					for (int i = 0; i < nVisibleLines; i++)
 						lines[i] = "Mj";
 					

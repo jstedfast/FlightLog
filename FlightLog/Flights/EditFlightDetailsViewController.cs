@@ -27,7 +27,6 @@
 using System;
 using System.Text;
 using System.Drawing;
-using System.Collections;
 using System.Collections.Generic;
 
 using MonoTouch.Foundation;
@@ -43,14 +42,14 @@ namespace FlightLog {
 		AirportEntryElement departed, arrived;
 		List<AirportEntryElement> visited;
 		BooleanElement holdingProcedures;
-		PilotCertification certification;
+		readonly PilotCertification certification;
 		AircraftEntryElement aircraft;
 		UIBarButtonItem cancel, save;
 		DateEntryElement date;
 		bool autoFlightTimes = true;
 		UIAlertViewDelegate del;
 		UIAlertView alert;
-		bool exists;
+		readonly bool exists;
 		
 		public EditFlightDetailsViewController (Flight flight, bool exists) : base (UITableViewStyle.Grouped, new RootElement (null))
 		{
@@ -290,8 +289,8 @@ namespace FlightLog {
 
 		List<Airport> GetAirports ()
 		{
-			HashSet<string> missing = new HashSet<string> ();
-			List<Airport> airports = new List<Airport> ();
+			var missing = new HashSet<string> ();
+			var airports = new List<Airport> ();
 
 			if (GetAirportCode (departed.Value, airports, missing) == null)
 				return null;
@@ -306,7 +305,7 @@ namespace FlightLog {
 
 		void OnVisitedAirportEdited (object sender, EventArgs e)
 		{
-			AirportEntryElement airport = (AirportEntryElement) sender;
+			var airport = (AirportEntryElement) sender;
 			int index = visited.IndexOf (airport);
 			int last = visited.Count - 1;
 
@@ -392,10 +391,12 @@ namespace FlightLog {
 		void FetchValues ()
 		{
 			// Make sure all entry elements sync their values from their UITextFields
-			foreach (Section s in Root) {
-				foreach (Element e in s) {
-					if (e is EntryElement)
-						((EntryElement) e).FetchValue ();
+			foreach (Section section in Root) {
+				foreach (Element element in section) {
+					var entry = element as EntryElement;
+
+					if (entry != null)
+						entry.FetchValue ();
 				}
 			}
 		}
@@ -463,7 +464,7 @@ namespace FlightLog {
 		}
 		
 		class CrossCountryAlertDelegate : UIAlertViewDelegate {
-			EditFlightDetailsViewController editor;
+			readonly EditFlightDetailsViewController editor;
 			
 			public CrossCountryAlertDelegate (EditFlightDetailsViewController editor)
 			{
@@ -481,7 +482,7 @@ namespace FlightLog {
 		
 		void ShowCrossCountryAlert (Aircraft aircraft, string origin, HashSet<string> missing, double minimum)
 		{
-			StringBuilder message = new StringBuilder ();
+			var message = new StringBuilder ();
 			string title = "Cross-Country Alert";
 			int i = 0;
 
@@ -506,6 +507,7 @@ namespace FlightLog {
 					}
 
 					message.Append (airport);
+					i++;
 				}
 
 				message.AppendLine (".");
@@ -550,9 +552,9 @@ namespace FlightLog {
 				return;
 			
 			// We need at least a departure airport
-			HashSet<string> missing = new HashSet<string> ();
-			List<Airport> airports = new List<Airport> ();
-			List<string> via = new List<string> ();
+			var missing = new HashSet<string> ();
+			var airports = new List<Airport> ();
+			var via = new List<string> ();
 			string code;
 			
 			if ((code = GetAirportCode (departed.Value, airports, missing)) == null)

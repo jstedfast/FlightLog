@@ -25,9 +25,6 @@
 // 
 
 using System;
-using System.Drawing;
-using System.Collections;
-using System.Collections.Generic;
 
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
@@ -89,8 +86,8 @@ namespace FlightLog {
 			
 			profile = new AircraftProfileView (View.Bounds.Width);
 			Root.Add (new Section (profile));
-			
-			Section section = new Section ("Type of Aircraft");
+
+			var section = new Section ("Type of Aircraft");
 			section.Add (category = new StringElement ("Category"));
 			section.Add (classification = new StringElement ("Classification"));
 			section.Add (isComplex = new StringElement ("Complex"));

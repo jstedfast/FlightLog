@@ -26,8 +26,6 @@
 
 using System;
 using System.Drawing;
-using System.Collections;
-using System.Collections.Generic;
 
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
@@ -37,7 +35,7 @@ namespace FlightLog
 {
 	public class EditAircraftDetailsViewController : DialogViewController
 	{
-		RadioGroup classes = new RadioGroup ("AircraftClassification", 0);
+		readonly RadioGroup classes = new RadioGroup ("AircraftClassification", 0);
 		BooleanElement isComplex, isHighPerformance, isTailDragger, isSimulator;
 		RootElement category, classification;
 		EditAircraftProfileView profile;
@@ -74,8 +72,8 @@ namespace FlightLog
 		
 		static RootElement CreateCategoryElement (AircraftCategory category)
 		{
-			RootElement root = new RootElement ("Category", new RadioGroup ("AircraftCategory", 0));
-			Section section = new Section ();
+			var root = new RootElement ("Category", new RadioGroup ("AircraftCategory", 0));
+			var section = new Section ();
 			
 			foreach (AircraftCategory value in Enum.GetValues (typeof (AircraftCategory)))
 				section.Add (new RadioElement (value.ToHumanReadableName (), "AircraftCategory"));
@@ -99,9 +97,9 @@ namespace FlightLog
 		
 		static RootElement CreateClassificationElement (AircraftCategory category, RadioGroup classes)
 		{
-			RootElement root = new RootElement ("Class", classes);
 			int next = (int) category + Aircraft.CategoryStep;
-			Section section = new Section ();
+			var root = new RootElement ("Class", classes);
+			var section = new Section ();
 			
 			foreach (AircraftClassification value in Enum.GetValues (typeof (AircraftClassification))) {
 				if ((int) value < (int) category)
@@ -183,7 +181,7 @@ namespace FlightLog
 				NSError error;
 				
 				if (!PhotoManager.Save (profile.TailNumber, profile.Photograph, false, out error)) {
-					UIAlertView alert = new UIAlertView ("Error", error.LocalizedDescription, null, "Dismiss", null);
+					var alert = new UIAlertView ("Error", error.LocalizedDescription, null, "Dismiss", null);
 					alert.Show ();
 					return;
 				}
