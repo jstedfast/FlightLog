@@ -366,17 +366,17 @@ namespace FlightLog {
 			return cell;
 		}
 		
-		protected override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
+		public override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
 		{
 			return true;
 		}
 		
-		protected override UITableViewCellEditingStyle EditingStyleForRow (UITableView tableView, NSIndexPath indexPath)
+		public override UITableViewCellEditingStyle EditingStyleForRow (UITableView tableView, NSIndexPath indexPath)
 		{
 			return UITableViewCellEditingStyle.Delete;
 		}
 		
-		protected override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
+		public override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
 		{
 			if (editingStyle != UITableViewCellEditingStyle.Delete)
 				return;
@@ -405,7 +405,7 @@ namespace FlightLog {
 			return path0.Section == path1.Section && path0.Row == path1.Row;
 		}
 		
-		protected override NSIndexPath WillSelectRow (UITableView tableView, NSIndexPath indexPath)
+		public override NSIndexPath WillSelectRow (UITableView tableView, NSIndexPath indexPath)
 		{
 			var selected = tableView.IndexPathForSelectedRow;
 			if (selected != null && !PathsEqual (selected, indexPath))
@@ -414,7 +414,7 @@ namespace FlightLog {
 			return indexPath;
 		}
 		
-		protected override void RowSelected (UITableView tableView, NSIndexPath indexPath)
+		public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
 		{
 			DetailsViewController.Flight = GetItem (tableView, indexPath);
 			selectedRow[searching ? 1 : 0] = indexPath;

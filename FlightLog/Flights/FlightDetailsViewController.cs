@@ -205,12 +205,12 @@ namespace FlightLog {
 			NavigationController.PushViewController (editor, true);
 		}
 
-		protected override int NumberOfSections (UITableView tableView)
+		public override int NumberOfSections (UITableView tableView)
 		{
 			return sections.Count;
 		}
 
-		protected override int RowsInSection (UITableView tableView, int section)
+		public override int RowsInSection (UITableView tableView, int section)
 		{
 			if (titles[section] == SectionTitle.Remarks)
 				return 0;
@@ -218,12 +218,12 @@ namespace FlightLog {
 			return sections[section].Count;
 		}
 
-		protected override string TitleForHeader (UITableView tableView, int section)
+		public override string TitleForHeader (UITableView tableView, int section)
 		{
 			return SectionTitles[(int) titles[section]];
 		}
 
-		protected override string TitleForFooter (UITableView tableView, int section)
+		public override string TitleForFooter (UITableView tableView, int section)
 		{
 			if (titles[section] == SectionTitle.Remarks)
 				return Flight.ToString (FlightProperty.Remarks);
@@ -231,7 +231,7 @@ namespace FlightLog {
 			return null;
 		}
 
-		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
+		public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 		{
 			var cell = tableView.DequeueReusableCell (FlightDetailsTableViewCellKey);
 
