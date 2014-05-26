@@ -281,7 +281,7 @@ namespace FlightLog {
 		/// <c>true</c> if holding procedures were performed; otherwise, <c>false</c>.
 		/// </value>
 		[SQLiteSearchAlias ("holds")]
-		public bool InstrumentHoldingProcedures {
+		public int InstrumentHoldingProcedures {
 			get; set;
 		}
 		

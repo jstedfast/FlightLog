@@ -37,11 +37,10 @@ namespace FlightLog {
 	public class EditFlightDetailsViewController : DialogViewController
 	{
 		HobbsMeterEntryElement total, dual, night, pic, sic, cfi, xc, actual, hood, simulator;
-		NumericEntryElement landDay, landNight, approaches;
+		NumericEntryElement landDay, landNight, approaches, holds;
 		LimitedEntryElement remarks, safetyPilot;
 		AirportEntryElement departed, arrived;
 		List<AirportEntryElement> visited;
-		BooleanElement holdingProcedures;
 		readonly PilotCertification certification;
 		AircraftEntryElement aircraft;
 		UIBarButtonItem cancel, save;
@@ -262,11 +261,11 @@ namespace FlightLog {
 		Section CreateInstrumentSection ()
 		{
 			approaches = new NumericEntryElement ("Approaches", "The number of approaches made.", Flight.InstrumentApproaches, 1, 99);
-			holdingProcedures = new BooleanElement ("Holding Procedures", Flight.InstrumentHoldingProcedures);
+			holds = new NumericEntryElement ("Holding Procedures", "The number of holding procedures made.", Flight.InstrumentHoldingProcedures, 1, 99);
 			safetyPilot = new SafetyPilotEntryElement (Flight.InstrumentSafetyPilot) { AutoComplete = true };
 
 			return new Section ("Instrument Experience") {
-				approaches, holdingProcedures, safetyPilot
+				approaches, holds, safetyPilot
 			};
 		}
 
@@ -602,7 +601,7 @@ namespace FlightLog {
 			Flight.InstrumentHood = hood.ValueAsSeconds;
 
 			// Holding Procedures and Approaches
-			Flight.InstrumentHoldingProcedures = holdingProcedures.Value;
+			Flight.InstrumentHoldingProcedures = holds.Value;
 			Flight.InstrumentApproaches = approaches.Value;
 
 			// Safety Pilot info

@@ -273,8 +273,7 @@ namespace FlightLog {
 			if (aircraft != null && aircraft.Count > 0) {
 				foreach (var flight in LogBook.GetFlightsForInstrumentCurrencyRequirements (aircraft)) {
 					approaches += flight.InstrumentApproaches;
-					if (flight.InstrumentHoldingProcedures)
-						holds++;
+					holds += flight.InstrumentHoldingProcedures;
 
 					oldestApproach = flight.Date;
 
